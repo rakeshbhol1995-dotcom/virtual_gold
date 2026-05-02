@@ -3,9 +3,9 @@ import { Address } from 'viem';
 
 export const CONTRACTS = {
   84532: { // Base Sepolia
-    goldToken: '0x57d1acdb0Df7144165C2ACf11bb1446EdAbE9fD5' as Address,
-    bondingCurve: '0xa022c304C4C8eb73505dbFcb7306ADF8E14038E3' as Address,
-    collateralToken: '0x3553c8e86a5Bd749F77665a5AaD78d951bbdE68B' as Address, // Mock USDT
+    goldToken: '0xBa3F5a2dA0134f328Ca9F829D993c1D664011720' as Address,
+    bondingCurve: '0x77DB2Ba2E1fA4AbCd51dcE9FC0da2eb20f4A8704' as Address,
+    collateralToken: '0x2343e4ae9170E1E87c42a3fA661d02D8955963d5' as Address, // Mock USDT
   },
   8453: { // Base Mainnet
     goldToken: '0x0000000000000000000000000000000000000000' as Address,
@@ -19,9 +19,9 @@ export const getContractAddress = (chainId: number | undefined, name: keyof type
   return CONTRACTS[chain][name];
 };
 
-export const getExplorerUrl = (chainId: number | undefined, address: string) => {
+export const getExplorerUrl = (chainId: number | undefined) => {
   const baseUrl = chainId === 8453 ? 'https://basescan.org' : 'https://sepolia.basescan.org';
-  return `${baseUrl}/address/${address}`;
+  return baseUrl;
 };
 
 export const GOLD_TOKEN_ABI = [
@@ -52,5 +52,5 @@ export const ERC20_ABI = [
   "function approve(address, uint256) returns (bool)",
   "function allowance(address, address) view returns (uint256)",
   "function totalSupply() view returns (uint256)",
-  "function mint(address, uint256) external" // Only for MockUSDT
+  "function mint(address, uint256) external"
 ];

@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ExternalLink, CheckCircle2, Clock, XCircle, Activity, Hash, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { getExplorerUrl, getContractAddress, GOLD_BONDING_CURVE_ABI } from '@/constants/contracts';
 import { useChainId, useWatchContractEvent, usePublicClient } from 'wagmi';
-import { formatUnits } from 'viem';
+import { formatUnits, parseAbi } from 'viem';
 import { useMounted } from '@/hooks/useMounted';
 
 export interface Transaction {
@@ -68,7 +68,7 @@ export const ActivityScanner = () => {
 
           const buyLogs = await publicClient.getContractEvents({
             address: bondingCurveAddress,
-            abi: GOLD_BONDING_CURVE_ABI,
+            abi: parseAbi(GOLD_BONDING_CURVE_ABI),
             eventName: 'Bought',
             fromBlock,
             toBlock: currentBlock
@@ -76,7 +76,7 @@ export const ActivityScanner = () => {
 
           const sellLogs = await publicClient.getContractEvents({
             address: bondingCurveAddress,
-            abi: GOLD_BONDING_CURVE_ABI,
+            abi: parseAbi(GOLD_BONDING_CURVE_ABI),
             eventName: 'Sold',
             fromBlock,
             toBlock: currentBlock
@@ -117,7 +117,7 @@ export const ActivityScanner = () => {
   // 2. Watch Live Bought
   useWatchContractEvent({
     address: bondingCurveAddress,
-    abi: GOLD_BONDING_CURVE_ABI,
+    abi: parseAbi(GOLD_BONDING_CURVE_ABI),
     eventName: 'Bought',
     onLogs(logs) {
       logs.forEach((log: any) => {
@@ -138,7 +138,7 @@ export const ActivityScanner = () => {
   // 3. Watch Live Sold
   useWatchContractEvent({
     address: bondingCurveAddress,
-    abi: GOLD_BONDING_CURVE_ABI,
+    abi: parseAbi(GOLD_BONDING_CURVE_ABI),
     eventName: 'Sold',
     onLogs(logs) {
       logs.forEach((log: any) => {

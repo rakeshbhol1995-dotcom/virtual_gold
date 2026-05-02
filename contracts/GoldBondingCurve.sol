@@ -38,6 +38,18 @@ contract GoldBondingCurve is Ownable, ReentrancyGuard {
         return INITIAL_PRICE + (SLOPE * supply / PRECISION);
     }
 
+    /**
+     * @dev Simple holder count tracker (Mock for UI stability).
+     * Real production should track via a mapping or indexing.
+     */
+    function getHoldersCount() public view returns (uint256) {
+        uint256 supply = goldToken.totalSupply();
+        if (supply == 0) return 0;
+        // Logic: Since we don't have a holder set, we return 1 + totalTrades/100 as proxy 
+        // OR we can just return a stable count for now.
+        return 1; // Minimum 1 if supply exists (Bonding Curve itself ba first buyer)
+    }
+
     function calculateCost(uint256 supply, uint256 amount) public pure returns (uint256) {
         uint256 newSupply = supply + amount;
         uint256 term1 = INITIAL_PRICE * amount / PRECISION;

@@ -69,6 +69,12 @@ contract GoldBondingCurve is Ownable, ReentrancyGuard {
         return INITIAL_PRICE + (SLOPE * supply / PRECISION);
     }
 
+    function getHoldersCount() public view returns (uint256) {
+        uint256 supply = goldToken.totalSupply();
+        if (supply == 0) return 0;
+        return 1; // Basic logic: if supply exists, there is at least 1 holder
+    }
+
     /**
      * @dev Core Integral Pricing for Solvency.
      */
