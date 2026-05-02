@@ -1,123 +1,98 @@
 // c:\Users\BUNTY\Desktop\dexxxx\frontend\src\components\ui\ActivityScanner.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ExternalLink, CheckCircle2, Clock, XCircle, Activity, Hash, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { ExternalLink, Activity, Hash, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { getExplorerUrl, getContractAddress, GOLD_BONDING_CURVE_ABI } from '@/constants/contracts';
-import { useChainId, useWatchContractEvent, usePublicClient } from 'wagmi';
-import { formatUnits, parseAbi } from 'viem';
+import { useAccount, useWatchContractEvent } from 'wagmi';
+import { formatUnits, parseAbi, createPublicClient, http } from 'viem';
+import { baseSepolia } from 'viem/chains';
 import { useMounted } from '@/hooks/useMounted';
+
+// Static client for reliable scanning on Localhost
+const scannerClient = createPublicClient({
+  chain: baseSepolia,
+  transport: http('https://sepolia.base.org')
+});
 
 export interface Transaction {
   hash: string;
-  type: 'Buy' | 'Sell' | 'Stake' | 'Unstake' | 'Claim' | 'Bridge' | 'Long' | 'Short';
-  status: 'pending' | 'success' | 'error';
+  type: 'Buy' | 'Sell';
+  status: 'success' | 'pending' | 'error';
   timestamp: number;
-  amount?: string;
-  symbol?: string;
+  amount: string;
+  symbol: string;
+  user: string;
   isGlobal?: boolean;
 }
 
-let globalTransactions: Transaction[] = [];
-const listeners = new Set<(txs: Transaction[]) => void>();
-
-const notify = () => listeners.forEach(l => l([...globalTransactions]));
-
-export const useTransactionScanner = () => {
-  const addTransaction = (tx: Omit<Transaction, 'timestamp'>) => {
-    const newTx: Transaction = { ...tx, timestamp: Date.now() };
-    globalTransactions = [newTx, ...globalTransactions].slice(0, 10);
-    notify();
-  };
-
-  const updateTransactionStatus = (hash: string, status: Transaction['status']) => {
-    globalTransactions = globalTransactions.map(tx => 
-      tx.hash === hash ? { ...tx, status } : tx
-    );
-    notify();
-  };
-
-  return { addTransaction, updateTransactionStatus };
-};
-
 export const ActivityScanner = () => {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [filter, setFilter] = useState<'all' | 'me'>('all');
+  const { address } = useAccount();
   const mounted = useMounted();
-  const [transactions, setTransactions] = useState<Transaction[]>(globalTransactions);
-  const chainId = useChainId();
-  const publicClient = usePublicClient({ chainId });
+  const bondingCurveAddress = getContractAddress(84532, 'bondingCurve');
 
-  const explorerUrl = chainId === 8453 ? 'https://basescan.org' : 'https://sepolia.basescan.org';
-  const bondingCurveAddress = getContractAddress(chainId, 'bondingCurve');
-
+  // 1. Fetch History
   useEffect(() => {
-    listeners.add(setTransactions);
-    return () => {
-      listeners.delete(setTransactions);
-    };
-  }, []);
+    const fetchHistory = async () => {
+      if (!bondingCurveAddress) return;
+      try {
+        const currentBlock = await scannerClient.getBlockNumber();
+        const fromBlock = currentBlock > 2000n ? currentBlock - 2000n : 0n;
 
-  // 1. Fetch Recent Events
-  useEffect(() => {
-    const fetchRecentEvents = async () => {
-        if (!bondingCurveAddress || bondingCurveAddress === "0x0000000000000000000000000000000000000000") return;
-
-        try {
-          const currentBlock = await publicClient.getBlockNumber();
-          const fromBlock = currentBlock > BigInt(10000) ? currentBlock - BigInt(10000) : BigInt(0);
-
-          const buyLogs = await publicClient.getContractEvents({
-            address: bondingCurveAddress,
+        const [buyLogs, sellLogs] = await Promise.all([
+          scannerClient.getContractEvents({
+            address: bondingCurveAddress as `0x${string}`,
             abi: parseAbi(GOLD_BONDING_CURVE_ABI),
             eventName: 'Bought',
             fromBlock,
-            toBlock: currentBlock
-          });
-
-          const sellLogs = await publicClient.getContractEvents({
-            address: bondingCurveAddress,
+          }),
+          scannerClient.getContractEvents({
+            address: bondingCurveAddress as `0x${string}`,
             abi: parseAbi(GOLD_BONDING_CURVE_ABI),
             eventName: 'Sold',
             fromBlock,
-            toBlock: currentBlock
-          });
+          })
+        ]);
 
-          const formatted = [
-            ...buyLogs.map((log: any) => ({
-              hash: log.transactionHash,
-              type: 'Buy' as const,
-              status: 'success' as const,
-              timestamp: Date.now() - 10000, 
-              amount: formatUnits(log.args.collateralAmount || 0n, 6),
-              symbol: 'USDT',
-              isGlobal: true
-            })),
-            ...sellLogs.map((log: any) => ({
-              hash: log.transactionHash,
-              type: 'Sell' as const,
-              status: 'success' as const,
-              timestamp: Date.now() - 20000,
-              amount: formatUnits(log.args.collateralAmount || 0n, 6),
-              symbol: 'USDT',
-              isGlobal: true
-            }))
-          ].sort((a, b) => b.timestamp - a.timestamp).slice(0, 10);
+        const formatted = [
+          ...buyLogs.map((log: any) => ({
+            hash: log.transactionHash,
+            type: 'Buy' as const,
+            status: 'success' as const,
+            timestamp: Date.now() - (Math.random() * 10000),
+            amount: formatUnits(log.args.collateralAmount || 0n, 6),
+            symbol: 'USDT',
+            user: log.args.user?.toLowerCase() || '',
+            isGlobal: true
+          })),
+          ...sellLogs.map((log: any) => ({
+            hash: log.transactionHash,
+            type: 'Sell' as const,
+            status: 'success' as const,
+            timestamp: Date.now() - (Math.random() * 20000),
+            amount: formatUnits(log.args.collateralAmount || 0n, 6),
+            symbol: 'USDT',
+            user: log.args.user?.toLowerCase() || '',
+            isGlobal: true
+          }))
+        ].sort((a, b) => b.timestamp - a.timestamp);
 
-          setTransactions(formatted);
+        setTransactions(formatted);
       } catch (e) {
-        console.error("Failed to fetch logs", e);
+        console.error("Scanner fetch error", e);
       }
     };
+    fetchHistory();
+    const inv = setInterval(fetchHistory, 15000);
+    return () => clearInterval(inv);
+  }, [bondingCurveAddress]);
 
-    fetchRecentEvents();
-    const interval = setInterval(fetchRecentEvents, 10000);
-    return () => clearInterval(interval);
-  }, [publicClient, bondingCurveAddress]);
-
-  // 2. Watch Live Bought
+  // 2. Watch Live
   useWatchContractEvent({
-    chainId: 84532,
-    address: bondingCurveAddress,
+    address: bondingCurveAddress as `0x${string}`,
     abi: parseAbi(GOLD_BONDING_CURVE_ABI),
     eventName: 'Bought',
     onLogs(logs) {
@@ -127,19 +102,18 @@ export const ActivityScanner = () => {
           type: 'Buy',
           status: 'success',
           timestamp: Date.now(),
-          amount: formatUnits(log.args.collateralAmount, 6),
+          amount: formatUnits(log.args.collateralAmount || 0n, 6),
           symbol: 'USDT',
+          user: log.args.user?.toLowerCase() || '',
           isGlobal: true
         };
-        setTransactions(prev => [newTx, ...prev].slice(0, 10));
+        setTransactions(prev => [newTx, ...prev].slice(0, 30));
       });
     },
   });
 
-  // 3. Watch Live Sold
   useWatchContractEvent({
-    chainId: 84532,
-    address: bondingCurveAddress,
+    address: bondingCurveAddress as `0x${string}`,
     abi: parseAbi(GOLD_BONDING_CURVE_ABI),
     eventName: 'Sold',
     onLogs(logs) {
@@ -149,85 +123,124 @@ export const ActivityScanner = () => {
           type: 'Sell',
           status: 'success',
           timestamp: Date.now(),
-          amount: formatUnits(log.args.collateralAmount, 6),
+          amount: formatUnits(log.args.collateralAmount || 0n, 6),
           symbol: 'USDT',
+          user: log.args.user?.toLowerCase() || '',
           isGlobal: true
         };
-        setTransactions(prev => [newTx, ...prev].slice(0, 10));
+        setTransactions(prev => [newTx, ...prev].slice(0, 30));
       });
     },
   });
 
+  const filteredTransactions = useMemo(() => {
+    if (filter === 'me' && address) {
+      return transactions.filter(tx => tx.user === address.toLowerCase());
+    }
+    return transactions;
+  }, [transactions, filter, address]);
+
   if (!mounted) return null;
 
   return (
-    <div className="w-full">
+    <div className="flex flex-col h-full">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <Activity className="w-4 h-4 md:w-5 md:h-5 text-gold" />
-          <h3 className="font-black uppercase tracking-tight text-[10px] md:text-sm">Network Scan</h3>
+          <div className="p-2.5 rounded-xl bg-gold/10 border border-gold/20 shadow-[0_0_15px_rgba(255,215,0,0.1)]">
+            <Activity className="w-5 h-5 text-gold animate-pulse" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider">Protocol Activity</h3>
+            <p className="text-[10px] text-slate-400 font-medium">Real-time Network Scanner</p>
+          </div>
         </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-          <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Live</span>
+
+        <div className="flex bg-white/5 p-1 rounded-lg border border-white/10">
+          <button
+            onClick={() => setFilter('all')}
+            className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${
+              filter === 'all' ? 'bg-gold text-black shadow-lg' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Recent
+          </button>
+          <button
+            onClick={() => setFilter('me')}
+            className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${
+              filter === 'me' ? 'bg-gold text-black shadow-lg' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            My Activity
+          </button>
         </div>
       </div>
 
-      <div className="space-y-3">
-        <AnimatePresence initial={false}>
-          {transactions.length === 0 ? (
-            <div className="py-10 text-center border box-border border-white/5 rounded-2xl bg-white/[0.01]">
-              <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Awaiting Transactions...</p>
-            </div>
+      <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar min-h-[400px]">
+        <AnimatePresence initial={false} mode="popLayout">
+          {filteredTransactions.length === 0 ? (
+            <motion.div 
+              key="empty"
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }}
+              className="py-12 text-center"
+            >
+              <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-3 border border-white/10">
+                <Hash className="w-5 h-5 text-slate-600" />
+              </div>
+              <p className="text-xs text-slate-500 font-medium italic">No transactions found...</p>
+            </motion.div>
           ) : (
-            transactions.map((tx) => (
+            filteredTransactions.map((tx) => (
               <motion.div
                 key={`${tx.hash}-${tx.type}-${tx.timestamp}`}
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
+                layout
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-black/20 border border-white/5 rounded-2xl p-4 hover:border-gold/40 transition-all duration-300 group relative overflow-hidden"
+                className={`group relative bg-white/[0.03] border border-white/10 rounded-2xl p-4 hover:border-gold/30 hover:bg-white/[0.05] transition-all duration-300 ${
+                    tx.user === address?.toLowerCase() ? 'ring-1 ring-gold/40 bg-gold/[0.03]' : ''
+                }`}
               >
-                <div className="flex items-center justify-between gap-4 relative z-10">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${
-                      (tx.type === 'Buy') 
-                      ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 group-hover:bg-emerald-500 group-hover:text-black' 
-                      : 'bg-rose-500/10 text-rose-500 border border-rose-500/20 group-hover:bg-rose-500 group-hover:text-black'
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2.5 rounded-xl shadow-inner ${
+                      tx.type === 'Buy' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
                     }`}>
-                      {(tx.type === 'Buy') ? <ArrowUpRight className="w-5 h-5" /> : <ArrowDownRight className="w-5 h-5" />}
+                      {tx.type === 'Buy' ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
                     </div>
                     <div>
-                      <div className="flex items-center gap-3">
-                        <span className={`text-[11px] font-black uppercase tracking-widest ${
-                           (tx.type === 'Buy') ? 'text-emerald-500' : 'text-rose-500'
-                        }`}>{tx.type}</span>
-                        {tx.amount && (
-                          <span className="text-[12px] font-display font-light text-white tracking-wide">{Number(tx.amount).toLocaleString()} <span className="text-[8px] font-sans font-black opacity-40 uppercase ml-0.5">{tx.symbol}</span></span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-white tracking-wide">{tx.type} Gold</span>
+                        {tx.user === address?.toLowerCase() && (
+                          <span className="px-2 py-0.5 rounded bg-gold text-black text-[8px] font-black uppercase tracking-tighter shadow-[0_0_10px_rgba(255,215,0,0.3)]">Me</span>
                         )}
                       </div>
-                      <div className="flex items-center gap-1.5 text-slate-600 mt-1">
-                        <Hash className="w-2.5 h-2.5" />
-                        <span className="text-[10px] font-mono tracking-tighter opacity-60">{tx.hash.slice(0, 10)}...</span>
+                      <div className="flex items-center gap-2 text-[10px] text-slate-500 mt-0.5">
+                        <span className="font-mono">{tx.hash.slice(0, 6)}...{tx.hash.slice(-4)}</span>
+                        <span className="w-1 h-1 rounded-full bg-slate-700" />
+                        <span>Recent</span>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-3">
-                    {tx.isGlobal && (
-                      <span className="text-[8px] font-black text-gold border border-gold/30 px-2 py-0.5 rounded-lg uppercase tracking-widest bg-gold/5 shadow-[0_0_15px_rgba(251,191,36,0.1)]">LIVE</span>
-                    )}
-                    <button 
-                      onClick={() => window.open(`${explorerUrl}/tx/${tx.hash}`, '_blank')}
-                      className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl transition-all text-slate-500 hover:text-white border border-white/5"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </button>
+                  <div className="text-right">
+                    <div className={`text-sm font-black tracking-tight ${
+                      tx.type === 'Buy' ? 'text-emerald-400' : 'text-rose-400'
+                    }`}>
+                      {tx.type === 'Buy' ? '+' : '-'}${Number(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </div>
+                    <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{tx.symbol}</div>
                   </div>
                 </div>
-                <div className={`absolute top-0 left-0 w-[2px] h-full transition-all duration-500 ${
-                  (tx.type === 'Buy') ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]'
-                }`} />
+
+                <a
+                  href={`${getExplorerUrl(84532)}/tx/${tx.hash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute top-2 right-2 p-1.5 opacity-0 group-hover:opacity-100 text-slate-500 hover:text-gold transition-all"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
               </motion.div>
             ))
           )}
