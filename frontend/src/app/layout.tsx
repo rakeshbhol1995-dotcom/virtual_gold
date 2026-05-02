@@ -42,11 +42,11 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/gold-logo.png" },
-      { url: "/gold-logo.png", type: "image/png" },
+      { url: "/gold-logo.png?v=2" },
+      { url: "/gold-logo.png?v=2", type: "image/png" },
     ],
-    shortcut: "/gold-logo.png",
-    apple: "/gold-logo.png",
+    shortcut: "/gold-logo.png?v=2",
+    apple: "/gold-logo.png?v=2",
   },
 };
 
