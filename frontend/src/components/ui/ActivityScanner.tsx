@@ -40,7 +40,7 @@ export const ActivityScanner = () => {
       if (!bondingCurveAddress) return;
       try {
         const currentBlock = await scannerClient.getBlockNumber();
-        const fromBlock = currentBlock > 2000n ? currentBlock - 2000n : 0n;
+        const fromBlock = currentBlock > 10000n ? currentBlock - 10000n : 0n;
 
         const [buyLogs, sellLogs] = await Promise.all([
           scannerClient.getContractEvents({
@@ -62,7 +62,7 @@ export const ActivityScanner = () => {
             hash: log.transactionHash,
             type: 'Buy' as const,
             status: 'success' as const,
-            timestamp: Date.now() - (Math.random() * 10000),
+            timestamp: Number(log.blockNumber) || Date.now(), // Use block number for order
             amount: formatUnits(log.args.collateralAmount || 0n, 6),
             symbol: 'USDT',
             user: log.args.user?.toLowerCase() || '',
@@ -72,7 +72,7 @@ export const ActivityScanner = () => {
             hash: log.transactionHash,
             type: 'Sell' as const,
             status: 'success' as const,
-            timestamp: Date.now() - (Math.random() * 20000),
+            timestamp: Number(log.blockNumber) || Date.now(),
             amount: formatUnits(log.args.collateralAmount || 0n, 6),
             symbol: 'USDT',
             user: log.args.user?.toLowerCase() || '',
@@ -80,13 +80,19 @@ export const ActivityScanner = () => {
           }))
         ].sort((a, b) => b.timestamp - a.timestamp);
 
-        setTransactions(formatted);
+        if (formatted.length > 0) {
+            setTransactions(prev => {
+                const existingHashes = new Set(prev.map(tx => tx.hash));
+                const newOnes = formatted.filter(tx => !existingHashes.has(tx.hash));
+                return [...newOnes, ...prev].sort((a, b) => b.timestamp - a.timestamp).slice(0, 50);
+            });
+        }
       } catch (e) {
         console.error("Scanner fetch error", e);
       }
     };
     fetchHistory();
-    const inv = setInterval(fetchHistory, 15000);
+    const inv = setInterval(fetchHistory, 10000);
     return () => clearInterval(inv);
   }, [bondingCurveAddress]);
 
@@ -133,45 +139,113 @@ export const ActivityScanner = () => {
     },
   });
 
-  const filteredTransactions = useMemo(() => {
-    if (filter === 'me' && address) {
-      return transactions.filter(tx => tx.user === address.toLowerCase());
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResult, setSearchResult] = useState<Transaction | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+
+  // ... (Previous useEffects for history and watch)
+
+  const handleSearch = async (val: string) => {
+    setSearchTerm(val);
+    if (val.length < 60) {
+        setSearchResult(null);
+        return;
     }
-    return transactions;
-  }, [transactions, filter, address]);
+
+    setIsSearching(true);
+    try {
+        // First check in-memory
+        const found = transactions.find(t => t.hash.toLowerCase() === val.toLowerCase());
+        if (found) {
+            setSearchResult(found);
+            setIsSearching(false);
+            return;
+        }
+
+        // If not found, fetch from RPC
+        const tx = await scannerClient.getTransaction({ hash: val as `0x${string}` });
+        const receipt = await scannerClient.getTransactionReceipt({ hash: val as `0x${string}` });
+        
+        if (tx && receipt) {
+            setSearchResult({
+                hash: tx.hash,
+                type: 'Buy', // Default to display
+                status: receipt.status === 'success' ? 'success' : 'error',
+                timestamp: Date.now(),
+                amount: formatUnits(tx.value || 0n, 6),
+                symbol: 'ETH/USDT',
+                user: tx.from.toLowerCase()
+            });
+        }
+    } catch (e) {
+        console.error("Search error", e);
+    }
+    setIsSearching(false);
+  };
+
+  const filteredTransactions = useMemo(() => {
+    let list = transactions;
+    if (filter === 'me' && address) {
+      list = transactions.filter(tx => tx.user === address.toLowerCase());
+    }
+    if (searchTerm && searchTerm.length > 10) {
+        return list.filter(tx => tx.hash.toLowerCase().includes(searchTerm.toLowerCase()));
+    }
+    return list;
+  }, [transactions, filter, address, searchTerm]);
 
   if (!mounted) return null;
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-gold/10 border border-gold/20 shadow-[0_0_15px_rgba(255,215,0,0.1)]">
-            <Activity className="w-5 h-5 text-gold animate-pulse" />
-          </div>
-          <div>
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider">Protocol Activity</h3>
-            <p className="text-[10px] text-slate-400 font-medium">Real-time Network Scanner</p>
-          </div>
+      <div className="space-y-4 mb-6">
+        <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-gold/10 border border-gold/20 shadow-[0_0_15px_rgba(255,215,0,0.1)]">
+                <Activity className="w-5 h-5 text-gold animate-pulse" />
+            </div>
+            <div>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Protocol Activity</h3>
+                <p className="text-[10px] text-slate-400 font-medium">Real-time Network Scanner</p>
+            </div>
+            </div>
+
+            <div className="flex bg-white/5 p-1 rounded-lg border border-white/10">
+                <button
+                    onClick={() => setFilter('all')}
+                    className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${
+                    filter === 'all' ? 'bg-gold text-black shadow-lg' : 'text-slate-400 hover:text-white'
+                    }`}
+                >
+                    Recent
+                </button>
+                <button
+                    onClick={() => setFilter('me')}
+                    className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${
+                    filter === 'me' ? 'bg-gold text-black shadow-lg' : 'text-slate-400 hover:text-white'
+                    }`}
+                >
+                    My Activity
+                </button>
+            </div>
         </div>
 
-        <div className="flex bg-white/5 p-1 rounded-lg border border-white/10">
-          <button
-            onClick={() => setFilter('all')}
-            className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${
-              filter === 'all' ? 'bg-gold text-black shadow-lg' : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Recent
-          </button>
-          <button
-            onClick={() => setFilter('me')}
-            className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${
-              filter === 'me' ? 'bg-gold text-black shadow-lg' : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            My Activity
-          </button>
+        {/* Search Bar */}
+        <div className="relative group">
+            <input 
+                type="text"
+                placeholder="Search Tx Hash (0x...)"
+                value={searchTerm}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-gold/50 focus:bg-white/[0.08] transition-all"
+            />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                {isSearching ? (
+                    <div className="w-3 h-3 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
+                ) : (
+                    <Hash className="w-3.5 h-3.5 text-slate-600" />
+                )}
+            </div>
         </div>
       </div>
 
