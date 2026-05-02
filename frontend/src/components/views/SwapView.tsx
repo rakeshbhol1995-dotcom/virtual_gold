@@ -10,7 +10,7 @@ import { MagneticButton } from '@/components/ui/MagneticButton';
 import { ArrowDownUp, Settings, ChevronDown, ShieldCheck, Info, TrendingUp, Zap, CreditCard, Apple, Globe, Copy, Share2, Users, Wallet, ShieldAlert } from 'lucide-react';
 
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useChainId, useSwitchChain } from 'wagmi';
-import { parseUnits, formatUnits } from 'viem';
+import { parseUnits, formatUnits, parseAbi } from 'viem';
 import { 
   getContractAddress,
   GOLD_BONDING_CURVE_ABI,

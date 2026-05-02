@@ -92,7 +92,7 @@ export const DashboardView = () => {
     address: bondingCurveAddress,
     abi: GOLD_BONDING_CURVE_ABI,
     functionName: 'totalVolume',
-    query: { refetchInterval: 10000 }
+    query: { refetchInterval: 3000 }
   });
 
   const currentPrice = priceData ? Number(formatUnits(priceData as bigint, 6)).toFixed(4) : '10.0000';

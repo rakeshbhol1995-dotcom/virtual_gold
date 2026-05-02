@@ -180,7 +180,7 @@ export const ActivityScanner = () => {
           ) : (
             transactions.map((tx) => (
               <motion.div
-                key={`${tx.hash}-${tx.type}`}
+                key={`${tx.hash}-${tx.type}-${tx.timestamp}`}
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
