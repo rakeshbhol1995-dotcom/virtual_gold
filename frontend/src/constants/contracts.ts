@@ -43,6 +43,8 @@ export const ERC20_ABI = parseAbi([
 
 export const GOLD_BONDING_CURVE_ABI = parseAbi([
   "function getCurrentPrice() view returns (uint256)",
+  "function getReserveBalance() view returns (uint256)",
+  "function getHoldersCount() view returns (uint256)",
   "function buy(uint256 collateralAmount, uint256 minGoldOut, address referrer) external",
   "function sell(uint256 goldAmount, uint256 minCollateralOut) external",
   "function getGoldOut(uint256 collateralAmount) view returns (uint256)",

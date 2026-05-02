@@ -9,7 +9,7 @@ import { HoldersView } from '@/components/views/HoldersView';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { useReadContract, useChainId } from 'wagmi';
 import { formatUnits } from 'viem';
-import { getContractAddress, GOLD_TOKEN_ABI, GOLD_BONDING_CURVE_ABI } from '@/constants/contracts';
+import { getContractAddress, ERC20_ABI, GOLD_BONDING_CURVE_ABI } from '@/constants/contracts';
 
 const container = {
   hidden: { opacity: 0 },
@@ -42,7 +42,7 @@ export const DashboardView = () => {
   const { data: totalSupply } = useReadContract({
     chainId,
     address: tokenAddress,
-    abi: GOLD_TOKEN_ABI,
+    abi: ERC20_ABI,
     functionName: 'totalSupply',
     query: { refetchInterval: 10000 }
   });
@@ -56,6 +56,15 @@ export const DashboardView = () => {
     query: { refetchInterval: 10000 }
   });
 
+  // Real Data: Holders Count
+  const { data: holdersCount } = useReadContract({
+    chainId,
+    address: bondingCurveAddress,
+    abi: GOLD_BONDING_CURVE_ABI,
+    functionName: 'getHoldersCount',
+    query: { refetchInterval: 10000 }
+  });
+
   const currentPrice = priceData ? Number(formatUnits(priceData as bigint, 6)).toFixed(2) : '0.00';
   const supplyFormatted = totalSupply ? Number(formatUnits(totalSupply as bigint, 18)).toLocaleString() : '0';
   const tvlFormatted = tvlData ? Number(formatUnits(tvlData as bigint, 6)).toLocaleString() : '0';
@@ -63,7 +72,7 @@ export const DashboardView = () => {
 
   const stats = [
     { label: 'Gold Price (Grams)', value: `$${currentPrice}`, change: 'LIVE', icon: <Zap className="text-gold" />, color: 'gold' },
-    { label: 'Total Supply', value: supplyFormatted, change: 'Grams', icon: <Users className="text-emerald-400" />, color: 'emerald' },
+    { label: 'Total Holders', value: holdersCount ? String(holdersCount) : '1', change: 'Network', icon: <Users className="text-emerald-400" />, color: 'emerald' },
     { label: 'Market Cap', value: `$${marketCap}`, change: 'Base Network', icon: <Globe className="text-blue-400" />, color: 'blue' },
     { label: 'Protocol TVL', value: `$${tvlFormatted}`, change: 'USDT', icon: <ShieldCheck className="text-gold" />, color: 'gold' },
   ];
