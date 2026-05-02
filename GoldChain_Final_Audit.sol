@@ -53,7 +53,7 @@ contract GoldBondingCurve is Ownable, ReentrancyGuard {
     
     address public feeRecipient;
 
-    event Bought(address indexed user, uint256 collateralAmount, uint256 goldAmount, uint256 fee);
+    event Bought(address indexed user, uint256 collateralAmount, uint256 goldAmount, uint256 fee, address indexed referrer);
     event Sold(address indexed user, uint256 goldAmount, uint256 collateralAmount, uint256 fee);
     event TokensRescued(address indexed token, uint256 amount);
 
@@ -77,27 +77,39 @@ contract GoldBondingCurve is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @notice GAS OPTIMIZED & SYMMETRICAL FEE BUY
-     * FIXED: Single transferFrom (F-Gas) & Symmetrical 1% fee logic.
+     * @dev Frontend Helper: Calculate gold out for a given collateral amount.
      */
-    function buy(uint256 collateralLimit, uint256 goldAmount) external nonReentrant {
+    function getGoldOut(uint256 collateralAmount) public view returns (uint256) {
+        uint256 fee = (collateralAmount * FEE_PERCENT) / BASIS_POINTS;
+        uint256 netCollateral = collateralAmount - fee;
+        return (netCollateral * PRECISION) / getCurrentPrice();
+    }
+
+    /**
+     * @dev Frontend Helper: Calculate sell proceeds.
+     */
+    function getSellProceeds(uint256 goldAmount) public view returns (uint256) {
+        uint256 supply = goldToken.totalSupply();
+        if (supply < goldAmount) return 0;
+        uint256 rawReturn = calculateCost(supply - goldAmount, goldAmount);
+        uint256 fee = (rawReturn * FEE_PERCENT) / BASIS_POINTS;
+        return rawReturn - fee;
+    }
+
+    function buy(uint256 collateralLimit, uint256 goldAmount, address referrer) external nonReentrant {
         uint256 supply = goldToken.totalSupply();
         uint256 cost = calculateCost(supply, goldAmount);
-        
-        // FIXED: Symmetrical Fee (Exact 1% of cost)
         uint256 fee = (cost * FEE_PERCENT) / BASIS_POINTS;
         uint256 totalRequired = cost + fee;
 
         require(totalRequired <= collateralLimit, "Price exceeds limit");
 
-        // Effects (CEI)
         goldToken.mint(msg.sender, goldAmount);
 
-        // Interactions (FIXED: Single transferFrom for better UX/Gas)
         collateralToken.safeTransferFrom(msg.sender, address(this), totalRequired);
         collateralToken.safeTransfer(feeRecipient, fee);
         
-        emit Bought(msg.sender, totalRequired, goldAmount, fee);
+        emit Bought(msg.sender, totalRequired, goldAmount, fee, referrer);
     }
 
     function sell(uint256 goldAmount, uint256 minCollateralOut) external nonReentrant {
@@ -110,10 +122,8 @@ contract GoldBondingCurve is Ownable, ReentrancyGuard {
 
         require(netReturn >= minCollateralOut, "Slippage too high");
 
-        // Effects
         goldToken.burn(msg.sender, goldAmount);
 
-        // Interactions
         collateralToken.safeTransfer(msg.sender, netReturn);
         collateralToken.safeTransfer(feeRecipient, fee);
         
@@ -123,7 +133,7 @@ contract GoldBondingCurve is Ownable, ReentrancyGuard {
     function rescueToken(address _token, uint256 _amount) external onlyOwner {
         require(_token != address(collateralToken), "Cannot rescue collateral");
         IERC20(_token).safeTransfer(owner(), _amount);
-        emit TokensRescued(_token, _amount); // FIXED: Added event
+        emit TokensRescued(_token, _amount); 
     }
 
     function setFeeRecipient(address _feeRecipient) external onlyOwner {
