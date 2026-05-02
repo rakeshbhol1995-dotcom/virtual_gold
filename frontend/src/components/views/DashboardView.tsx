@@ -122,27 +122,37 @@ export const DashboardView = () => {
                         />
                     ))}
                     
-                    {/* The Coin */}
+                    {/* The Custom 3D Gold Coin */}
                     <motion.div 
                         animate={{ 
-                            y: [0, -10, 0],
+                            y: [0, -15, 0],
                             boxShadow: [
-                                "0 0 40px rgba(255,215,0,0.3)",
-                                "0 0 80px rgba(255,184,0,0.6)",
-                                "0 0 40px rgba(255,215,0,0.3)"
+                                "0 0 50px rgba(255,215,0,0.4)",
+                                "0 0 100px rgba(255,184,0,0.7)",
+                                "0 0 50px rgba(255,215,0,0.4)"
                             ]
                         }}
-                        transition={{ duration: 4, repeat: Infinity }}
-                        className="relative w-full h-full bg-gradient-to-br from-yellow-300 via-gold to-yellow-700 rounded-full border-[8px] border-yellow-200/30 flex items-center justify-center shadow-2xl backdrop-blur-sm overflow-hidden group-hover:scale-110 transition-transform duration-700"
+                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                        className="relative w-full h-full rounded-full border-[10px] border-yellow-200/40 flex items-center justify-center shadow-2xl backdrop-blur-sm overflow-hidden group-hover:scale-110 transition-transform duration-700 bg-gradient-to-tr from-yellow-700 via-gold to-yellow-300"
                     >
-                        <Trophy size={180} className="text-yellow-100 drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
+                        {/* Coin Surface Detail */}
+                        <div className="absolute inset-2 rounded-full border-2 border-yellow-200/20" />
                         
-                        {/* Coin Shine */}
+                        {/* GOLD Text/Logo */}
+                        <div className="relative z-10 flex flex-col items-center">
+                            <span className="text-4xl md:text-6xl font-black text-white/90 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] tracking-tighter">GOLD</span>
+                            <div className="w-12 h-1 bg-white/40 rounded-full mt-1" />
+                        </div>
+                        
+                        {/* Coin Shine Animation */}
                         <motion.div 
-                            animate={{ x: ['-100%', '200%'] }}
+                            animate={{ x: ['-200%', '300%'], y: ['-100%', '200%'] }}
                             transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                            className="absolute inset-0 w-1/2 bg-white/20 -skew-x-12 blur-xl"
+                            className="absolute inset-0 w-full h-1/2 bg-white/30 -skew-x-12 blur-2xl"
                         />
+
+                        {/* Inner Ring Glow */}
+                        <div className="absolute inset-0 rounded-full shadow-[inset_0_0_50px_rgba(255,255,255,0.3)]" />
                     </motion.div>
                 </motion.div>
             </div>
