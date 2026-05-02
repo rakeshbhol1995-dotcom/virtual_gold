@@ -64,7 +64,7 @@ export const ActivityScanner = () => {
 
         try {
           const currentBlock = await publicClient.getBlockNumber();
-          const fromBlock = currentBlock > BigInt(5000) ? currentBlock - BigInt(5000) : BigInt(0);
+          const fromBlock = currentBlock > BigInt(10000) ? currentBlock - BigInt(10000) : BigInt(0);
 
           const buyLogs = await publicClient.getContractEvents({
             address: bondingCurveAddress,
@@ -116,6 +116,7 @@ export const ActivityScanner = () => {
 
   // 2. Watch Live Bought
   useWatchContractEvent({
+    chainId: 84532,
     address: bondingCurveAddress,
     abi: parseAbi(GOLD_BONDING_CURVE_ABI),
     eventName: 'Bought',
@@ -137,6 +138,7 @@ export const ActivityScanner = () => {
 
   // 3. Watch Live Sold
   useWatchContractEvent({
+    chainId: 84532,
     address: bondingCurveAddress,
     abi: parseAbi(GOLD_BONDING_CURVE_ABI),
     eventName: 'Sold',

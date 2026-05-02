@@ -34,7 +34,8 @@ export const DashboardView = () => {
 
   // Real Data: Current Price
   const { data: priceData } = useReadContract({
-    chainId,
+    chainId: 84532,
+    address: bondingCurveAddress,
     abi: parseAbi(GOLD_BONDING_CURVE_ABI),
     functionName: 'getCurrentPrice',
     query: { refetchInterval: 2000 }
@@ -59,36 +60,39 @@ export const DashboardView = () => {
 
   // Real Data: Total Supply
   const { data: totalSupply } = useReadContract({
-    chainId,
+    chainId: 84532,
     address: tokenAddress,
     abi: parseAbi(ERC20_ABI),
     functionName: 'totalSupply',
-    query: { refetchInterval: 5000 }
+    query: { refetchInterval: 3000 }
   });
 
   // Real Data: TVL (Reserve)
-  const { data: tvlData, isLoading: isTVLLoading } = useReadContract({
-    chainId,
+  const { data: tvlData } = useReadContract({
+    chainId: 84532,
+    address: getContractAddress(84532, 'collateralToken'),
     abi: parseAbi(ERC20_ABI),
     functionName: 'balanceOf',
     args: [bondingCurveAddress],
-    query: { refetchInterval: 5000 }
+    query: { refetchInterval: 3000 }
   });
 
   // Real Data: Holders Count
-  const { data: holdersCount, isLoading: isHoldersLoading } = useReadContract({
-    chainId,
+  const { data: holdersCount } = useReadContract({
+    chainId: 84532,
+    address: bondingCurveAddress,
     abi: parseAbi(GOLD_BONDING_CURVE_ABI),
     functionName: 'getHoldersCount',
-    query: { refetchInterval: 5000 }
+    query: { refetchInterval: 3000 }
   });
 
   // Real Data: Total Volume
-  const { data: totalVolumeData, isLoading: isVolumeLoading } = useReadContract({
-    chainId,
+  const { data: totalVolumeData } = useReadContract({
+    chainId: 84532,
+    address: bondingCurveAddress,
     abi: parseAbi(GOLD_BONDING_CURVE_ABI),
     functionName: 'totalVolume',
-    query: { refetchInterval: 3000 }
+    query: { refetchInterval: 2000 }
   });
 
   const currentPrice = priceData ? Number(formatUnits(priceData as bigint, 6)).toFixed(4) : '10.0000';
