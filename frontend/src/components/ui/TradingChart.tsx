@@ -19,16 +19,18 @@ export const TradingChart = () => {
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const lastPriceRef = useRef<number>(0);
+  
   const chainId = useChainId();
   const bondingCurveAddress = getContractAddress(chainId, 'bondingCurve');
 
   // Real Data: Current Price from Smart Contract
-  const { data: priceData } = useReadContract({
+  const { data: priceData, refetch } = useReadContract({
     chainId,
     address: bondingCurveAddress,
     abi: GOLD_BONDING_CURVE_ABI,
     functionName: 'getCurrentPrice',
-    query: { refetchInterval: 3000 }
+    query: { refetchInterval: 3000 } // Check every 3 seconds
   });
 
   const realPrice = priceData ? Number(formatUnits(priceData as bigint, 6)) : 10.20;
@@ -41,7 +43,6 @@ export const TradingChart = () => {
     if (!isMounted || !chartContainerRef.current) return;
 
     const el = chartContainerRef.current;
-
     const chart = createChart(el, {
       layout: {
         background: { type: ColorType.Solid, color: 'transparent' },
@@ -61,10 +62,6 @@ export const TradingChart = () => {
         borderColor: 'rgba(255,255,255,0.05)',
         autoScale: true,
       },
-      crosshair: {
-        vertLine: { color: 'rgba(255,184,0,0.2)', labelBackgroundColor: '#FFB800' },
-        horzLine: { color: 'rgba(255,184,0,0.2)', labelBackgroundColor: '#FFB800' },
-      },
     });
 
     const series = chart.addCandlestickSeries({
@@ -75,70 +72,57 @@ export const TradingChart = () => {
       wickDownColor: '#ef4444',
     });
 
-    // Generate a "Syncing" history that ends at the real price
-    const generateHistory = () => {
-      const data: CandleData[] = [];
-      const now = Math.floor(Date.now() / 1000);
-      let basePrice = realPrice * 0.95; // Start slightly lower
-      
-      for (let i = 100; i > 0; i--) {
+    // History Generation
+    const data: CandleData[] = [];
+    const now = Math.floor(Date.now() / 1000);
+    let base = realPrice * 0.98;
+    for (let i = 100; i > 0; i--) {
         const time = (now - i * 3600) as Time;
-        const open = basePrice;
-        const change = (Math.random() - 0.48) * 0.05;
-        const close = open + change;
-        const high = Math.max(open, close) + Math.random() * 0.02;
-        const low = Math.min(open, close) - Math.random() * 0.02;
-        
-        data.push({ time, open, high, low, close });
-        basePrice = close;
-      }
-      
-      // Ensure the last candle matches real price
-      const lastTime = now as Time;
-      data.push({
-        time: lastTime,
-        open: basePrice,
-        high: Math.max(basePrice, realPrice) + 0.01,
-        low: Math.min(basePrice, realPrice) - 0.01,
-        close: realPrice
-      });
-      
-      return data;
-    };
-
-    series.setData(generateHistory());
-    chart.timeScale().fitContent();
-
+        const open = base;
+        const close = base + (Math.random() - 0.45) * 0.04;
+        data.push({ time, open, high: Math.max(open,close)+0.01, low: Math.min(open,close)-0.01, close });
+        base = close;
+    }
+    series.setData(data);
+    
     chartRef.current = chart;
     seriesRef.current = series;
+    lastPriceRef.current = realPrice;
 
     const handleResize = () => {
       if (el) chart.applyOptions({ width: el.clientWidth, height: el.clientHeight || 360 });
     };
     window.addEventListener('resize', handleResize);
 
-    // Micro-fluctuation simulation (adds life to the candle)
-    const interval = setInterval(() => {
-        if (!seriesRef.current) return;
-        const now = Math.floor(Date.now() / 1000) as Time;
-        const noise = (Math.random() - 0.5) * 0.005;
-        const displayPrice = realPrice + noise;
-        
-        seriesRef.current.update({
-            time: now,
-            open: realPrice,
-            high: displayPrice + 0.002,
-            low: displayPrice - 0.002,
-            close: displayPrice
-        });
-    }, 2000);
-
     return () => {
-      clearInterval(interval);
       window.removeEventListener('resize', handleResize);
       chart.remove();
     };
-  }, [isMounted, realPrice]);
+  }, [isMounted]);
+
+  // UPDATE LOOP: Sync with real price + Micro-fluctuation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!seriesRef.current) return;
+      
+      const now = Math.floor(Date.now() / 1000) as Time;
+      // Use real price but add tiny organic noise for visual flow
+      const noise = (Math.random() - 0.5) * 0.002;
+      const displayPrice = realPrice + noise;
+      
+      seriesRef.current.update({
+        time: now,
+        open: lastPriceRef.current,
+        high: Math.max(lastPriceRef.current, displayPrice) + 0.001,
+        low: Math.min(lastPriceRef.current, displayPrice) - 0.001,
+        close: displayPrice
+      });
+      
+      lastPriceRef.current = displayPrice;
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [realPrice]);
 
   if (!isMounted) return <div className="w-full h-full animate-pulse bg-white/5 rounded-xl" />;
 
