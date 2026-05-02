@@ -7,6 +7,9 @@ import { TradingChart } from '@/components/ui/TradingChart';
 import { ActivityScanner } from '@/components/ui/ActivityScanner';
 import { HoldersView } from '@/components/views/HoldersView';
 import { GlassCard } from '@/components/ui/GlassCard';
+import { useReadContract, useChainId } from 'wagmi';
+import { formatUnits } from 'viem';
+import { getContractAddress, GOLD_TOKEN_ABI, GOLD_BONDING_CURVE_ABI } from '@/constants/contracts';
 
 const container = {
   hidden: { opacity: 0 },
@@ -22,6 +25,49 @@ const item = {
 };
 
 export const DashboardView = () => {
+  const chainId = useChainId();
+  const tokenAddress = getContractAddress(chainId, 'goldToken');
+  const bondingCurveAddress = getContractAddress(chainId, 'bondingCurve');
+
+  // Real Data: Current Price
+  const { data: priceData } = useReadContract({
+    chainId,
+    address: bondingCurveAddress,
+    abi: GOLD_BONDING_CURVE_ABI,
+    functionName: 'getCurrentPrice',
+    query: { refetchInterval: 5000 }
+  });
+
+  // Real Data: Total Supply
+  const { data: totalSupply } = useReadContract({
+    chainId,
+    address: tokenAddress,
+    abi: GOLD_TOKEN_ABI,
+    functionName: 'totalSupply',
+    query: { refetchInterval: 10000 }
+  });
+
+  // Real Data: TVL (Reserve)
+  const { data: tvlData } = useReadContract({
+    chainId,
+    address: bondingCurveAddress,
+    abi: GOLD_BONDING_CURVE_ABI,
+    functionName: 'getReserveBalance',
+    query: { refetchInterval: 10000 }
+  });
+
+  const currentPrice = priceData ? Number(formatUnits(priceData as bigint, 6)).toFixed(2) : '0.00';
+  const supplyFormatted = totalSupply ? Number(formatUnits(totalSupply as bigint, 18)).toLocaleString() : '0';
+  const tvlFormatted = tvlData ? Number(formatUnits(tvlData as bigint, 6)).toLocaleString() : '0';
+  const marketCap = priceData && totalSupply ? (Number(formatUnits(priceData as bigint, 6)) * Number(formatUnits(totalSupply as bigint, 18))).toLocaleString() : '0';
+
+  const stats = [
+    { label: 'Gold Price (Grams)', value: `$${currentPrice}`, change: 'LIVE', icon: <Zap className="text-gold" />, color: 'gold' },
+    { label: 'Total Supply', value: supplyFormatted, change: 'Grams', icon: <Users className="text-emerald-400" />, color: 'emerald' },
+    { label: 'Market Cap', value: `$${marketCap}`, change: 'Base Network', icon: <Globe className="text-blue-400" />, color: 'blue' },
+    { label: 'Protocol TVL', value: `$${tvlFormatted}`, change: 'USDT', icon: <ShieldCheck className="text-gold" />, color: 'gold' },
+  ];
+
   return (
     <motion.div 
       variants={container}
@@ -31,12 +77,7 @@ export const DashboardView = () => {
     >
       {/* Hero Section: Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        {[
-          { label: 'Gold Price (Grams)', value: '$2,342.10', change: '+2.4%', icon: <Zap className="text-gold" />, color: 'gold' },
-          { label: 'Total Holders', value: '1,248', change: '+124', icon: <Users className="text-emerald-400" />, color: 'emerald' },
-          { label: 'Market Cap', value: '$45.2M', change: '+5.2%', icon: <Globe className="text-blue-400" />, color: 'blue' },
-          { label: 'Treasury Backing', value: '100%', change: 'Stable', icon: <ShieldCheck className="text-gold" />, color: 'gold' },
-        ].map((stat, i) => (
+        {stats.map((stat, i) => (
           <motion.div key={i} variants={item}>
             <GlassCard className="p-6 border-white/5 bg-slate-900/40 relative group overflow-hidden">
                <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
@@ -83,21 +124,6 @@ export const DashboardView = () => {
         </motion.div>
 
         <div className="space-y-6">
-           {/* Moon Mission Card */}
-           <motion.div variants={item}>
-              <GlassCard className="p-8 border-gold/20 bg-gold/5 relative overflow-hidden group">
-                 <div className="absolute -right-10 -top-10 w-40 h-40 bg-gold/10 rounded-full blur-3xl group-hover:bg-gold/20 transition-all" />
-                 <Crown className="w-12 h-12 text-gold mb-6 animate-float" />
-                 <h3 className="text-2xl font-black text-white mb-2 italic tracking-tighter">THE MOON IS <span className="text-gold underline decoration-2 underline-offset-4">CALLING</span></h3>
-                 <p className="text-xs text-slate-400 font-medium leading-relaxed mb-8">
-                    Join 1,200+ holders and start your journey with the world's most stable gold-backed protocol.
-                 </p>
-                 <button className="w-full py-4 bg-gold text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl hover:bg-white transition-all duration-500 shadow-[0_0_30px_rgba(255,184,0,0.2)]">
-                    Join The Mission
-                 </button>
-              </GlassCard>
-           </motion.div>
-
            {/* Quick Stats Card */}
            <motion.div variants={item}>
               <GlassCard className="p-6 border-white/5 bg-slate-900/40">
@@ -107,9 +133,9 @@ export const DashboardView = () => {
                  </h4>
                  <div className="space-y-4">
                     {[
-                       { l: 'Liquidity Locked', v: '98%', p: 98, c: 'bg-gold' },
-                       { l: 'Community Score', v: '9.2/10', p: 92, c: 'bg-emerald-400' },
-                       { l: 'L1 Migration Status', v: 'Phase 2', p: 45, c: 'bg-blue-400' },
+                       { l: 'Liquidity Locked', v: '100%', p: 100, c: 'bg-gold' },
+                       { l: 'Base Verification', v: 'Verified', p: 100, c: 'bg-emerald-400' },
+                       { l: 'Bonding Progress', v: supplyFormatted + ' / 1M', p: Math.min(100, (Number(totalSupply || 0) / 10**24) * 100), c: 'bg-blue-400' },
                     ].map((row, i) => (
                        <div key={i} className="space-y-2">
                           <div className="flex justify-between items-center text-[10px] font-bold">
@@ -144,27 +170,9 @@ export const DashboardView = () => {
         </div>
       </div>
 
-      {/* Row 2: Activities & Holders */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <motion.div variants={item}>
-           <GlassCard className="border-white/5 bg-slate-900/40 p-6">
-              <div className="flex items-center gap-3 mb-8">
-                 <Zap className="text-gold w-5 h-5" />
-                 <h3 className="text-sm font-black uppercase tracking-widest text-white">Live Transactions</h3>
-              </div>
-              <ActivityScanner />
-           </GlassCard>
-        </motion.div>
-
-        <motion.div variants={item}>
-           <GlassCard className="border-white/5 bg-slate-900/40 p-6">
-              <div className="flex items-center gap-3 mb-8">
-                 <Star className="text-gold w-5 h-5" />
-                 <h3 className="text-sm font-black uppercase tracking-widest text-white">Elite Holders</h3>
-              </div>
-              <HoldersView />
-           </GlassCard>
-        </motion.div>
+        <ActivityScanner />
+        <HoldersView />
       </div>
     </motion.div>
   );
