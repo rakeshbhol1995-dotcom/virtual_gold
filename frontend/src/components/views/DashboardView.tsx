@@ -1,8 +1,8 @@
 // c:\Users\BUNTY\Desktop\dexxxx\frontend\src\components\views\DashboardView.tsx
 'use client';
 
-import React, { useMemo } from 'react';
-import { motion } from 'framer-motion';
+import React, { useMemo, useState, useEffect } from 'react';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { 
   Activity, 
   TrendingUp, 
@@ -12,7 +12,8 @@ import {
   Zap,
   Globe,
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  Flame
 } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { useReadContract, useChainId } from 'wagmi';
@@ -29,14 +30,30 @@ const container = {
 };
 
 const item = {
-  hidden: { opacity: 0, y: 30 },
-  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100 } }
+  hidden: { opacity: 0, scale: 0.9, y: 30 },
+  show: { opacity: 1, scale: 1, y: 0, transition: { type: 'spring', damping: 15 } }
 };
 
 export const DashboardView = () => {
   const chainId = useChainId();
   const mounted = useMounted();
   const bondingCurveAddress = getContractAddress(84532, 'bondingCurve');
+
+  // Mouse Parallax Logic
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const springX = useSpring(mouseX, { stiffness: 50, damping: 20 });
+  const springY = useSpring(mouseY, { stiffness: 50, damping: 20 });
+  const rotateX = useTransform(springY, [-300, 300], [10, -10]);
+  const rotateY = useTransform(springX, [-300, 300], [-10, 10]);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+    mouseX.set(x);
+    mouseY.set(y);
+  };
 
   const { data: price } = useReadContract({
     chainId: 84532,
@@ -71,130 +88,180 @@ export const DashboardView = () => {
       variants={container}
       initial="hidden"
       animate="show"
-      className="space-y-6 md:space-y-10 pb-20 px-1 md:px-4"
+      className="space-y-6 md:space-y-10 pb-20"
     >
-      {/* 🛡️ CINEMATIC HERO SECTION */}
-      <motion.div variants={item} className="relative">
-        <div className="relative overflow-hidden bg-slate-950/60 border border-gold/20 rounded-[2rem] md:rounded-[3.5rem] p-8 md:p-20 group shadow-2xl">
-            {/* Background Glows */}
-            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-gold/5 via-transparent to-transparent pointer-events-none" />
+      {/* 🚀 EXPLOSIVE HERO SECTION 🚀 */}
+      <motion.div 
+        variants={item} 
+        onMouseMove={handleMouseMove}
+        className="relative perspective-1000"
+      >
+        <div className="relative overflow-hidden bg-slate-950 border border-gold/30 rounded-[3rem] p-10 md:p-24 shadow-[0_0_100px_rgba(255,184,0,0.1)] group">
+            {/* Animated Gradient Background */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-gold/10 via-transparent to-red-500/5 opacity-50" />
             
-            {/* 🔥 CINEMATIC BURNING COIN - MOBILE RESPONSIVE 🔥 */}
-            <div className="md:absolute relative flex justify-center md:block md:-top-10 md:-right-10 lg:right-10 lg:top-10 z-0 mb-8 md:mb-0">
-                <motion.div 
-                    animate={{ 
-                        y: [0, -20, 0],
-                        scale: [1, 1.02, 1]
-                    }}
-                    transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                    className="relative w-48 h-48 md:w-80 md:h-80 lg:w-[450px] lg:h-[450px]"
-                >
-                    {/* Atmospheric Glow */}
+            {/* 🔥 PARTICLE FIRE SYSTEM 🔥 */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                {[...Array(15)].map((_, i) => (
                     <motion.div 
-                        animate={{ opacity: [0.2, 0.4, 0.2] }}
-                        transition={{ duration: 3, repeat: Infinity }}
-                        className="absolute inset-0 bg-gold/20 rounded-full blur-[60px] md:blur-[100px]"
+                        key={i}
+                        initial={{ y: '110%', x: `${Math.random() * 100}%`, opacity: 0 }}
+                        animate={{ 
+                            y: '-10%', 
+                            opacity: [0, 1, 0],
+                            scale: [0, 1.5, 0],
+                        }}
+                        transition={{ 
+                            duration: 2 + Math.random() * 3, 
+                            repeat: Infinity, 
+                            delay: Math.random() * 5 
+                        }}
+                        className="absolute w-1 h-1 bg-gold rounded-full blur-[1px]"
                     />
-                    
-                    {/* The Generated Cinematic Image */}
-                    <img 
-                        src="/assets/burning-gold.png" 
-                        alt="Burning Gold Coin" 
-                        className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_50px_rgba(255,184,0,0.4)]"
-                    />
-                </motion.div>
+                ))}
             </div>
 
-            <div className="relative z-10 max-w-3xl text-center md:text-left">
-                <motion.div 
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="inline-flex items-center gap-3 px-4 py-2 bg-gold/10 text-gold rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-6 md:mb-10 border border-gold/20"
-                >
-                   <Sparkles className="w-3.5 h-3.5 fill-gold animate-pulse" /> 
-                   <span>Verified Protocol V2</span>
-                </motion.div>
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-12 relative z-10">
+                <div className="flex-1 text-center lg:text-left">
+                    <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="inline-flex items-center gap-3 px-5 py-2 bg-red-500/10 text-red-400 rounded-full text-[10px] font-black uppercase tracking-[0.3em] mb-10 border border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.1)]"
+                    >
+                       <Flame className="w-4 h-4 animate-bounce" /> 
+                       <span>Protocol Heat Level: Extreme</span>
+                    </motion.div>
 
-                <h1 className="text-4xl md:text-6xl lg:text-8xl font-black tracking-tighter text-white mb-6 md:mb-8 leading-[0.95] uppercase">
-                    SMALL INVESTMENT, <br/>
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold via-amber-200 to-yellow-600">BIG GROWTH.</span>
-                </h1>
+                    <h1 className="text-5xl md:text-8xl font-black tracking-tighter text-white mb-8 leading-[0.85] uppercase">
+                        SMALL <span className="text-gold">INVESTMENT</span>, <br/>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-gold to-yellow-500 animate-pulse">BIG GROWTH.</span>
+                    </h1>
 
-                <p className="text-slate-400 text-base md:text-xl lg:text-2xl font-medium leading-relaxed max-w-2xl mx-auto md:mx-0">
-                    Join the digital gold revolution with a <span className="text-white font-bold">21 Million</span> hard-capped supply. Built on Base for security, speed, and 100% transparency.
-                </p>
+                    <p className="text-slate-400 text-lg md:text-2xl font-medium leading-relaxed max-w-xl mx-auto lg:mx-0">
+                        Join the most aggressive gold standard on Base. <span className="text-white">21 Million</span> hard-cap. Infinite scalability. Zero compromises.
+                    </p>
 
-                <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-8 mt-10 md:mt-14">
-                    <button className="w-full sm:w-auto group flex items-center justify-center gap-3 px-8 md:px-10 py-4 md:py-5 bg-gold text-black rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-[0_0_40px_rgba(255,215,0,0.2)] hover:scale-105 transition-all">
-                        Launch Terminal <ArrowRight className="w-4 h-4" />
-                    </button>
-                    
-                    <div className="flex items-center gap-3 px-6 py-3 bg-white/5 border border-white/10 rounded-2xl">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                        <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Network Active</span>
+                    <div className="flex flex-col sm:flex-row items-center gap-6 mt-14">
+                        <button className="w-full sm:w-auto px-10 py-5 bg-gold text-black rounded-2xl text-xs font-black uppercase tracking-[0.2em] shadow-[0_0_50px_rgba(255,215,0,0.4)] hover:shadow-gold transition-all hover:-translate-y-1 active:translate-y-0">
+                            Enter the Gold Mine
+                        </button>
+                        <div className="flex items-center gap-4 text-slate-500">
+                            <div className="flex -space-x-3">
+                                {[1,2,3].map(i => <div key={i} className="w-10 h-10 rounded-full border-2 border-slate-900 bg-slate-800" />)}
+                            </div>
+                            <span className="text-[10px] font-black uppercase tracking-widest">+1,248 Pioneers</span>
+                        </div>
                     </div>
                 </div>
+
+                {/* 3D FLOATING BURNING COIN */}
+                <motion.div 
+                    style={{ rotateX, rotateY }}
+                    className="relative w-64 h-64 md:w-96 md:h-96"
+                >
+                    {/* Radial Glow */}
+                    <motion.div 
+                        animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.6, 0.3] }}
+                        transition={{ duration: 3, repeat: Infinity }}
+                        className="absolute inset-0 bg-gold/20 rounded-full blur-[100px]"
+                    />
+                    
+                    {/* Fire Sparks Overlay */}
+                    <div className="absolute inset-0 z-20">
+                         {[...Array(8)].map((_, i) => (
+                             <motion.div 
+                                key={i}
+                                animate={{ 
+                                    y: [0, -100], 
+                                    x: [0, (i % 2 === 0 ? 50 : -50)],
+                                    opacity: [0, 1, 0] 
+                                }}
+                                transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.2 }}
+                                className="absolute bottom-1/2 left-1/2 w-1.5 h-1.5 bg-orange-500 rounded-full blur-[1px]"
+                             />
+                         ))}
+                    </div>
+
+                    <img 
+                        src="/assets/burning-gold.png" 
+                        alt="Gold Coin" 
+                        className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_80px_rgba(255,184,0,0.6)] group-hover:scale-110 transition-transform duration-500"
+                    />
+                </motion.div>
             </div>
         </div>
       </motion.div>
 
-      {/* STATS GRID - MOBILE RESPONSIVE */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+      {/* STATS GRID */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {/* PRICE CARD */}
         <motion.div variants={item}>
-            <div className="bg-slate-900/40 border border-white/10 rounded-2xl md:rounded-[2.5rem] p-5 md:p-8 hover:border-gold/40 transition-all duration-500 group relative overflow-hidden">
-                <div className="flex items-center justify-between mb-4 md:mb-8">
-                    <div className="p-3 md:p-4 bg-gold/10 rounded-xl md:rounded-2xl border border-gold/20">
+            <GlassCard className="p-6 md:p-10 border-white/10 bg-slate-900/40 hover:border-gold transition-all duration-500 group">
+                <div className="flex items-center justify-between mb-6 md:mb-10">
+                    <div className="p-3 md:p-4 bg-gold/10 rounded-2xl border border-gold/20 group-hover:rotate-12 transition-transform">
                         <Activity className="w-5 h-5 md:w-7 md:h-7 text-gold" />
                     </div>
-                    <span className="text-[8px] md:text-[10px] font-black text-emerald-400 uppercase tracking-widest hidden sm:block">Live</span>
                 </div>
-                <h3 className="text-slate-500 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-1">Price (Gram)</h3>
-                <div className="text-xl md:text-4xl font-black text-white tracking-tighter">${currentPrice}</div>
-            </div>
+                <h3 className="text-slate-500 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-2">Market Price</h3>
+                <div className="text-2xl md:text-5xl font-black text-white tracking-tighter">${currentPrice}</div>
+            </GlassCard>
         </motion.div>
 
         {/* RESERVE CARD */}
         <motion.div variants={item}>
-            <div className="bg-slate-900/40 border border-emerald-500/20 rounded-2xl md:rounded-[2.5rem] p-5 md:p-8 hover:bg-emerald-500/[0.02] transition-all duration-500 group shadow-lg">
-                <div className="flex items-center justify-between mb-4 md:mb-8">
-                    <div className="p-3 md:p-4 bg-emerald-500/10 rounded-xl md:rounded-2xl border border-emerald-500/20">
+            <GlassCard className="p-6 md:p-10 border-emerald-500/20 bg-slate-900/40 hover:bg-emerald-500/5 transition-all duration-500 group">
+                <div className="flex items-center justify-between mb-6 md:mb-10">
+                    <div className="p-3 md:p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
                         <ShieldCheck className="w-5 h-5 md:w-7 md:h-7 text-emerald-400" />
                     </div>
-                    <span className="text-[8px] md:text-[10px] font-black text-emerald-400 uppercase tracking-widest hidden sm:block">100% Backed</span>
                 </div>
-                <h3 className="text-slate-500 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-1">Reserve (USDT)</h3>
-                <div className="text-xl md:text-4xl font-black text-white tracking-tighter">${formattedTVL}</div>
-            </div>
+                <h3 className="text-slate-500 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-2">Protocol Reserve</h3>
+                <div className="text-2xl md:text-5xl font-black text-white tracking-tighter">${formattedTVL}</div>
+            </GlassCard>
         </motion.div>
 
         {/* VOLUME CARD */}
         <motion.div variants={item}>
-            <div className="bg-slate-900/40 border border-white/10 rounded-2xl md:rounded-[2.5rem] p-5 md:p-8 hover:border-blue-400/40 transition-all duration-500">
-                <div className="flex items-center justify-between mb-4 md:mb-8">
-                    <div className="p-3 md:p-4 bg-blue-500/10 rounded-xl md:rounded-2xl border border-blue-500/20">
+            <GlassCard className="p-6 md:p-10 border-white/10 bg-slate-900/40 hover:border-blue-400 transition-all duration-500">
+                <div className="flex items-center justify-between mb-6 md:mb-10">
+                    <div className="p-3 md:p-4 bg-blue-500/10 rounded-2xl border border-blue-500/20">
                         <TrendingUp className="w-5 h-5 md:w-7 md:h-7 text-blue-400" />
                     </div>
-                    <Globe className="w-4 h-4 text-slate-700" />
                 </div>
-                <h3 className="text-slate-500 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-1">Total Volume</h3>
-                <div className="text-xl md:text-4xl font-black text-white tracking-tighter">${formattedVolume}</div>
-            </div>
+                <h3 className="text-slate-500 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-2">Total Volume</h3>
+                <div className="text-2xl md:text-5xl font-black text-white tracking-tighter">${formattedVolume}</div>
+            </GlassCard>
         </motion.div>
 
         {/* HOLDERS CARD */}
         <motion.div variants={item}>
-            <div className="bg-slate-900/40 border border-white/10 rounded-2xl md:rounded-[2.5rem] p-5 md:p-8 hover:border-white/30 transition-all duration-500">
-                <div className="flex items-center justify-between mb-4 md:mb-8">
-                    <div className="p-3 md:p-4 bg-white/5 rounded-xl md:rounded-2xl border border-white/10">
+            <GlassCard className="p-6 md:p-10 border-white/10 bg-slate-900/40 hover:border-white transition-all duration-500">
+                <div className="flex items-center justify-between mb-6 md:mb-10">
+                    <div className="p-3 md:p-4 bg-white/5 rounded-2xl border border-white/10">
                         <Users className="w-5 h-5 md:w-7 md:h-7 text-white" />
                     </div>
                 </div>
-                <h3 className="text-slate-500 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-1">Total Holders</h3>
-                <div className="text-xl md:text-4xl font-black text-white tracking-tighter">{holdersCount?.toString() || '1'}</div>
-            </div>
+                <h3 className="text-slate-500 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-2">Total Pioneers</h3>
+                <div className="text-2xl md:text-5xl font-black text-white tracking-tighter">{holdersCount?.toString() || '1'}</div>
+            </GlassCard>
         </motion.div>
       </div>
+
+      {/* FINAL TRUST BANNER */}
+      <motion.div variants={item}>
+        <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-gold/10 border border-gold/20 rounded-[3rem] p-10 flex flex-col md:flex-row items-center justify-between gap-10">
+            <div className="flex items-center gap-8">
+                <div className="w-16 h-16 rounded-3xl bg-gold/10 flex items-center justify-center border border-gold/20 shadow-2xl">
+                    <ShieldCheck className="w-8 h-8 text-gold" />
+                </div>
+                <div>
+                    <h4 className="text-xl font-black text-white uppercase tracking-tighter">100% On-Chain Solvency</h4>
+                    <p className="text-slate-500 text-sm font-medium mt-1">Our liquidity is locked in the bonding curve. Verified. Mathematical. Immutable.</p>
+                </div>
+            </div>
+            <button className="px-10 py-4 bg-white text-black rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all">Audit Report</button>
+        </div>
+      </motion.div>
     </motion.div>
   );
 };
