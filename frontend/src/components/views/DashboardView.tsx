@@ -8,7 +8,12 @@ import {
   TrendingUp, 
   Users, 
   ShieldCheck, 
-  ZapIcon
+  ZapIcon,
+  BarChart3,
+  Clock,
+  ArrowUpRight,
+  Target,
+  Rocket
 } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { useReadContract, useChainId } from 'wagmi';
@@ -30,18 +35,11 @@ const item = {
 };
 
 const PLANETS = [
-  { name: 'Mercury', color: '#A5A5A5', size: 8, orbit: 70, speed: 12 },
-  { name: 'Venus', color: '#E3BB76', size: 12, orbit: 100, speed: 20 },
-  { name: 'Earth', color: '#2271B3', size: 14, orbit: 140, speed: 28 },
-  { name: 'Mars', color: '#E27B58', size: 12, orbit: 180, speed: 35 },
-  { name: 'Jupiter', color: '#D39C7E', size: 22, orbit: 230, speed: 50 },
-];
-
-const FLOATING_WORDS = [
-  { text: "Small Investment", top: '20%', left: '15%' },
-  { text: "Big Growth", top: '15%', left: '75%' },
-  { text: "21 Million Cap", top: '70%', left: '80%' },
-  { text: "100% Solvency", top: '75%', left: '20%' }
+  { name: 'Mercury', color: '#A5A5A5', size: 10, orbit: 90, speed: 15 },
+  { name: 'Venus', color: '#E3BB76', size: 16, orbit: 130, speed: 25 },
+  { name: 'Earth', color: '#2271B3', size: 18, orbit: 180, speed: 35 },
+  { name: 'Mars', color: '#E27B58', size: 14, orbit: 230, speed: 45 },
+  { name: 'Jupiter', color: '#D39C7E', size: 30, orbit: 310, speed: 65 },
 ];
 
 export const DashboardView = () => {
@@ -71,9 +69,22 @@ export const DashboardView = () => {
     functionName: 'getHoldersCount',
   });
 
+  const { data: totalSupply } = useReadContract({
+    chainId: 84532,
+    address: getContractAddress(84532, 'goldToken') as `0x${string}`,
+    abi: parseAbi(['function totalSupply() view returns (uint256)']),
+    functionName: 'totalSupply',
+  });
+
   const currentPrice = useMemo(() => price ? formatUnits(price as bigint, 6) : '10.00', [price]);
   const formattedVolume = useMemo(() => volume ? Number(formatUnits(volume as bigint, 6)).toLocaleString() : '0', [volume]);
   const formattedTVL = useMemo(() => volume ? (Number(formatUnits(volume as bigint, 6)) * 0.85).toLocaleString() : '0', [volume]);
+  
+  const supplyPercent = useMemo(() => {
+    if (!totalSupply) return 0;
+    const supply = Number(formatUnits(totalSupply as bigint, 18));
+    return (supply / 21000000) * 100;
+  }, [totalSupply]);
 
   if (!mounted) return null;
 
@@ -82,81 +93,66 @@ export const DashboardView = () => {
       variants={container}
       initial="hidden"
       animate="show"
-      className="space-y-6 md:space-y-10 pb-20 px-2"
+      className="space-y-12 pb-32 px-4"
     >
-      {/* 🌌 CLEAN SOLAR SYSTEM HERO 🌌 */}
+      {/* 🌌 MEGA SOLAR HERO SECTION (BIGGER) 🌌 */}
       <motion.div variants={item} className="relative">
-        <div className="relative overflow-hidden bg-slate-950/60 border border-gold/20 rounded-[3rem] min-h-[550px] md:min-h-[600px] flex items-center justify-center group shadow-2xl">
-            {/* Background Effects */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,184,0,0.05)_0%,transparent_70%)] pointer-events-none" />
+        <div className="relative overflow-hidden bg-slate-950 border border-gold/20 rounded-[4rem] min-h-[750px] md:min-h-[850px] flex items-center justify-center group shadow-[0_0_150px_rgba(255,184,0,0.1)]">
+            {/* Space Nebula */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,184,0,0.1)_0%,transparent_80%)] pointer-events-none" />
             
             {/* BRANDING (TOP-LEFT) */}
-            <div className="absolute top-10 left-10 z-50">
-                <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter uppercase italic leading-none">
-                    GOLD <span className="text-gold animate-pulse">CHAIN</span>
-                </h1>
-                <p className="text-[8px] md:text-[10px] font-black text-slate-500 uppercase tracking-[0.5em] mt-2">Mathematical Galaxy Standard</p>
-                <div className="w-16 h-1 bg-gold/30 mt-4 rounded-full" />
+            <div className="absolute top-16 left-16 z-50">
+                <motion.div 
+                    initial={{ x: -50, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    className="space-y-4"
+                >
+                    <h1 className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase italic leading-none">
+                        GOLD <span className="text-gold">CHAIN</span>
+                    </h1>
+                    <div className="flex items-center gap-4">
+                        <div className="w-20 h-1.5 bg-gold rounded-full" />
+                        <p className="text-sm md:text-base font-black text-slate-500 uppercase tracking-[0.6em]">Galaxy Standard V2</p>
+                    </div>
+                </motion.div>
             </div>
 
-            {/* ✨ FLOATING KEYWORDS ✨ */}
-            <div className="absolute inset-0 pointer-events-none z-40">
-                {FLOATING_WORDS.map((word, i) => (
-                    <motion.div 
-                        key={i}
-                        animate={{ 
-                            opacity: [0.3, 0.6, 0.3],
-                            y: [0, -15, 0]
-                        }}
-                        transition={{ duration: 5 + i, repeat: Infinity, ease: "easeInOut" }}
-                        className="absolute hidden md:block"
-                        style={{ top: word.top, left: word.left }}
-                    >
-                        <span className="text-[10px] font-black text-gold/60 uppercase tracking-[0.3em]">
-                            {word.text}
-                        </span>
-                    </motion.div>
-                ))}
-            </div>
-
-            {/* SOLAR SYSTEM CONTAINER */}
-            <div className="relative w-full h-full flex items-center justify-center scale-[0.7] sm:scale-85 md:scale-90 lg:scale-100 transition-all duration-700">
-                
-                {/* ☀️ BURNING GOLD SUN */}
+            {/* ☀️ MEGA BURNING SURYA (BIGGER & BRIGHTER) ☀️ */}
+            <div className="relative w-full h-full flex items-center justify-center scale-90 md:scale-100 lg:scale-110">
                 <motion.div whileHover="hover" className="relative z-30 group/sun cursor-pointer">
-                    {[...Array(3)].map((_, i) => (
+                    {/* Layered Sun Fire */}
+                    {[...Array(4)].map((_, i) => (
                         <motion.div 
                             key={i}
-                            animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.5, 0.2], rotate: 360 }}
-                            transition={{ duration: 6 + i, repeat: Infinity, ease: "linear" }}
-                            className={`absolute inset-0 rounded-full blur-[30px] md:blur-[50px] ${i === 0 ? 'bg-orange-600' : i === 1 ? 'bg-red-500' : 'bg-gold'}`}
-                            style={{ margin: `-${i * 12}px` }}
+                            animate={{ 
+                                scale: [1, 1.4, 1], 
+                                opacity: [0.1, 0.4, 0.1], 
+                                rotate: [0, 90, 180, 270, 360] 
+                            }}
+                            transition={{ duration: 4 + i, repeat: Infinity, ease: "linear" }}
+                            className={`absolute inset-0 rounded-full blur-[60px] md:blur-[100px] ${i === 0 ? 'bg-red-600' : i === 1 ? 'bg-orange-500' : i === 2 ? 'bg-yellow-400' : 'bg-gold'}`}
+                            style={{ margin: `-${i * 20}px` }}
                         />
                     ))}
                     
                     <motion.div 
-                        animate={{ scale: [1, 1.05, 1] }}
+                        animate={{ scale: [1, 1.08, 1] }}
                         transition={{ duration: 3, repeat: Infinity }}
-                        className="relative w-28 h-28 md:w-36 md:h-36 bg-gradient-to-tr from-yellow-700 via-gold to-yellow-200 rounded-full flex items-center justify-center border-[6px] border-yellow-200/20 shadow-[0_0_60px_rgba(255,215,0,0.4)]"
+                        className="relative w-40 h-40 md:w-56 md:h-56 bg-gradient-to-tr from-yellow-700 via-gold to-white rounded-full flex items-center justify-center border-[10px] border-white/20 shadow-[0_0_120px_rgba(255,215,0,0.6)]"
                     >
-                        <span className="text-2xl md:text-3xl font-black text-white italic drop-shadow-2xl tracking-tighter">GOLD</span>
-                    </motion.div>
-
-                    {/* Lightning on Hover */}
-                    <motion.div 
-                        variants={{ hover: { opacity: 1, scale: 1.5 } }}
-                        initial={{ opacity: 0, scale: 0 }}
-                        className="absolute inset-0 z-50 pointer-events-none"
-                    >
-                        <ZapIcon className="absolute -top-12 left-1/2 -translate-x-1/2 text-white w-10 h-10 animate-pulse drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]" />
+                        <div className="text-center z-10">
+                            <span className="block text-4xl md:text-6xl font-black text-white italic drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] tracking-tighter">GOLD</span>
+                            <div className="w-16 h-2 bg-black/40 rounded-full mx-auto mt-2" />
+                        </div>
                     </motion.div>
                 </motion.div>
 
-                {/* 🪐 ORBITING PLANETS */}
+                {/* 🪐 ORBITING PLANETS (EXPANDED) */}
                 {PLANETS.map((planet, i) => (
                     <div 
                         key={planet.name}
-                        className="absolute rounded-full border border-white/5 pointer-events-none"
+                        className="absolute rounded-full border border-white/10 pointer-events-none"
                         style={{ width: planet.orbit * 2, height: planet.orbit * 2 }}
                     >
                         <motion.div 
@@ -169,17 +165,17 @@ export const DashboardView = () => {
                                 style={{ top: '50%', left: '100%', transform: 'translate(-50%, -50%)' }}
                             >
                                 <motion.div 
-                                    whileHover={{ scale: 1.8 }}
-                                    className="rounded-full shadow-2xl border border-white/30"
+                                    whileHover={{ scale: 2 }}
+                                    className="rounded-full shadow-2xl border-2 border-white/40"
                                     style={{ 
                                         width: planet.size, 
                                         height: planet.size, 
                                         backgroundColor: planet.color,
-                                        boxShadow: `0 0 20px ${planet.color}80`
+                                        boxShadow: `0 0 30px ${planet.color}`
                                     }}
                                 />
-                                <div className="absolute top-full mt-3 opacity-0 group-hover/planet:opacity-100 transition-all">
-                                    <span className="text-[9px] font-black text-white bg-black/95 px-3 py-1 rounded-full border border-gold/40 shadow-2xl whitespace-nowrap uppercase tracking-widest">
+                                <div className="absolute top-full mt-4 opacity-0 group-hover/planet:opacity-100 transition-all scale-75 group-hover/planet:scale-100">
+                                    <span className="text-[10px] font-black text-white bg-black/95 px-4 py-1.5 rounded-full border border-gold/40 shadow-2xl whitespace-nowrap uppercase tracking-widest">
                                         {planet.name}
                                     </span>
                                 </div>
@@ -188,25 +184,89 @@ export const DashboardView = () => {
                     </div>
                 ))}
             </div>
+
+            {/* 📊 BOTTOM METRICS BAR (NEW) 📊 */}
+            <div className="absolute bottom-16 left-0 right-0 px-16 flex items-center justify-between z-50">
+                <div className="flex gap-12">
+                    <div>
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Max Supply</p>
+                        <p className="text-2xl font-black text-white">21,000,000.00</p>
+                    </div>
+                    <div className="w-[1px] h-10 bg-white/10" />
+                    <div>
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Target Price</p>
+                        <p className="text-2xl font-black text-gold">$100,000.00</p>
+                    </div>
+                </div>
+                <button className="px-12 py-5 bg-gold text-black rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:scale-105 transition-all shadow-[0_0_50px_rgba(255,215,0,0.4)]">Buy Gold Now</button>
+            </div>
         </div>
       </motion.div>
 
-      {/* STATS GRID */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        {[{ label: 'Market Price', value: `$${currentPrice}`, icon: <Activity className="text-gold" />, border: 'border-gold/20' },
-          { label: 'Protocol Reserve', value: `$${formattedTVL}`, icon: <ShieldCheck className="text-emerald-400" />, border: 'border-emerald-500/20' },
-          { label: 'Total Volume', value: `$${formattedVolume}`, icon: <TrendingUp className="text-blue-400" />, border: 'border-blue-500/20' },
-          { label: 'Total Pioneers', value: holdersCount?.toString() || '1', icon: <Users className="text-white" />, border: 'border-white/10' }
+      {/* 🚀 PROTOCOL HEALTH & PROGRESS 🚀 */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          {/* Supply Progress */}
+          <GlassCard className="lg:col-span-2 p-10 border-gold/20 bg-slate-900/60 overflow-hidden relative">
+              <div className="flex items-center justify-between mb-8">
+                  <div>
+                      <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">Minting Progress</h3>
+                      <p className="text-slate-500 text-xs font-medium">Scarcity tracking in real-time</p>
+                  </div>
+                  <Target className="w-10 h-10 text-gold opacity-50" />
+              </div>
+              <div className="relative h-6 bg-white/5 rounded-full overflow-hidden border border-white/10">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.max(5, supplyPercent)}%` }}
+                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-gold to-yellow-300 shadow-[0_0_30px_rgba(255,215,0,0.5)]"
+                  />
+              </div>
+              <div className="flex justify-between mt-4">
+                  <span className="text-[10px] font-black text-slate-500 uppercase">Current: {totalSupply ? formatUnits(totalSupply as bigint, 18) : '0'} GOLD</span>
+                  <span className="text-[10px] font-black text-gold uppercase tracking-widest">Hard Cap: 21,000,000</span>
+              </div>
+          </GlassCard>
+
+          {/* Protocol Status */}
+          <GlassCard className="p-10 border-emerald-500/20 bg-emerald-500/5">
+              <div className="flex items-center gap-4 mb-8">
+                  <div className="w-3 h-3 rounded-full bg-emerald-500 animate-ping" />
+                  <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">Protocol Status</h3>
+              </div>
+              <div className="space-y-6">
+                  <div className="flex justify-between items-center">
+                      <span className="text-xs font-medium text-slate-400">Security Audit</span>
+                      <span className="text-[10px] font-black text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full uppercase">Passed</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                      <span className="text-xs font-medium text-slate-400">Liquidity</span>
+                      <span className="text-[10px] font-black text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full uppercase">Locked</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                      <span className="text-xs font-medium text-slate-400">Slippage Protection</span>
+                      <span className="text-[10px] font-black text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full uppercase">Active</span>
+                  </div>
+              </div>
+          </GlassCard>
+      </div>
+
+      {/* 📊 MAIN STATS GRID 📊 */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        {[{ label: 'Live Price', value: `$${currentPrice}`, icon: <Activity className="text-gold" />, color: 'gold' },
+          { label: 'Total Reserve', value: `$${formattedTVL}`, icon: <ShieldCheck className="text-emerald-400" />, color: 'emerald' },
+          { label: 'Trading Volume', value: `$${formattedVolume}`, icon: <TrendingUp className="text-blue-400" />, color: 'blue' },
+          { label: 'Global Pioneers', value: holdersCount?.toString() || '1', icon: <Users className="text-white" />, color: 'white' }
         ].map((stat, i) => (
           <motion.div key={i} variants={item}>
-            <GlassCard className={`p-6 md:p-8 ${stat.border} bg-slate-900/40 hover:bg-white/[0.03] transition-all duration-500 group relative overflow-hidden`}>
-                <div className="flex items-center justify-between mb-6">
-                    <div className="p-3 md:p-4 bg-white/5 rounded-2xl border border-white/10 group-hover:scale-110 transition-transform">
+            <GlassCard className="p-8 border-white/10 bg-slate-900/40 hover:scale-105 transition-all duration-500 group relative">
+                <div className="flex items-center justify-between mb-10">
+                    <div className="p-4 bg-white/5 rounded-2xl border border-white/10 group-hover:bg-gold/10 transition-colors">
                         {stat.icon}
                     </div>
+                    <ArrowUpRight className="w-5 h-5 text-slate-700 group-hover:text-gold transition-colors" />
                 </div>
-                <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-1 text-left">{stat.label}</h3>
-                <div className="text-2xl md:text-4xl font-black text-white tracking-tighter text-left">{stat.value}</div>
+                <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] mb-2 text-left">{stat.label}</h3>
+                <div className="text-3xl md:text-5xl font-black text-white tracking-tighter text-left">{stat.value}</div>
             </GlassCard>
           </motion.div>
         ))}
