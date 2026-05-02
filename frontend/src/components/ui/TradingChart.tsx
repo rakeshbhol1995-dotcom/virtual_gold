@@ -1,124 +1,70 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { createChart, ColorType, IChartApi, ISeriesApi } from 'lightweight-charts';
 
-interface TradingChartProps {
-    currentPrice?: number;
-}
+export const TradingChart = () => {
+  const container = useRef<HTMLDivElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
-export const TradingChart: React.FC<TradingChartProps> = ({ currentPrice = 2342.10 }) => {
-    const chartContainerRef = useRef<HTMLDivElement>(null);
-    const chartRef = useRef<IChartApi | null>(null);
-    const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
-    const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
+  useEffect(() => {
+    if (!isMounted || !container.current) return;
 
-    useEffect(() => {
-        if (!isMounted || !chartContainerRef.current) return;
+    // Remove existing script if any
+    const existingScript = document.getElementById('tradingview-widget-script');
+    if (existingScript) {
+      existingScript.remove();
+    }
 
-        const handleResize = () => {
-            if (chartRef.current && chartContainerRef.current) {
-                chartRef.current.applyOptions({ width: chartContainerRef.current.clientWidth });
-            }
-        };
+    const script = document.createElement("script");
+    script.id = 'tradingview-widget-script';
+    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
+    script.type = "text/javascript";
+    script.async = true;
+    script.innerHTML = JSON.stringify({
+      "autosize": true,
+      "symbol": "OANDA:XAUUSD",
+      "interval": "D",
+      "timezone": "Etc/UTC",
+      "theme": "dark",
+      "style": "1",
+      "locale": "en",
+      "enable_publishing": false,
+      "allow_symbol_change": true,
+      "calendar": false,
+      "support_host": "https://www.tradingview.com",
+      "backgroundColor": "rgba(2, 6, 23, 1)",
+      "gridColor": "rgba(255, 255, 255, 0.05)",
+      "hide_top_toolbar": false,
+      "save_image": false,
+      "container_id": "tradingview_gold_chart"
+    });
 
-        const chart = createChart(chartContainerRef.current, {
-            layout: {
-                background: { type: ColorType.Solid, color: 'transparent' },
-                textColor: '#94a3b8',
-            },
-            grid: {
-                vertLines: { color: 'rgba(255, 255, 255, 0.02)' },
-                horzLines: { color: 'rgba(255, 255, 255, 0.02)' },
-            },
-            width: chartContainerRef.current.clientWidth,
-            height: 350,
-            timeScale: {
-                timeVisible: true,
-                secondsVisible: false,
-                borderColor: 'rgba(255, 255, 255, 0.05)',
-            },
-            rightPriceScale: {
-                borderColor: 'rgba(255, 255, 255, 0.05)',
-                scaleMargins: {
-                    top: 0.3,
-                    bottom: 0.25,
-                },
-            }
-        });
+    container.current.appendChild(script);
 
-        const candlestickSeries = chart.addCandlestickSeries({
-            upColor: '#FFB800',
-            downColor: '#ef4444',
-            borderVisible: false,
-            wickUpColor: '#FFB800',
-            wickDownColor: '#ef4444',
-        });
+    return () => {
+      if (container.current) {
+        container.current.innerHTML = '';
+      }
+    };
+  }, [isMounted]);
 
-        // Generate base historical data
-        let baseTime = Math.floor(Date.now() / 1000) - (86400 * 30);
-        let data = [];
-        let prevPrice = currentPrice - 50;
+  if (!isMounted) return <div className="h-[500px] w-full animate-pulse bg-white/5 rounded-2xl" />;
 
-        for (let i = 0; i < 60; i++) {
-            let open = prevPrice;
-            let close = open + (Math.random() - 0.5) * 20;
-            data.push({
-                time: (baseTime + (i * 3600)) as any,
-                open: open,
-                high: Math.max(open, close) + Math.random() * 5,
-                low: Math.min(open, close) - Math.random() * 5,
-                close: close
-            });
-            prevPrice = close;
-        }
-
-        candlestickSeries.setData(data);
-        chartRef.current = chart;
-        seriesRef.current = candlestickSeries;
-
-        window.addEventListener('resize', handleResize);
-
-        // Real-time Simulation Interval
-        const interval = setInterval(() => {
-           if (seriesRef.current) {
-              const lastTime = Math.floor(Date.now() / 1000);
-              const lastClose = data[data.length - 1].close;
-              const newPrice = lastClose + (Math.random() - 0.45) * 5; // Slight upward bias
-              
-              seriesRef.current.update({
-                 time: lastTime as any,
-                 open: lastClose,
-                 high: Math.max(lastClose, newPrice) + 2,
-                 low: Math.min(lastClose, newPrice) - 2,
-                 close: newPrice
-              });
-           }
-        }, 3000);
-
-        return () => {
-            window.removeEventListener('resize', handleResize);
-            clearInterval(interval);
-            chart.remove();
-        };
-    }, [isMounted]);
-
-    if (!isMounted) return <div className="h-[350px] w-full animate-pulse bg-white/5 rounded-2xl" />;
-
-    return (
-        <div className="w-full relative group">
-            <div 
-                ref={chartContainerRef} 
-                className="w-full rounded-2xl overflow-hidden"
-            />
-            <div className="absolute top-4 right-4 z-10 flex items-center gap-2 px-3 py-1 bg-gold/10 border border-gold/20 rounded-full">
-                <div className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
-                <span className="text-[10px] font-black text-gold tracking-widest uppercase">Live Pulse</span>
-            </div>
-        </div>
-    );
+  return (
+    <div className="w-full h-[500px] bg-slate-950/50 rounded-2xl overflow-hidden border border-white/5 relative group">
+      <div id="tradingview_gold_chart" ref={container} className="w-full h-full" />
+      
+      {/* Premium Overlay Branding */}
+      <div className="absolute bottom-12 right-4 z-10 pointer-events-none">
+         <div className="bg-gold/10 backdrop-blur-md border border-gold/20 px-4 py-2 rounded-xl flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-gold animate-pulse" />
+            <span className="text-[10px] font-black text-gold tracking-widest uppercase">Live Gold Market</span>
+         </div>
+      </div>
+    </div>
+  );
 };
