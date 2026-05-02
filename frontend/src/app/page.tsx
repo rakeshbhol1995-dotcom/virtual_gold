@@ -143,7 +143,6 @@ export default function Home() {
               <img src="https://www.vectorlogo.zone/logos/linkedin/linkedin-icon.svg" className="w-4 h-4 invert" alt="LinkedIn" />
             </a>
           </div>
-        </div>
       </header>
 
       <main className="flex-1 flex flex-col items-center pt-10 pb-40 px-6 w-full relative">
