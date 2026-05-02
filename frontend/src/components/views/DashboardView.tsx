@@ -8,9 +8,6 @@ import {
   TrendingUp, 
   Users, 
   ShieldCheck, 
-  Zap,
-  Globe,
-  Flame,
   ZapIcon
 } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -44,8 +41,7 @@ const FLOATING_WORDS = [
   { text: "Small Investment", top: '20%', left: '15%' },
   { text: "Big Growth", top: '15%', left: '75%' },
   { text: "21 Million Cap", top: '70%', left: '80%' },
-  { text: "100% Solvency", top: '75%', left: '20%' },
-  { text: "Mathematical Scarcity", top: '45%', left: '85%' }
+  { text: "100% Solvency", top: '75%', left: '20%' }
 ];
 
 export const DashboardView = () => {
@@ -88,58 +84,43 @@ export const DashboardView = () => {
       animate="show"
       className="space-y-6 md:space-y-10 pb-20 px-2"
     >
-      {/* 🌌 PREMIUM SOLAR SYSTEM HERO WITH FLOATING KEYWORDS 🌌 */}
+      {/* 🌌 CLEAN SOLAR SYSTEM HERO 🌌 */}
       <motion.div variants={item} className="relative">
-        <div className="relative overflow-hidden bg-slate-950 border border-gold/20 rounded-[3rem] min-h-[550px] md:min-h-[650px] flex items-center justify-center group shadow-2xl">
-            {/* Space Background Layer */}
+        <div className="relative overflow-hidden bg-slate-950/60 border border-gold/20 rounded-[3rem] min-h-[550px] md:min-h-[600px] flex items-center justify-center group shadow-2xl">
+            {/* Background Effects */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,184,0,0.05)_0%,transparent_70%)] pointer-events-none" />
-            <div className="absolute inset-0 opacity-20 pointer-events-none">
-                {[...Array(60)].map((_, i) => (
-                    <motion.div 
-                        key={i} 
-                        animate={{ opacity: [0.1, 0.6, 0.1] }}
-                        transition={{ duration: 2 + Math.random() * 2, repeat: Infinity }}
-                        className="absolute w-0.5 h-0.5 bg-white rounded-full" 
-                        style={{ top: `${Math.random()*100}%`, left: `${Math.random()*100}%` }} 
-                    />
-                ))}
+            
+            {/* BRANDING (TOP-LEFT) */}
+            <div className="absolute top-10 left-10 z-50">
+                <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter uppercase italic leading-none">
+                    GOLD <span className="text-gold animate-pulse">CHAIN</span>
+                </h1>
+                <p className="text-[8px] md:text-[10px] font-black text-slate-500 uppercase tracking-[0.5em] mt-2">Mathematical Galaxy Standard</p>
+                <div className="w-16 h-1 bg-gold/30 mt-4 rounded-full" />
             </div>
 
-            {/* ✨ FLOATING "MAST" KEYWORDS ✨ */}
+            {/* ✨ FLOATING KEYWORDS ✨ */}
             <div className="absolute inset-0 pointer-events-none z-40">
                 {FLOATING_WORDS.map((word, i) => (
                     <motion.div 
                         key={i}
-                        initial={{ opacity: 0 }}
                         animate={{ 
-                            opacity: [0.4, 0.8, 0.4],
-                            y: [0, -20, 0],
-                            x: [0, (i % 2 === 0 ? 10 : -10), 0]
+                            opacity: [0.3, 0.6, 0.3],
+                            y: [0, -15, 0]
                         }}
-                        transition={{ 
-                            duration: 5 + i, 
-                            repeat: Infinity, 
-                            ease: "easeInOut"
-                        }}
+                        transition={{ duration: 5 + i, repeat: Infinity, ease: "easeInOut" }}
                         className="absolute hidden md:block"
                         style={{ top: word.top, left: word.left }}
                     >
-                        <div className="flex flex-col items-center">
-                            <span className="text-[10px] font-black text-gold uppercase tracking-[0.3em] drop-shadow-[0_0_10px_rgba(255,215,0,0.5)]">
-                                {word.text}
-                            </span>
-                            <motion.div 
-                                animate={{ scaleX: [0, 1, 0] }}
-                                transition={{ duration: 4, repeat: Infinity }}
-                                className="w-full h-[1px] bg-gold/30 mt-1"
-                            />
-                        </div>
+                        <span className="text-[10px] font-black text-gold/60 uppercase tracking-[0.3em]">
+                            {word.text}
+                        </span>
                     </motion.div>
                 ))}
             </div>
 
-            {/* SOLAR SYSTEM (OPTIMIZED SIZE) */}
-            <div className="relative w-full h-full flex items-center justify-center scale-[0.7] sm:scale-85 md:scale-[0.9] lg:scale-100 transition-all duration-700">
+            {/* SOLAR SYSTEM CONTAINER */}
+            <div className="relative w-full h-full flex items-center justify-center scale-[0.7] sm:scale-85 md:scale-90 lg:scale-100 transition-all duration-700">
                 
                 {/* ☀️ BURNING GOLD SUN */}
                 <motion.div whileHover="hover" className="relative z-30 group/sun cursor-pointer">
@@ -152,24 +133,22 @@ export const DashboardView = () => {
                             style={{ margin: `-${i * 12}px` }}
                         />
                     ))}
-
-                    <motion.div 
-                        variants={{ hover: { scale: 1.6, opacity: 1 } }}
-                        initial={{ opacity: 0, scale: 0 }}
-                        className="absolute inset-0 z-50 pointer-events-none"
-                    >
-                        <ZapIcon className="absolute -top-12 left-1/2 -translate-x-1/2 text-white w-10 h-10 animate-pulse drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]" />
-                    </motion.div>
                     
                     <motion.div 
                         animate={{ scale: [1, 1.05, 1] }}
                         transition={{ duration: 3, repeat: Infinity }}
-                        className="relative w-28 h-28 md:w-40 md:h-40 bg-gradient-to-tr from-yellow-700 via-gold to-yellow-200 rounded-full flex items-center justify-center border-[6px] border-yellow-200/20 shadow-[0_0_60px_rgba(255,215,0,0.4)]"
+                        className="relative w-28 h-28 md:w-36 md:h-36 bg-gradient-to-tr from-yellow-700 via-gold to-yellow-200 rounded-full flex items-center justify-center border-[6px] border-yellow-200/20 shadow-[0_0_60px_rgba(255,215,0,0.4)]"
                     >
-                        <div className="text-center">
-                            <span className="block text-2xl md:text-3xl font-black text-white italic drop-shadow-2xl">GOLD</span>
-                            <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mt-1" />
-                        </div>
+                        <span className="text-2xl md:text-3xl font-black text-white italic drop-shadow-2xl tracking-tighter">GOLD</span>
+                    </motion.div>
+
+                    {/* Lightning on Hover */}
+                    <motion.div 
+                        variants={{ hover: { opacity: 1, scale: 1.5 } }}
+                        initial={{ opacity: 0, scale: 0 }}
+                        className="absolute inset-0 z-50 pointer-events-none"
+                    >
+                        <ZapIcon className="absolute -top-12 left-1/2 -translate-x-1/2 text-white w-10 h-10 animate-pulse drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]" />
                     </motion.div>
                 </motion.div>
 
@@ -199,7 +178,7 @@ export const DashboardView = () => {
                                         boxShadow: `0 0 20px ${planet.color}80`
                                     }}
                                 />
-                                <div className="absolute top-full mt-3 opacity-0 group-hover/planet:opacity-100 transition-all scale-75 group-hover/planet:scale-100">
+                                <div className="absolute top-full mt-3 opacity-0 group-hover/planet:opacity-100 transition-all">
                                     <span className="text-[9px] font-black text-white bg-black/95 px-3 py-1 rounded-full border border-gold/40 shadow-2xl whitespace-nowrap uppercase tracking-widest">
                                         {planet.name}
                                     </span>
@@ -209,30 +188,11 @@ export const DashboardView = () => {
                     </div>
                 ))}
             </div>
-
-            {/* 👑 BOTTOM BRANDING OVERLAY (NEW) 👑 */}
-            <div className="absolute bottom-10 left-0 right-0 flex flex-col items-center z-50">
-                <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center gap-4 bg-black/40 backdrop-blur-xl border border-white/10 px-8 py-4 rounded-[2rem] shadow-2xl"
-                >
-                    <div className="text-center md:text-left">
-                        <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter uppercase italic leading-none">
-                            GOLD <span className="text-gold">CHAIN</span>
-                        </h1>
-                        <p className="text-[8px] md:text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mt-1">Mathematical Galaxy Standard</p>
-                    </div>
-                    <div className="w-[1px] h-10 bg-white/10 hidden md:block mx-2" />
-                    <button className="hidden md:block px-8 py-3 bg-gold text-black rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_0_30px_rgba(255,215,0,0.3)]">Launch App</button>
-                </motion.div>
-            </div>
         </div>
       </motion.div>
 
       {/* STATS GRID */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        {/* STAT CARDS REMAIN THE SAME BUT WITH REFINED BORDERS */}
         {[{ label: 'Market Price', value: `$${currentPrice}`, icon: <Activity className="text-gold" />, border: 'border-gold/20' },
           { label: 'Protocol Reserve', value: `$${formattedTVL}`, icon: <ShieldCheck className="text-emerald-400" />, border: 'border-emerald-500/20' },
           { label: 'Total Volume', value: `$${formattedVolume}`, icon: <TrendingUp className="text-blue-400" />, border: 'border-blue-500/20' },
