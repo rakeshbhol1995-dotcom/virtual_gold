@@ -14,13 +14,13 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://virtualgold.org'),
-  title: "Gold Chain | The Premier Gold-Backed DEX & Commodity Protocol",
-  description: "Trade digital gold (GRAMS) with institutional security on the Base Network. Gold Chain is a decentralized commodity-backed protocol featuring a fair launch bonding curve and 100% on-chain liquidity.",
-  keywords: ["Gold Chain", "Base Network Trading", "Base DEX", "Gold Trading", "DEX", "Bonding Curve", "DeFi", "GRAMS Token", "Base Sepolia Gold"],
-  authors: [{ name: "Gold Chain Team" }],
+  title: "Gold Chain | The Gold Standard of DeFi | To The Moon 🚀",
+  description: "The world's most secure gold-backed decentralized exchange on Base. Trade GRAMS with 100% transparency, guaranteed liquidity, and institutional-grade security. Join the Moon Mission today!",
+  keywords: ["Gold Chain", "Base Network", "Gold Trading", "Crypto Moon", "DEX", "Bonding Curve", "DeFi Gold", "GRAMS Token", "Institutional Crypto"],
+  authors: [{ name: "Gold Chain Protocol" }],
   openGraph: {
-    title: "Gold Chain | Professional Gold-Backed DEX",
-    description: "The gold standard of decentralized finance. Secure, Decentralized, and 100% Backed.",
+    title: "Gold Chain | Gold-Backed Exchange | To The Moon",
+    description: "Secure, Decentralized, and 100% Backed. The future of gold is here on the Base Network.",
     url: "https://virtualgold.org",
     siteName: "Gold Chain",
     images: [
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
         url: "/gold-logo.png",
         width: 1200,
         height: 630,
-        alt: "Gold Chain Banner",
+        alt: "Gold Chain Moon Mission",
       },
     ],
     locale: "en_US",
@@ -36,15 +36,13 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Gold Chain | Gold-Backed Exchange",
-    description: "The premier L2 ecosystem for digital gold.",
+    title: "Gold Chain | Moon Mission 🚀",
+    description: "The premier ecosystem for digital gold on Base.",
     images: ["/gold-logo.png"],
   },
   icons: {
-    icon: [
-      { url: "/gold-logo.png" },
-      { url: "/gold-logo.png", sizes: "32x32", type: "image/png" },
-    ],
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
     apple: "/gold-logo.png",
   },
 };
