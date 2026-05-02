@@ -529,25 +529,6 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
           </GlassCard>
         </div>
 
-        <div className="w-full max-w-[1200px] grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-        {/* Left Side: Trade Card */}
-        <motion.div variants={item} className="w-full">
-          <GlassCard className="p-4 md:p-8 border-white/5 bg-slate-900/60 relative overflow-hidden group">
-            <div className="absolute -right-20 -top-20 w-64 h-64 bg-gold/5 rounded-full blur-3xl group-hover:bg-gold/10 transition-all" />
-            
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h2 className="text-xl md:text-2xl font-black text-white italic tracking-tighter">SWAP <span className="text-gold">CORE</span></h2>
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Institutional Liquidity</p>
-              </div>
-              <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/5">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[8px] font-black text-emerald-400">LIVE</span>
-              </div>
-            </div>
-          </GlassCard>
-        </motion.div>
-
         <div className="flex flex-col gap-6">
           <GlassCard className="border-white/5 bg-white/[0.01] p-5 h-fit" delay={0.2}>
             <div className="space-y-4">
