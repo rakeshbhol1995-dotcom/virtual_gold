@@ -17,7 +17,7 @@ import {
   ZapIcon,
   Calculator,
   MessageSquare,
-  Twitter,
+  Share2,
   Globe,
   ArrowRight
 } from 'lucide-react';
@@ -242,7 +242,7 @@ export const DashboardView = () => {
           <div className="flex flex-wrap justify-center gap-6">
               {[
                   { label: 'Telegram', icon: <MessageSquare className="w-6 h-6" />, color: 'bg-blue-500' },
-                  { label: 'Twitter X', icon: <Twitter className="w-6 h-6" />, color: 'bg-white text-black' },
+                  { label: 'Twitter X', icon: <Share2 className="w-6 h-6" />, color: 'bg-white text-black' },
                   { label: 'Global App', icon: <Globe className="w-6 h-6" />, color: 'bg-emerald-500' }
               ].map((social, i) => (
                   <button key={i} className={`flex items-center gap-4 px-10 py-5 ${social.color} rounded-2xl font-black uppercase text-xs tracking-widest hover:scale-105 transition-all shadow-2xl`}>
