@@ -95,17 +95,17 @@ export const DashboardView = () => {
     query: { refetchInterval: 10000 }
   });
 
-  const currentPrice = priceData ? Number(formatUnits(priceData as bigint, 6)).toFixed(2) : '0.00';
+  const currentPrice = priceData ? Number(formatUnits(priceData as bigint, 6)).toFixed(4) : '10.0000';
   const supplyFormatted = totalSupply ? Number(formatUnits(totalSupply as bigint, 18)).toLocaleString() : '0';
   const tvlFormatted = tvlData ? Number(formatUnits(tvlData as bigint, 6)).toLocaleString() : '0.00';
   const volumeFormatted = totalVolumeData ? Number(formatUnits(totalVolumeData as bigint, 6)).toLocaleString() : '0.00';
-  const marketCap = priceData && totalSupply ? (Number(formatUnits(priceData as bigint, 6)) * Number(formatUnits(totalSupply as bigint, 18))).toLocaleString() : '0';
+  const holdersFormatted = holdersCount ? String(holdersCount) : '0';
 
   const stats = [
-    { label: 'Gold Price (Grams)', value: priceData ? `$${currentPrice}` : '...', change: 'LIVE', icon: <Zap className="text-gold" />, color: 'gold', customClass: priceColor },
-    { label: 'Protocol Volume', value: isVolumeLoading ? '...' : `$${volumeFormatted}`, change: 'TOTAL', icon: <TrendingUp className="text-blue-400" />, color: 'blue' },
-    { label: 'Total Holders', value: isHoldersLoading ? '...' : (holdersCount ? String(holdersCount) : '1'), change: 'Active', icon: <Users className="text-emerald-400" />, color: 'emerald' },
-    { label: 'Protocol TVL', value: isTVLLoading ? '...' : `$${tvlFormatted}`, change: 'BACKED', icon: <ShieldCheck className="text-gold" />, color: 'gold' },
+    { label: 'Gold Price (Grams)', value: `$${currentPrice}`, change: 'LIVE', icon: <Zap className="text-gold" />, color: 'gold', customClass: priceColor },
+    { label: 'Protocol Volume', value: `$${volumeFormatted}`, change: 'TOTAL', icon: <TrendingUp className="text-blue-400" />, color: 'blue' },
+    { label: 'Total Holders', value: holdersFormatted, change: 'Active', icon: <Users className="text-emerald-400" />, color: 'emerald' },
+    { label: 'Protocol TVL', value: `$${tvlFormatted}`, change: 'BACKED', icon: <ShieldCheck className="text-gold" />, color: 'gold' },
   ];
 
   return (
