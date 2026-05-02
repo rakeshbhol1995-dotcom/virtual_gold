@@ -40,7 +40,7 @@ export const ActivityScanner = () => {
       if (!bondingCurveAddress) return;
       try {
         const currentBlock = await scannerClient.getBlockNumber();
-        const fromBlock = currentBlock > 10000n ? currentBlock - 10000n : 0n;
+        const fromBlock = currentBlock > 5000n ? currentBlock - 5000n : 0n;
 
         const [buyLogs, sellLogs] = await Promise.all([
           scannerClient.getContractEvents({
