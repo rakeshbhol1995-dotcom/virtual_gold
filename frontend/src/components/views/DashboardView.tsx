@@ -8,7 +8,7 @@ import {
   TrendingUp, 
   Users, 
   ShieldCheck, 
-  ArrowUpRight,
+  ArrowUpRight, 
   ArrowDownRight,
   Sparkles
 } from 'lucide-react';
@@ -27,12 +27,12 @@ const container = {
 };
 
 const brandReveal = {
-  hidden: { opacity: 0, y: 20, letterSpacing: '0.6em' },
+  hidden: { opacity: 0, y: 20, letterSpacing: '0.4em' },
   show: { 
     opacity: 1, 
     y: 0, 
-    letterSpacing: '0.4em',
-    transition: { duration: 1.2, ease: [0.16, 1, 0.3, 1] } 
+    letterSpacing: '0.25em',
+    transition: { duration: 1, ease: [0.16, 1, 0.3, 1] } 
   }
 };
 
@@ -91,76 +91,79 @@ export const DashboardView = () => {
       animate="show"
       className="space-y-24 pb-40 px-4 pt-10"
     >
-      {/* 🌌 PREMIUM BRANDED HERO 🌌 */}
-      <div className="relative overflow-hidden bg-slate-950/95 border border-gold/30 rounded-[4rem] min-h-[700px] md:min-h-[850px] flex flex-col items-center justify-center shadow-2xl">
+      {/* 🌌 HERO SECTION: RESIZED BRANDING 🌌 */}
+      <div className="relative overflow-hidden bg-slate-950/95 border border-gold/30 rounded-[4rem] min-h-[700px] md:min-h-[800px] flex flex-col items-center justify-center shadow-2xl">
             
-            {/* ✨ STARS BACKGROUND ✨ */}
+            {/* ✨ STARS ✨ */}
             <div className="absolute inset-0 pointer-events-none">
                 {[...Array(60)].map((_, i) => (
                     <motion.div
                         key={i}
                         animate={{ opacity: [0.1, 0.6, 0.1] }}
                         transition={{ duration: 2 + Math.random() * 3, repeat: Infinity }}
-                        className="absolute w-0.5 h-0.5 bg-white rounded-full shadow-[0_0_5px_white]"
+                        className="absolute w-0.5 h-0.5 bg-white rounded-full"
                         style={{ top: `${Math.random() * 100}%`, left: `${Math.random() * 100}%` }}
                     />
                 ))}
             </div>
 
-            {/* 🏆 ROYAL GOLD CHAIN BRANDING 🏆 */}
-            <div className="text-center z-50 mb-10">
+            {/* 🏆 RESIZED BRANDING 🏆 */}
+            <div className="text-center z-50 mb-8">
                 <motion.div variants={brandReveal} className="relative inline-block">
-                    <h1 className="text-5xl md:text-9xl font-black uppercase tracking-[0.3em] leading-none text-transparent bg-clip-text bg-gradient-to-b from-[#FFF3A0] via-gold to-[#B8860B] drop-shadow-[0_10px_40px_rgba(255,215,0,0.4)]">
+                    {/* Resized Text: md:text-7xl for better balance */}
+                    <h1 className="text-4xl md:text-7xl font-black uppercase tracking-[0.2em] leading-none text-transparent bg-clip-text bg-gradient-to-b from-[#FFF3A0] via-gold to-[#B8860B] drop-shadow-[0_0_30px_rgba(255,215,0,0.4)]">
                         GOLD CHAIN
                     </h1>
-                    {/* Glowing Underline */}
                     <motion.div 
                       initial={{ width: 0 }}
                       animate={{ width: '100%' }}
-                      transition={{ duration: 1.5, delay: 0.5 }}
-                      className="h-1 bg-gradient-to-r from-transparent via-gold to-transparent mt-6 shadow-[0_0_20px_gold]"
+                      transition={{ duration: 1.2, delay: 0.4 }}
+                      className="h-1 bg-gradient-to-r from-transparent via-gold to-transparent mt-4 shadow-[0_0_15px_gold]"
                     />
                 </motion.div>
-                <motion.p variants={brandReveal} className="text-[10px] md:text-sm font-black text-gold/30 uppercase tracking-[1.2em] mt-10">THE SUPREME ON-CHAIN GOLD STANDARD</motion.p>
+                {/* New Base Subtext */}
+                <motion.p variants={brandReveal} className="text-[10px] md:text-xs font-black text-gold/40 uppercase tracking-[0.8em] mt-8">
+                    BASE NATIVE GOLD STANDARD
+                </motion.p>
             </div>
 
-            {/* GOLDEN SINGULARITY ANIMATION */}
-            <div className="relative w-full flex items-center justify-center scale-75 md:scale-90 lg:scale-100 mt-10">
+            {/* GOLDEN SINGULARITY */}
+            <div className="relative w-full flex items-center justify-center scale-75 md:scale-90 lg:scale-100 mt-6">
                 <motion.div className="relative z-30">
                     {[...Array(4)].map((_, i) => (
                         <motion.div 
                             key={i}
-                            animate={{ scale: [1, 1.5, 1], opacity: [0.05, 0.2, 0.05], rotate: 360 }}
+                            animate={{ scale: [1, 1.4, 1], opacity: [0.05, 0.2, 0.05], rotate: 360 }}
                             transition={{ duration: 5 + i, repeat: Infinity }}
-                            className="absolute inset-0 rounded-full bg-gold blur-[70px]"
-                            style={{ margin: `-${i * 25}px` }}
+                            className="absolute inset-0 rounded-full bg-gold blur-[60px]"
+                            style={{ margin: `-${i * 20}px` }}
                         />
                     ))}
                     <motion.div 
                         animate={{ rotate: 360 }}
                         transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-                        className="relative w-40 h-40 md:w-60 md:h-60 border-2 border-gold/20 rounded-full flex items-center justify-center p-4"
+                        className="relative w-40 h-40 md:w-56 md:h-56 border-2 border-gold/20 rounded-full flex items-center justify-center p-4"
                     >
-                        <div className="absolute w-4/5 h-4/5 border-[3px] border-gold/50 rounded-full shadow-[0_0_30px_rgba(255,215,0,0.3)]" />
-                        <div className="absolute w-1/3 h-1/3 bg-gradient-to-tr from-yellow-700 to-gold rounded-full shadow-[0_0_60px_rgba(255,215,0,0.5)]" />
+                        <div className="absolute w-4/5 h-4/5 border-[2px] border-gold/40 rounded-full shadow-[0_0_20px_rgba(255,215,0,0.2)]" />
+                        <div className="absolute w-1/3 h-1/3 bg-gradient-to-tr from-yellow-700 to-gold rounded-full shadow-[0_0_50px_rgba(255,215,0,0.4)]" />
                     </motion.div>
                 </motion.div>
 
-                {/* 🪐 GOLDEN ORBITS */}
+                {/* 🪐 ORBITS */}
                 {PLANETS.map((planet, i) => (
                     <div key={planet.name} className="absolute rounded-full border border-white/5 pointer-events-none" style={{ width: planet.orbit * 2, height: planet.orbit * 2 }}>
                         <motion.div animate={{ rotate: 360 }} transition={{ duration: planet.speed, repeat: Infinity, ease: "linear" }} className="absolute w-full h-full">
                             <div className="absolute flex flex-col items-center pointer-events-auto" style={{ top: '50%', left: '100%', transform: 'translate(-50%, -50%)' }}>
-                                <div className="rounded-full border-2 border-white/20 shadow-2xl" style={{ width: planet.size, height: planet.size, backgroundColor: planet.color }} />
+                                <div className="rounded-full border border-white/10" style={{ width: planet.size, height: planet.size, backgroundColor: planet.color }} />
                             </div>
                         </motion.div>
                     </div>
                 ))}
             </div>
 
-            <div className="absolute bottom-16 flex items-center gap-4 px-8 py-3 bg-white/5 border border-white/10 rounded-full backdrop-blur-md opacity-40">
+            <div className="absolute bottom-16 flex items-center gap-3 px-6 py-2.5 bg-white/5 border border-white/10 rounded-full backdrop-blur-md opacity-50">
                 <Sparkles className="w-4 h-4 text-gold" />
-                <span className="text-[10px] font-black text-white uppercase tracking-[0.5em]">Protocol Active</span>
+                <span className="text-[9px] font-black text-white uppercase tracking-[0.4em]">Verified on Base</span>
             </div>
       </div>
 
@@ -173,11 +176,11 @@ export const DashboardView = () => {
           { label: 'TRADE VOLUME', value: `$${formattedVolume}`, icon: <TrendingUp className="text-blue-400" /> }
         ].map((stat, i) => (
           <motion.div key={i} variants={brandReveal}>
-            <GlassCard className="p-12 border-white/5 bg-slate-900/60 hover:bg-gold/5 transition-all text-center group">
-                <div className="flex justify-center mb-10">
+            <GlassCard className="p-10 border-white/5 bg-slate-900/60 hover:bg-gold/5 transition-all text-center group">
+                <div className="flex justify-center mb-8">
                     <div className="p-4 bg-white/5 rounded-2xl border border-white/10 group-hover:scale-110 transition-transform">{stat.icon}</div>
                 </div>
-                <h3 className="text-slate-600 text-[10px] font-black uppercase tracking-[0.5em] mb-2">{stat.label}</h3>
+                <h3 className="text-slate-600 text-[9px] font-black uppercase tracking-[0.4em] mb-2">{stat.label}</h3>
                 <div className="text-3xl md:text-5xl font-black text-white tracking-tighter drop-shadow-xl">{stat.value}</div>
             </GlassCard>
           </motion.div>
@@ -195,32 +198,32 @@ export const DashboardView = () => {
             <div className="p-10 md:p-14 space-y-12">
                 <div className="flex items-center justify-between border-b border-white/10 pb-10">
                     <div className="space-y-2 text-left">
-                        <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter italic">LIVE <span className="text-gold">ACTIVITY</span></h2>
-                        <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Real-time Trading Pulse</p>
+                        <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter italic">LIVE <span className="text-gold">ACTIVITY</span></h2>
+                        <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest">Real-time Trading Pulse</p>
                     </div>
-                    <Activity className="w-10 h-10 text-gold opacity-20 animate-pulse" />
+                    <Activity className="w-8 h-8 text-gold opacity-20 animate-pulse" />
                 </div>
 
                 <div className="w-full overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
                             <tr className="border-b border-white/5">
-                                <th className="pb-6 text-[10px] font-black text-slate-600 uppercase tracking-widest">Wallet ID</th>
-                                <th className="pb-6 text-[10px] font-black text-slate-600 uppercase tracking-widest text-center">Action</th>
-                                <th className="pb-6 text-[10px] font-black text-slate-600 uppercase tracking-widest text-right">Amount (GOLD)</th>
+                                <th className="pb-6 text-[9px] font-black text-slate-600 uppercase tracking-widest">Wallet ID</th>
+                                <th className="pb-6 text-[9px] font-black text-slate-600 uppercase tracking-widest text-center">Action</th>
+                                <th className="pb-6 text-[9px] font-black text-slate-600 uppercase tracking-widest text-right">Amount (GOLD)</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
                             {MOCK_TRADES.map((trade, i) => (
                                 <tr key={i} className="group hover:bg-white/[0.02] transition-colors">
-                                    <td className="py-8 text-sm font-black text-white/60 group-hover:text-white transition-colors uppercase tracking-widest">{trade.id}</td>
-                                    <td className="py-8">
-                                        <div className={`mx-auto flex items-center justify-center gap-2 w-24 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${trade.type === 'BUY' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
-                                            {trade.type === 'BUY' ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                                    <td className="py-7 text-xs font-black text-white/50 group-hover:text-white transition-colors uppercase tracking-widest">{trade.id}</td>
+                                    <td className="py-7">
+                                        <div className={`mx-auto flex items-center justify-center gap-2 w-20 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest ${trade.type === 'BUY' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                                            {trade.type === 'BUY' ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
                                             {trade.type}
                                         </div>
                                     </td>
-                                    <td className="py-8 text-lg font-black text-white text-right tracking-tighter">{trade.amount}</td>
+                                    <td className="py-7 text-lg font-black text-white text-right tracking-tighter">{trade.amount}</td>
                                 </tr>
                             ))}
                         </tbody>
