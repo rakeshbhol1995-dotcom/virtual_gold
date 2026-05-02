@@ -2,11 +2,11 @@ import { parseAbi } from 'viem';
 
 export const CONTRACT_ADDRESSES = {
   84532: { // Base Sepolia
-    goldToken: "0xC640632AA465e91BB44eb14A7F81D6E325B3C74A",
-    bondingCurve: "0x6C2064e0A8929B2B26f89fa2e357692C74bd0d39",
-    goldFutures: "0x7d8e0e37b89d99B45908638E3Ef6040e4E93977a", // V4 - PYTH SECURED
-    collateralToken: "0xb90Ec2984F904e743ac4138D11740cF0911F5a42", // Mock USDT
-    tokenFactory: "0x5af06e6A2Ae0B186286cAedd9593f2aE3b39dB8b", // Launchpad Factory
+    goldToken: "0x0B3131906643b96414d191F51610304DFcD0b4C6",
+    bondingCurve: "0x939D453F56b0D1DA304195941B21F5B19aB73456",
+    goldFutures: "0x0000000000000000000000000000000000000000",
+    collateralToken: "0x88cD9C167EA26D6109CC475BFFDAa936Ea7aA921", // Mock USDT
+    tokenFactory: "0x5af06e6A2Ae0B186286cAedd9593f2aE3b39dB8b", 
     staking: "0x0000000000000000000000000000000000000000",
     bridge: "0x0000000000000000000000000000000000000000",
   },
@@ -42,14 +42,13 @@ export const ERC20_ABI = parseAbi([
 ]);
 
 export const GOLD_BONDING_CURVE_ABI = parseAbi([
+  "function buy(uint256 collateralLimit, uint256 goldAmount)",
+  "function sell(uint256 goldAmount, uint256 minCollateralOut)",
   "function getCurrentPrice() view returns (uint256)",
-  "function getReserveBalance() view returns (uint256)",
-  "function getHoldersCount() view returns (uint256)",
-  "function buy(uint256 collateralAmount, uint256 minGoldOut, address referrer) external",
-  "function sell(uint256 goldAmount, uint256 minCollateralOut) external",
+  "function calculateCost(uint256 supply, uint256 amount) view returns (uint256)",
   "function getGoldOut(uint256 collateralAmount) view returns (uint256)",
-  "function getSellProceeds(uint256 goldAmount) view returns (uint256)",
-  "event Bought(address indexed user, uint256 collateralAmount, uint256 goldAmount, uint256 fee, address indexed referrer)",
+  "function getHoldersCount() view returns (uint256)",
+  "event Bought(address indexed user, uint256 collateralAmount, uint256 goldAmount, uint256 fee)",
   "event Sold(address indexed user, uint256 goldAmount, uint256 collateralAmount, uint256 fee)"
 ]);
 

@@ -1,19 +1,45 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "./GoldToken.sol";
 
+// ==========================================
+// 1. GOLD TOKEN CONTRACT
+// ==========================================
+contract GoldToken is ERC20, Ownable {
+    address public bondingCurve;
+
+    error OnlyBondingCurve();
+
+    constructor(address _initialOwner) ERC20("Gold Grams", "GOLD") Ownable(_initialOwner) {}
+
+    function setBondingCurve(address _bondingCurve) external onlyOwner {
+        require(bondingCurve == address(0), "Already set");
+        bondingCurve = _bondingCurve;
+    }
+
+    function mint(address to, uint256 amount) external {
+        if (msg.sender != bondingCurve) revert OnlyBondingCurve();
+        _mint(to, amount);
+    }
+
+    function burn(address from, uint256 amount) external {
+        if (msg.sender != bondingCurve) revert OnlyBondingCurve();
+        _burn(from, amount);
+    }
+}
+
+// ==========================================
+// 2. GOLD BONDING CURVE CONTRACT (AUDIT FIXED)
+// ==========================================
 contract GoldBondingCurve is Ownable, ReentrancyGuard {
-    using SafeERC20 for IERC20; 
-
     GoldToken public immutable goldToken;
     IERC20 public immutable collateralToken;
 
-    uint256 public constant INITIAL_PRICE = 10 * 10**6; 
+    uint256 public constant INITIAL_PRICE = 10 * 10**6; // $10
     uint256 public constant SLOPE = 1 * 10**2; 
     uint256 public constant PRECISION = 10**18;
     
@@ -24,7 +50,6 @@ contract GoldBondingCurve is Ownable, ReentrancyGuard {
 
     event Bought(address indexed user, uint256 collateralAmount, uint256 goldAmount, uint256 fee);
     event Sold(address indexed user, uint256 goldAmount, uint256 collateralAmount, uint256 fee);
-    event TokensRescued(address indexed token, uint256 amount);
 
     constructor(address _goldToken, address _collateralToken, address _feeRecipient) Ownable(msg.sender) {
         goldToken = GoldToken(_goldToken);
@@ -37,27 +62,29 @@ contract GoldBondingCurve is Ownable, ReentrancyGuard {
         return INITIAL_PRICE + (SLOPE * supply / PRECISION);
     }
 
+    /**
+     * @dev INTEGRAL MATH FOR SOLVENCY
+     * Ensures contract always has enough collateral to pay back sellers.
+     */
     function calculateCost(uint256 supply, uint256 amount) public pure returns (uint256) {
         uint256 newSupply = supply + amount;
         uint256 term1 = INITIAL_PRICE * amount / PRECISION;
-        uint256 squareDifference = (newSupply * newSupply) - (supply * supply);
-        uint256 term2 = (SLOPE * squareDifference) / (2 * PRECISION * PRECISION);
+        uint256 term2 = (SLOPE * ((newSupply * newSupply / PRECISION) - (supply * supply / PRECISION))) / (2 * PRECISION);
         return term1 + term2;
     }
 
     function buy(uint256 collateralLimit, uint256 goldAmount) external nonReentrant {
         uint256 supply = goldToken.totalSupply();
         uint256 cost = calculateCost(supply, goldAmount);
-        uint256 fee = (cost * FEE_PERCENT) / BASIS_POINTS;
+        uint256 fee = (cost * FEE_PERCENT) / (BASIS_POINTS - FEE_PERCENT);
         uint256 totalRequired = cost + fee;
 
         require(totalRequired <= collateralLimit, "Price exceeds limit");
 
-        goldToken.mint(msg.sender, goldAmount);
-
-        collateralToken.safeTransferFrom(msg.sender, address(this), totalRequired);
-        collateralToken.safeTransfer(feeRecipient, fee);
+        collateralToken.transferFrom(msg.sender, address(this), cost);
+        collateralToken.transferFrom(msg.sender, feeRecipient, fee);
         
+        goldToken.mint(msg.sender, goldAmount);
         emit Bought(msg.sender, totalRequired, goldAmount, fee);
     }
 
@@ -72,20 +99,14 @@ contract GoldBondingCurve is Ownable, ReentrancyGuard {
         require(netReturn >= minCollateralOut, "Slippage too high");
 
         goldToken.burn(msg.sender, goldAmount);
-
-        collateralToken.safeTransfer(msg.sender, netReturn);
-        collateralToken.safeTransfer(feeRecipient, fee);
+        collateralToken.transfer(msg.sender, netReturn);
+        collateralToken.transfer(feeRecipient, fee);
         
         emit Sold(msg.sender, goldAmount, netReturn, fee);
     }
 
     function rescueToken(address _token, uint256 _amount) external onlyOwner {
         require(_token != address(collateralToken), "Cannot rescue collateral");
-        IERC20(_token).safeTransfer(owner(), _amount);
-        emit TokensRescued(_token, _amount);
-    }
-
-    function setFeeRecipient(address _feeRecipient) external onlyOwner {
-        feeRecipient = _feeRecipient;
+        IERC20(_token).transfer(owner(), _amount);
     }
 }
