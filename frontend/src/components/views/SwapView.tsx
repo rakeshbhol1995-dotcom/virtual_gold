@@ -419,13 +419,25 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
                   </div>
                     
                     {amount && (
-                      <div className="mt-6 pt-4 border-t border-white/5 flex flex-col gap-2">
+                      <div className="mt-6 pt-4 border-t border-white/5 space-y-3">
                         <div className="flex justify-between items-center text-[8px] uppercase font-black tracking-widest text-slate-500">
                           <span>Exchange Rate</span>
                           <span className="text-white">1 Gram = {priceData ? Number(formatUnits(priceData as bigint, 6)).toFixed(4) : '10.00'} USDT</span>
                         </div>
                         <div className="flex justify-between items-center text-[8px] uppercase font-black tracking-widest text-slate-500">
-                          <span>Slippage Tolerance</span>
+                          <span>Route</span>
+                          <span className="text-white">Direct Bonding Curve</span>
+                        </div>
+                        <div className="flex justify-between items-center text-[8px] uppercase font-black tracking-widest text-slate-500">
+                          <span>Protocol Fee (1%)</span>
+                          <span className="text-gold">{(Number(amount || 0) * 0.01).toFixed(4)} {isSelling ? 'GRAMS' : 'USDT'}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-[8px] uppercase font-black tracking-widest text-slate-500">
+                          <span>Price Impact</span>
+                          <span className="text-emerald-400">{'< 0.01%'}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-[8px] uppercase font-black tracking-widest text-slate-500">
+                          <span>Slippage</span>
                           <span className="text-gold">{slippage}%</span>
                         </div>
                       </div>

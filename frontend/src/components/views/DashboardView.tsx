@@ -124,6 +124,23 @@ export const DashboardView = () => {
                  </div>
               </GlassCard>
            </motion.div>
+
+           {/* Developer API Card */}
+           <motion.div variants={item}>
+              <GlassCard className="p-6 border-white/5 bg-slate-900/60 group cursor-pointer hover:border-gold/30">
+                 <div className="flex items-center justify-between mb-4">
+                    <div className="p-2 bg-gold/10 rounded-lg text-gold group-hover:scale-110 transition-transform">
+                       <Zap size={16} />
+                    </div>
+                    <span className="text-[8px] font-black text-emerald-400 uppercase">Active</span>
+                 </div>
+                 <h4 className="text-xs font-black text-white uppercase tracking-tighter mb-2 italic">DEVELOPER API</h4>
+                 <p className="text-[9px] text-slate-400 uppercase leading-relaxed">Connect your bots to generate high-frequency volume via our low-latency endpoint.</p>
+                 <div className="mt-4 py-2 px-3 bg-black/40 rounded-xl font-mono text-[8px] text-gold/60 border border-white/5 overflow-hidden whitespace-nowrap">
+                    GET /v1/gold-chain/volume
+                 </div>
+              </GlassCard>
+           </motion.div>
         </div>
       </div>
 
