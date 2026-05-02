@@ -14,21 +14,21 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://virtualgold.org'),
-  title: "Gold Chain | The Gold Standard of DeFi | To The Moon 🚀",
-  description: "The world's most secure gold-backed decentralized exchange on Base. Trade GRAMS with 100% transparency, guaranteed liquidity, and institutional-grade security. Join the Moon Mission today!",
-  keywords: ["Gold Chain", "Base Network", "Gold Trading", "Crypto Moon", "DEX", "Bonding Curve", "DeFi Gold", "GRAMS Token", "Institutional Crypto"],
+  title: "GOLD CHAIN | Base Native Gold Standard",
+  description: "The premier decentralized gold protocol on Base. 100% Backed, Secure, and Transparent. Join the Gold Chain revolution today.",
+  keywords: ["Gold Chain", "Base Network", "Gold Trading", "Crypto Gold", "DEX", "Bonding Curve", "DeFi Gold", "GRAMS Token", "Institutional Crypto"],
   authors: [{ name: "Gold Chain Protocol" }],
   openGraph: {
-    title: "Gold Chain | Gold-Backed Exchange | To The Moon",
-    description: "Secure, Decentralized, and 100% Backed. The future of gold is here on the Base Network.",
+    title: "GOLD CHAIN | The Base Gold Standard",
+    description: "Secure, Decentralized, and 100% Backed. Digital gold, perfected on Base.",
     url: "https://virtualgold.org",
     siteName: "Gold Chain",
     images: [
       {
         url: "/gold-logo.png",
-        width: 1200,
-        height: 630,
-        alt: "Gold Chain Moon Mission",
+        width: 1024,
+        height: 1024,
+        alt: "Gold Chain Premium Logo",
       },
     ],
     locale: "en_US",
@@ -36,13 +36,16 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Gold Chain | Moon Mission 🚀",
+    title: "GOLD CHAIN | Gold on Base",
     description: "The premier ecosystem for digital gold on Base.",
     images: ["/gold-logo.png"],
   },
   icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
+    icon: [
+      { url: "/gold-logo.png" },
+      { url: "/gold-logo.png", type: "image/png" },
+    ],
+    shortcut: "/gold-logo.png",
     apple: "/gold-logo.png",
   },
 };
