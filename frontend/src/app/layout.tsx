@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     siteName: "Gold Chain Protocol",
     images: [
       {
-        url: "/icon.png",
+        url: "/gold-logo.png",
         width: 1024,
         height: 1024,
         alt: "Gold Chain - The Base Standard",
@@ -42,12 +42,12 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "GOLD CHAIN | Premium Gold on Base L2",
     description: "The world's most secure gold-backed protocol, native to Base.",
-    images: ["/icon.png"],
+    images: ["/gold-logo.png"],
   },
   icons: {
-    icon: "/icon.png?v=4",
-    shortcut: "/icon.png?v=4",
-    apple: "/icon.png?v=4",
+    icon: "/gold-logo.png?v=5",
+    shortcut: "/gold-logo.png?v=5",
+    apple: "/gold-logo.png?v=5",
   },
 };
 
