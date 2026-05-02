@@ -99,14 +99,53 @@ export const DashboardView = () => {
                 ))}
             </div>
 
-            <motion.div 
-                variants={float}
-                initial="initial"
-                animate="animate"
-                className="absolute -top-10 -right-10 p-4 opacity-5 group-hover:opacity-10 transition-opacity rotate-12 pointer-events-none"
-            >
-                <Trophy size={450} className="text-gold" />
-            </motion.div>
+            {/* 🔥 BURNING GOLD COIN ANIMATION 🔥 */}
+            <div className="absolute -top-10 -right-10 md:right-20 md:top-20 pointer-events-none z-0">
+                <motion.div 
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                    className="relative w-48 h-48 md:w-80 md:h-80"
+                >
+                    {/* Fire Layers */}
+                    {[...Array(3)].map((_, i) => (
+                        <motion.div 
+                            key={i}
+                            animate={{ 
+                                scale: [1, 1.2, 1],
+                                opacity: [0.3, 0.6, 0.3],
+                                rotate: [0, 10, -10, 0]
+                            }}
+                            transition={{ duration: 2 + i, repeat: Infinity, ease: "easeInOut" }}
+                            className={`absolute inset-0 rounded-full blur-[40px] md:blur-[60px] ${
+                                i === 0 ? 'bg-orange-600' : i === 1 ? 'bg-red-500' : 'bg-gold'
+                            }`}
+                        />
+                    ))}
+                    
+                    {/* The Coin */}
+                    <motion.div 
+                        animate={{ 
+                            y: [0, -10, 0],
+                            boxShadow: [
+                                "0 0 40px rgba(255,215,0,0.3)",
+                                "0 0 80px rgba(255,184,0,0.6)",
+                                "0 0 40px rgba(255,215,0,0.3)"
+                            ]
+                        }}
+                        transition={{ duration: 4, repeat: Infinity }}
+                        className="relative w-full h-full bg-gradient-to-br from-yellow-300 via-gold to-yellow-700 rounded-full border-[8px] border-yellow-200/30 flex items-center justify-center shadow-2xl backdrop-blur-sm overflow-hidden group-hover:scale-110 transition-transform duration-700"
+                    >
+                        <Trophy size={180} className="text-yellow-100 drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
+                        
+                        {/* Coin Shine */}
+                        <motion.div 
+                            animate={{ x: ['-100%', '200%'] }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                            className="absolute inset-0 w-1/2 bg-white/20 -skew-x-12 blur-xl"
+                        />
+                    </motion.div>
+                </motion.div>
+            </div>
 
             <div className="relative z-10 max-w-4xl">
                 <motion.div 
