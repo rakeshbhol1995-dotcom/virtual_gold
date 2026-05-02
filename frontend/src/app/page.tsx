@@ -144,7 +144,7 @@ export default function Home() {
             </a>
           </div>
         </div>
-      </nav>
+      </header>
 
       <main className="flex-1 flex flex-col items-center pt-10 pb-40 px-6 w-full relative">
         <div className="w-full flex justify-center items-start min-h-[700px]">
