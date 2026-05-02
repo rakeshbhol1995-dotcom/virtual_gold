@@ -13,7 +13,9 @@ contract GoldToken is ERC20, Ownable {
     using SafeERC20 for IERC20;
     
     address public bondingCurve;
+    uint256 public constant MAX_SUPPLY = 21_000_000 * 10**18;
     error OnlyBondingCurve();
+    error MaxSupplyReached();
     event BondingCurveSet(address indexed bondingCurve);
 
     constructor(address _initialOwner) ERC20("Gold Grams", "GOLD") Ownable(_initialOwner) {}
@@ -26,6 +28,7 @@ contract GoldToken is ERC20, Ownable {
 
     function mint(address to, uint256 amount) external {
         if (msg.sender != bondingCurve) revert OnlyBondingCurve();
+        if (totalSupply() + amount > MAX_SUPPLY) revert MaxSupplyReached();
         _mint(to, amount);
     }
 
@@ -45,7 +48,7 @@ contract GoldBondingCurve is Ownable, ReentrancyGuard {
     IERC20 public immutable collateralToken;
 
     uint256 public constant INITIAL_PRICE = 10 * 10**6; // $10 (USDT 6 Decimals)
-    uint256 public constant SLOPE = 1 * 10**2; 
+    uint256 public constant SLOPE = 4762; 
     uint256 public constant PRECISION = 10**18;
     
     uint256 public constant FEE_PERCENT = 100; // 1%
