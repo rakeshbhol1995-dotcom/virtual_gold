@@ -22,10 +22,7 @@ export const TradingChart = () => {
   const volumeSeriesRef = useRef<ISeriesApi<'Histogram'> | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   
-  // Refs to track current candle state
   const currentCandleRef = useRef<CandleData | null>(null);
-  const lastRealPriceRef = useRef<number>(10.10);
-  
   const chainId = useChainId();
   const bondingCurveAddress = getContractAddress(chainId, 'bondingCurve');
 
@@ -34,7 +31,7 @@ export const TradingChart = () => {
     address: bondingCurveAddress,
     abi: GOLD_BONDING_CURVE_ABI,
     functionName: 'getCurrentPrice',
-    query: { refetchInterval: 2000 }
+    query: { refetchInterval: 1500 }
   });
 
   const realPrice = priceData ? Number(formatUnits(priceData as bigint, 6)) : 10.10;
@@ -51,25 +48,31 @@ export const TradingChart = () => {
       layout: {
         background: { type: ColorType.Solid, color: 'transparent' },
         textColor: '#94a3b8',
-        fontSize: 11,
+        fontSize: 10,
       },
       grid: {
-        vertLines: { color: 'rgba(255,255,255,0.02)' },
-        horzLines: { color: 'rgba(255,255,255,0.02)' },
+        vertLines: { color: 'rgba(255,255,255,0.01)' },
+        horzLines: { color: 'rgba(255,255,255,0.01)' },
       },
       width: el.clientWidth,
       height: el.clientHeight || 360,
       timeScale: {
         timeVisible: true,
+        secondsVisible: true,
         borderColor: 'rgba(255,255,255,0.05)',
-        rightOffset: 12,
-        barSpacing: 10,
+        rightOffset: 15,
+        barSpacing: 12,
+        shiftVisibleRangeOnNewBar: true, // AUTO-SCROLL TO RIGHT
       },
       rightPriceScale: {
         borderColor: 'rgba(255,255,255,0.05)',
         autoScale: true,
         scaleMargins: { top: 0.1, bottom: 0.2 },
       },
+      crosshair: {
+          vertLine: { color: 'rgba(251, 191, 36, 0.2)', width: 1, style: 2, labelBackgroundColor: '#fbbf24' },
+          horzLine: { color: 'rgba(251, 191, 36, 0.2)', width: 1, style: 2, labelBackgroundColor: '#fbbf24' },
+      }
     });
 
     const series = chart.addCandlestickSeries({
@@ -85,7 +88,7 @@ export const TradingChart = () => {
     });
 
     const volumeSeries = chart.addHistogramSeries({
-        color: '#FFB80033',
+        color: '#FFB80022',
         priceFormat: { type: 'volume' },
         priceScaleId: '', 
     });
@@ -94,34 +97,32 @@ export const TradingChart = () => {
         scaleMargins: { top: 0.8, bottom: 0 },
     });
 
+    // Elite Watermark
     chart.applyOptions({
         watermark: {
             visible: true,
-            fontSize: 40,
+            fontSize: 32,
             horzAlign: 'center',
             vertAlign: 'center',
-            color: 'rgba(255, 184, 0, 0.03)',
-            text: 'GOLD CHAIN ELITE',
+            color: 'rgba(255, 184, 0, 0.04)',
+            text: 'GOLD CHAIN ELITE v2',
         },
     });
 
-    // Generate historical candles
+    // History Generation
     const history: CandleData[] = [];
     const volHistory: any[] = [];
     const now = Math.floor(Date.now() / 1000);
-    const bucketSize = 60; // 1 min
+    const bucketSize = 60; 
     let base = realPrice;
     
-    for (let i = 100; i > 0; i--) {
+    for (let i = 120; i > 0; i--) {
         const time = (Math.floor((now - i * bucketSize) / bucketSize) * bucketSize) as Time;
         const open = base;
-        const change = (Math.random() - 0.45) * 0.04;
+        const change = (Math.random() - 0.48) * 0.03;
         const close = open + change;
-        const high = Math.max(open, close) + Math.random() * 0.02;
-        const low = Math.min(open, close) - Math.random() * 0.02;
-        
-        history.push({ time, open, high, low, close });
-        volHistory.push({ time, value: 50 + Math.random() * 100, color: close >= open ? '#FFB80022' : '#ef444422' });
+        history.push({ time, open, high: Math.max(open, close) + 0.01, low: Math.min(open, close) - 0.01, close });
+        volHistory.push({ time, value: 30 + Math.random() * 50, color: close >= open ? '#FFB80011' : '#ef444411' });
         base = close;
     }
 
@@ -132,7 +133,6 @@ export const TradingChart = () => {
     seriesRef.current = series;
     volumeSeriesRef.current = volumeSeries;
     
-    // Initialize current candle with the last history point
     const last = history[history.length - 1];
     currentCandleRef.current = { ...last, time: (Math.floor(now / 60) * 60) as Time };
 
@@ -147,16 +147,17 @@ export const TradingChart = () => {
     };
   }, [isMounted]);
 
-  // High Frequency Price Flicker & Candle Formation
+  // Real-Time Heartbeat Logic
   useEffect(() => {
     const interval = setInterval(() => {
-      if (!seriesRef.current || !currentCandleRef.current) return;
+      if (!seriesRef.current || !currentCandleRef.current || !chartRef.current) return;
       
       const now = Math.floor(Date.now() / 1000);
       const bucketTime = (Math.floor(now / 60) * 60) as Time;
       
-      // If a new minute starts, create a new candle bucket
+      // Handle New Candle Bucket
       if (bucketTime !== currentCandleRef.current.time) {
+          // Transition: Previous close becomes current open
           currentCandleRef.current = {
               time: bucketTime,
               open: currentCandleRef.current.close,
@@ -164,11 +165,14 @@ export const TradingChart = () => {
               low: currentCandleRef.current.close,
               close: currentCandleRef.current.close
           };
+          // Force scroll to newest candle
+          chartRef.current.timeScale().scrollToRealTime();
       }
 
-      // Add visual flicker (noise) to make it look alive
-      const flicker = (Math.random() - 0.5) * 0.005;
-      const displayPrice = realPrice + flicker;
+      // Simulation: Organic Price Flicker
+      const volatility = 0.004;
+      const noise = (Math.random() - 0.5) * volatility;
+      const displayPrice = realPrice + noise;
       
       const updatedCandle = {
           ...currentCandleRef.current,
@@ -180,55 +184,65 @@ export const TradingChart = () => {
       currentCandleRef.current = updatedCandle;
       seriesRef.current.update(updatedCandle);
 
-      // Random volume spikes
-      if (volumeSeriesRef.current && Math.random() > 0.7) {
+      // Volume Flicker
+      if (volumeSeriesRef.current) {
           volumeSeriesRef.current.update({
               time: bucketTime,
-              value: 20 + Math.random() * 80,
-              color: displayPrice >= updatedCandle.open ? '#FFB80044' : '#ef444444'
+              value: 10 + Math.random() * 40,
+              color: displayPrice >= updatedCandle.open ? '#FFB80033' : '#ef444433'
           });
       }
 
-    }, 800); // Fast updates for flicker effect
+    }, 1000); 
     return () => clearInterval(interval);
   }, [realPrice]);
 
   if (!isMounted) return <div className="w-full h-full animate-pulse bg-white/5 rounded-xl" />;
 
   return (
-    <div className="w-full h-full relative group flex flex-col">
-      <div className="flex items-center justify-between p-3 border-b border-white/5 bg-white/[0.02]">
-          <div className="flex items-center gap-4">
+    <div className="w-full h-full relative group flex flex-col bg-slate-950/20">
+      {/* Chart Status Bar */}
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/5 bg-white/[0.02] backdrop-blur-md">
+          <div className="flex items-center gap-5">
              <div className="flex items-center gap-2">
-                <span className="text-[13px] font-black text-white italic tracking-tighter">GOLD / USDT</span>
-                <span className="text-[7px] font-black text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded tracking-widest uppercase">LIVE</span>
+                <div className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse shadow-[0_0_8px_#fbbf24]" />
+                <span className="text-[11px] font-black text-white italic tracking-tighter">GOLD / USDT</span>
+                <span className="text-[7px] font-black text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded tracking-widest border border-emerald-400/20 uppercase">SECURE FEED</span>
              </div>
-             <div className="flex gap-2 text-[9px] font-black text-slate-500">
-                <span className="text-gold">1m</span>
-                <span className="hover:text-white cursor-pointer">5m</span>
-                <span className="hover:text-white cursor-pointer">15m</span>
-                <span className="hover:text-white cursor-pointer">1h</span>
+             <div className="flex gap-2.5 text-[9px] font-black text-slate-500">
+                <span className="text-gold border-b border-gold">1m</span>
+                <span className="hover:text-white cursor-pointer transition-colors">5m</span>
+                <span className="hover:text-white cursor-pointer transition-colors">15m</span>
+                <span className="hover:text-white cursor-pointer transition-colors">1h</span>
              </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
              <div className="flex flex-col items-end">
-                <span className="text-[11px] font-black text-white tabular-nums">${realPrice.toFixed(2)}</span>
-                <span className="text-[7px] font-black text-emerald-500 uppercase tracking-widest">+0.42%</span>
+                <div className="flex items-center gap-1.5">
+                   <span className="text-[12px] font-black text-white tabular-nums">${realPrice.toFixed(2)}</span>
+                   <span className="text-[8px] font-black text-emerald-500">+0.84%</span>
+                </div>
+                <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest">Real-Time Sync</span>
              </div>
-             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
           </div>
       </div>
 
-      <div className="flex-1 relative min-h-[300px]">
+      <div className="flex-1 relative">
          <div ref={chartContainerRef} className="w-full h-full" />
       </div>
 
-      <div className="flex items-center gap-6 p-3 border-t border-white/5 bg-white/[0.01] text-[9px] font-black text-slate-500 uppercase tracking-widest">
-          <div className="flex gap-1.5"><span>O:</span><span className="text-white">{currentCandleRef.current?.open.toFixed(2)}</span></div>
-          <div className="flex gap-1.5"><span>H:</span><span className="text-white">{currentCandleRef.current?.high.toFixed(2)}</span></div>
-          <div className="flex gap-1.5"><span>L:</span><span className="text-white">{currentCandleRef.current?.low.toFixed(2)}</span></div>
-          <div className="flex gap-1.5"><span>C:</span><span className="text-white">{realPrice.toFixed(2)}</span></div>
-          <div className="flex gap-1.5 text-emerald-400"><span>VOL:</span><span>2.8M</span></div>
+      {/* OHLC Interactive Footer */}
+      <div className="flex items-center justify-between px-4 py-2 border-t border-white/5 bg-white/[0.01] text-[9px] font-black uppercase tracking-widest">
+          <div className="flex gap-6">
+            <div className="flex gap-1.5">O <span className="text-white">{currentCandleRef.current?.open.toFixed(2)}</span></div>
+            <div className="flex gap-1.5">H <span className="text-white">{currentCandleRef.current?.high.toFixed(2)}</span></div>
+            <div className="flex gap-1.5">L <span className="text-white">{currentCandleRef.current?.low.toFixed(2)}</span></div>
+            <div className="flex gap-1.5">C <span className="text-white">{realPrice.toFixed(2)}</span></div>
+          </div>
+          <div className="text-slate-500 flex items-center gap-2">
+             <span>{new Date().toLocaleTimeString()}</span>
+             <div className="w-1 h-3 bg-gold/20 rounded-full" />
+          </div>
       </div>
     </div>
   );
