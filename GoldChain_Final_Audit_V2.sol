@@ -52,6 +52,7 @@ contract GoldBondingCurve is Ownable, ReentrancyGuard {
     uint256 public constant BASIS_POINTS = 10000;
     
     address public feeRecipient;
+    uint256 public totalVolume;
 
     event Bought(address indexed user, uint256 collateralAmount, uint256 goldAmount, uint256 fee, address indexed referrer);
     event Sold(address indexed user, uint256 goldAmount, uint256 collateralAmount, uint256 fee);
@@ -112,6 +113,7 @@ contract GoldBondingCurve is Ownable, ReentrancyGuard {
 
         // Effects (CEI)
         goldToken.mint(msg.sender, goldAmount);
+        totalVolume += cost;
 
         // Interactions (Optimized single transferFrom)
         collateralToken.safeTransferFrom(msg.sender, address(this), totalRequired);
@@ -132,6 +134,7 @@ contract GoldBondingCurve is Ownable, ReentrancyGuard {
 
         // Effects
         goldToken.burn(msg.sender, goldAmount);
+        totalVolume += rawReturn;
 
         // Interactions
         collateralToken.safeTransfer(msg.sender, netReturn);

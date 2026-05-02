@@ -49,6 +49,7 @@ export const GOLD_BONDING_CURVE_ABI = parseAbi([
   "function getGoldOut(uint256 collateralAmount) view returns (uint256)",
   "function getSellProceeds(uint256 goldAmount) view returns (uint256)",
   "function getHoldersCount() view returns (uint256)",
+  "function totalVolume() view returns (uint256)",
   "event Bought(address indexed user, uint256 collateralAmount, uint256 goldAmount, uint256 fee, address indexed referrer)",
   "event Sold(address indexed user, uint256 goldAmount, uint256 collateralAmount, uint256 fee)"
 ]);

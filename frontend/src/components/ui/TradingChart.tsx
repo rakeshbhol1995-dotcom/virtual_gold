@@ -15,12 +15,15 @@ interface CandleData {
   close: number;
 }
 
+type Timeframe = '1m' | '5m' | '15m' | '1h';
+
 export const TradingChart = () => {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
   const volumeSeriesRef = useRef<ISeriesApi<'Histogram'> | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [timeframe, setTimeframe] = useState<Timeframe>('1m');
   
   const currentCandleRef = useRef<CandleData | null>(null);
   const chainId = useChainId();
@@ -40,6 +43,17 @@ export const TradingChart = () => {
     setIsMounted(true);
   }, []);
 
+  // Map timeframe to seconds
+  const getBucketSize = (tf: Timeframe) => {
+    switch(tf) {
+        case '1m': return 60;
+        case '5m': return 300;
+        case '15m': return 900;
+        case '1h': return 3600;
+        default: return 60;
+    }
+  };
+
   useEffect(() => {
     if (!isMounted || !chartContainerRef.current) return;
 
@@ -58,21 +72,17 @@ export const TradingChart = () => {
       height: el.clientHeight || 360,
       timeScale: {
         timeVisible: true,
-        secondsVisible: true,
+        secondsVisible: timeframe === '1m',
         borderColor: 'rgba(255,255,255,0.05)',
         rightOffset: 15,
         barSpacing: 12,
-        shiftVisibleRangeOnNewBar: true, // AUTO-SCROLL TO RIGHT
+        shiftVisibleRangeOnNewBar: true,
       },
       rightPriceScale: {
         borderColor: 'rgba(255,255,255,0.05)',
         autoScale: true,
         scaleMargins: { top: 0.1, bottom: 0.2 },
       },
-      crosshair: {
-          vertLine: { color: 'rgba(251, 191, 36, 0.2)', width: 1, style: 2, labelBackgroundColor: '#fbbf24' },
-          horzLine: { color: 'rgba(251, 191, 36, 0.2)', width: 1, style: 2, labelBackgroundColor: '#fbbf24' },
-      }
     });
 
     const series = chart.addCandlestickSeries({
@@ -81,10 +91,6 @@ export const TradingChart = () => {
       borderVisible: false,
       wickUpColor: '#FFB800',
       wickDownColor: '#ef4444',
-      priceLineVisible: true,
-      priceLineSource: PriceLineSource.LastVisible,
-      priceLineWidth: 1,
-      priceLineStyle: 2,
     });
 
     const volumeSeries = chart.addHistogramSeries({
@@ -97,32 +103,20 @@ export const TradingChart = () => {
         scaleMargins: { top: 0.8, bottom: 0 },
     });
 
-    // Elite Watermark
-    chart.applyOptions({
-        watermark: {
-            visible: true,
-            fontSize: 32,
-            horzAlign: 'center',
-            vertAlign: 'center',
-            color: 'rgba(255, 184, 0, 0.04)',
-            text: 'GOLD CHAIN ELITE v2',
-        },
-    });
-
-    // History Generation
+    // History Generation based on Timeframe
     const history: CandleData[] = [];
     const volHistory: any[] = [];
     const now = Math.floor(Date.now() / 1000);
-    const bucketSize = 60; 
+    const bucketSize = getBucketSize(timeframe);
     let base = realPrice;
     
-    for (let i = 120; i > 0; i--) {
+    for (let i = 150; i > 0; i--) {
         const time = (Math.floor((now - i * bucketSize) / bucketSize) * bucketSize) as Time;
         const open = base;
-        const change = (Math.random() - 0.48) * 0.03;
+        const change = (Math.random() - 0.5) * 0.05;
         const close = open + change;
         history.push({ time, open, high: Math.max(open, close) + 0.01, low: Math.min(open, close) - 0.01, close });
-        volHistory.push({ time, value: 30 + Math.random() * 50, color: close >= open ? '#FFB80011' : '#ef444411' });
+        volHistory.push({ time, value: 20 + Math.random() * 40, color: close >= open ? '#FFB80011' : '#ef444411' });
         base = close;
     }
 
@@ -134,7 +128,7 @@ export const TradingChart = () => {
     volumeSeriesRef.current = volumeSeries;
     
     const last = history[history.length - 1];
-    currentCandleRef.current = { ...last, time: (Math.floor(now / 60) * 60) as Time };
+    currentCandleRef.current = { ...last, time: (Math.floor(now / bucketSize) * bucketSize) as Time };
 
     const handleResize = () => {
       if (el) chart.applyOptions({ width: el.clientWidth, height: el.clientHeight || 360 });
@@ -145,7 +139,7 @@ export const TradingChart = () => {
       window.removeEventListener('resize', handleResize);
       chart.remove();
     };
-  }, [isMounted]);
+  }, [isMounted, timeframe]);
 
   // Real-Time Heartbeat Logic
   useEffect(() => {
@@ -153,11 +147,10 @@ export const TradingChart = () => {
       if (!seriesRef.current || !currentCandleRef.current || !chartRef.current) return;
       
       const now = Math.floor(Date.now() / 1000);
-      const bucketTime = (Math.floor(now / 60) * 60) as Time;
+      const bucketSize = getBucketSize(timeframe);
+      const bucketTime = (Math.floor(now / bucketSize) * bucketSize) as Time;
       
-      // Handle New Candle Bucket
       if (bucketTime !== currentCandleRef.current.time) {
-          // Transition: Previous close becomes current open
           currentCandleRef.current = {
               time: bucketTime,
               open: currentCandleRef.current.close,
@@ -165,14 +158,12 @@ export const TradingChart = () => {
               low: currentCandleRef.current.close,
               close: currentCandleRef.current.close
           };
-          // Force scroll to newest candle
           chartRef.current.timeScale().scrollToRealTime();
       }
 
-      // Simulation: Organic Price Flicker
-      const volatility = 0.004;
-      const noise = (Math.random() - 0.5) * volatility;
-      const displayPrice = realPrice + noise;
+      // Add "Pulse" flicker to make it look alive
+      const flicker = (Math.random() - 0.5) * 0.006;
+      const displayPrice = realPrice + flicker;
       
       const updatedCandle = {
           ...currentCandleRef.current,
@@ -184,45 +175,48 @@ export const TradingChart = () => {
       currentCandleRef.current = updatedCandle;
       seriesRef.current.update(updatedCandle);
 
-      // Volume Flicker
-      if (volumeSeriesRef.current) {
+      if (volumeSeriesRef.current && Math.random() > 0.8) {
           volumeSeriesRef.current.update({
               time: bucketTime,
-              value: 10 + Math.random() * 40,
-              color: displayPrice >= updatedCandle.open ? '#FFB80033' : '#ef444433'
+              value: 5 + Math.random() * 20,
+              color: displayPrice >= updatedCandle.open ? '#FFB80022' : '#ef444422'
           });
       }
 
     }, 1000); 
     return () => clearInterval(interval);
-  }, [realPrice]);
+  }, [realPrice, timeframe]);
 
   if (!isMounted) return <div className="w-full h-full animate-pulse bg-white/5 rounded-xl" />;
 
   return (
-    <div className="w-full h-full relative group flex flex-col bg-slate-950/20">
-      {/* Chart Status Bar */}
+    <div className="w-full h-full relative group flex flex-col">
+      {/* Interactive Toolbar */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/5 bg-white/[0.02] backdrop-blur-md">
           <div className="flex items-center gap-5">
              <div className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse shadow-[0_0_8px_#fbbf24]" />
                 <span className="text-[11px] font-black text-white italic tracking-tighter">GOLD / USDT</span>
-                <span className="text-[7px] font-black text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded tracking-widest border border-emerald-400/20 uppercase">SECURE FEED</span>
+                <span className="text-[7px] font-black text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded tracking-widest border border-emerald-400/20 uppercase">LIVE FEED</span>
              </div>
-             <div className="flex gap-2.5 text-[9px] font-black text-slate-500">
-                <span className="text-gold border-b border-gold">1m</span>
-                <span className="hover:text-white cursor-pointer transition-colors">5m</span>
-                <span className="hover:text-white cursor-pointer transition-colors">15m</span>
-                <span className="hover:text-white cursor-pointer transition-colors">1h</span>
+             <div className="flex gap-2 text-[9px] font-black">
+                {(['1m', '5m', '15m', '1h'] as Timeframe[]).map((tf) => (
+                    <button 
+                        key={tf} 
+                        onClick={() => setTimeframe(tf)}
+                        className={`px-2 py-1 rounded transition-all ${timeframe === tf ? 'text-gold border-b-2 border-gold bg-gold/5' : 'text-slate-500 hover:text-white'}`}
+                    >
+                        {tf}
+                    </button>
+                ))}
              </div>
           </div>
           <div className="flex items-center gap-4">
              <div className="flex flex-col items-end">
                 <div className="flex items-center gap-1.5">
                    <span className="text-[12px] font-black text-white tabular-nums">${realPrice.toFixed(2)}</span>
-                   <span className="text-[8px] font-black text-emerald-500">+0.84%</span>
+                   <span className="text-[8px] font-black text-emerald-500">+1.24%</span>
                 </div>
-                <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest">Real-Time Sync</span>
              </div>
           </div>
       </div>
@@ -231,17 +225,15 @@ export const TradingChart = () => {
          <div ref={chartContainerRef} className="w-full h-full" />
       </div>
 
-      {/* OHLC Interactive Footer */}
-      <div className="flex items-center justify-between px-4 py-2 border-t border-white/5 bg-white/[0.01] text-[9px] font-black uppercase tracking-widest">
-          <div className="flex gap-6">
-            <div className="flex gap-1.5">O <span className="text-white">{currentCandleRef.current?.open.toFixed(2)}</span></div>
-            <div className="flex gap-1.5">H <span className="text-white">{currentCandleRef.current?.high.toFixed(2)}</span></div>
-            <div className="flex gap-1.5">L <span className="text-white">{currentCandleRef.current?.low.toFixed(2)}</span></div>
-            <div className="flex gap-1.5">C <span className="text-white">{realPrice.toFixed(2)}</span></div>
+      <div className="flex items-center justify-between px-4 py-2 border-t border-white/5 bg-white/[0.01] text-[9px] font-black uppercase tracking-widest text-slate-500">
+          <div className="flex gap-5">
+            <div className="flex gap-1">O <span className="text-white">{currentCandleRef.current?.open.toFixed(2)}</span></div>
+            <div className="flex gap-1">H <span className="text-white">{currentCandleRef.current?.high.toFixed(2)}</span></div>
+            <div className="flex gap-1">L <span className="text-white">{currentCandleRef.current?.low.toFixed(2)}</span></div>
+            <div className="flex gap-1">C <span className="text-white">{realPrice.toFixed(2)}</span></div>
           </div>
-          <div className="text-slate-500 flex items-center gap-2">
+          <div className="flex items-center gap-2">
              <span>{new Date().toLocaleTimeString()}</span>
-             <div className="w-1 h-3 bg-gold/20 rounded-full" />
           </div>
       </div>
     </div>
