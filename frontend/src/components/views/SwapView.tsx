@@ -146,7 +146,7 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
     try {
       writeContractRaw({
         ...args,
-        gas: BigInt(500000), 
+        gas: BigInt(1000000), 
       });
     } catch (e) {
       setPendingAction(null);
