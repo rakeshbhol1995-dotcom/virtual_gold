@@ -32,5 +32,5 @@ export const BaseLogo = ({ className = "w-6 h-6" }: { className?: string }) => (
 );
 
 export const GoldLogo = ({ className = "w-6 h-6" }: { className?: string }) => (
-  <img src="/gold-logo.png" alt="Gold Logo" className={className} />
+  <img src="/gold-logo.png?v=5" alt="Gold Logo" className={className} />
 );

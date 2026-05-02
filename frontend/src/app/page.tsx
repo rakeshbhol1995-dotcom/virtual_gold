@@ -82,7 +82,7 @@ export default function Home() {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 px-4 md:px-8 h-24 flex items-center justify-between bg-black/40 backdrop-blur-xl border-b border-white/5">
         <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setActiveTab('dashboard')}>
-          <img src="/gold-logo.png" alt="Gold Chain" className="w-10 h-10 md:w-12 md:h-12 drop-shadow-[0_0_15px_rgba(255,215,0,0.4)]" />
+          <img src="/gold-logo.png?v=5" alt="Gold Chain" className="w-10 h-10 md:w-12 md:h-12 drop-shadow-[0_0_15px_rgba(255,215,0,0.4)]" />
           <div className="hidden sm:block">
             <h1 className="text-xl md:text-2xl font-black tracking-tighter uppercase italic leading-tight">
               GOLD <span className="text-gold">CHAIN</span>
