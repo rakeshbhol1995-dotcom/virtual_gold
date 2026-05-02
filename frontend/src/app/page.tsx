@@ -90,38 +90,52 @@ export default function Home() {
       <MouseGlow />
       <LaserBackground />
 
-      <nav className="flex flex-col md:flex-row items-center justify-between px-6 py-6 backdrop-blur-3xl border-b border-white/5 sticky top-0 z-[100] gap-4">
-        <div className="flex items-center gap-4 cursor-pointer" onClick={() => setActiveTab('dashboard')}>
-          <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center border border-white/10 overflow-hidden">
-            <img src="/gold-logo.png" alt="Logo" className="w-full h-full object-cover" />
+      {/* Navigation Backdrop */}
+      <div className="fixed top-0 left-0 right-0 h-24 bg-slate-950/60 backdrop-blur-2xl border-b border-white/5 z-40 pointer-events-none" />
+
+      {/* Modern Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 px-4 md:px-8 h-24 flex items-center justify-between">
+        <div className="flex items-center gap-4 cursor-pointer group" onClick={() => setActiveTab('dashboard')}>
+          <div className="relative">
+             <div className="absolute inset-0 bg-gold/20 rounded-full blur-md group-hover:bg-gold/40 transition-all" />
+             <img src="/gold-logo.png" alt="Gold Chain" className="w-10 h-10 relative z-10 drop-shadow-[0_0_10px_rgba(255,184,0,0.3)] group-hover:rotate-12 transition-transform duration-500" />
           </div>
-          <span className="text-xl font-black tracking-tighter text-gold uppercase">GOLD CHAIN</span>
+          <div className="hidden md:block">
+            <h1 className="text-xl font-black tracking-tighter uppercase italic leading-tight">
+              GOLD <span className="text-gold">CHAIN</span>
+            </h1>
+            <p className="text-[8px] font-black tracking-[0.3em] uppercase text-slate-500">The Gold Standard</p>
+          </div>
         </div>
         
-        <div className="flex items-center gap-6 text-[10px] font-black tracking-widest uppercase overflow-x-auto no-scrollbar">
+        <nav className="flex items-center gap-2 p-1.5 bg-white/5 rounded-[2rem] border border-white/5 backdrop-blur-xl">
           {(['dashboard', 'swap', 'whitepaper'] as ViewType[]).map((tab) => (
             <button 
               key={tab} 
               onClick={() => setActiveTab(tab)}
-              className={`${activeTab === tab ? "text-gold" : "text-slate-500 hover:text-slate-300"}`}
+              className={`px-6 py-2.5 rounded-[1.5rem] text-[10px] font-black tracking-widest uppercase transition-all duration-500 relative overflow-hidden group ${
+                activeTab === tab 
+                  ? 'bg-gold text-black shadow-[0_0_30px_rgba(255,184,0,0.3)]' 
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
             >
-              {tab === 'futures' ? 'F&O Trade' : tab === 'launchpad' ? '🚀 Launch' : tab}
+              <span className="relative z-10">{tab}</span>
             </button>
           ))}
-        </div>
+        </nav>
 
         <div className="flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/5">
+             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+             <span className="text-[9px] font-black uppercase text-slate-400">BASE MAINNET</span>
+          </div>
           <button 
-            className="px-6 py-2 rounded-xl border border-gold/40 text-gold text-[10px] font-black uppercase"
+            className="group relative px-6 py-3 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-[1.5rem] hover:bg-gold transition-all duration-500 overflow-hidden"
             onClick={() => isConnected ? disconnect() : connect({ connector: injected() })}
           >
-            {isConnected ? truncateAddress(address!) : 'Connect Wallet'}
+             <span className="relative z-10">{isConnected ? truncateAddress(address!) : 'CONNECT'}</span>
+             <div className="absolute inset-0 bg-gold translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
           </button>
-
-          <div className="hidden md:flex items-center gap-5 border-l border-white/10 pl-5">
-            <a href="https://x.com/virtualgold26" target="_blank" rel="noreferrer" className="opacity-50 hover:opacity-100 transition-all">
-              <img src="https://www.vectorlogo.zone/logos/twitter/twitter-official.svg" className="w-4 h-4 invert" alt="Twitter" />
-            </a>
             <a href="https://www.instagram.com/" target="_blank" rel="noreferrer" className="opacity-50 hover:opacity-100 transition-all">
               <img src="https://www.vectorlogo.zone/logos/instagram/instagram-icon.svg" className="w-4 h-4 invert" alt="Instagram" />
             </a>

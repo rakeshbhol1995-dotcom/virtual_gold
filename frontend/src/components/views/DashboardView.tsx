@@ -1,244 +1,154 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { GlassCard } from '@/components/ui/GlassCard';
-import { 
-  TrendingUp, 
-  BarChart3, 
-  Flame, 
-  Globe, 
-  Cpu, 
-  Zap,
-  Activity,
-  Wallet,
-  Recycle
-} from 'lucide-react';
-import { useReadContract, useChainId, useAccount, useWriteContract } from 'wagmi';
-import { formatUnits, parseUnits } from 'viem';
-import { 
-  getContractAddress, 
-  GOLD_BONDING_CURVE_ABI,
-  GOLD_FUTURES_ABI,
-  ERC20_ABI
-} from '@/constants/contracts';
-import { ActivityScanner } from '@/components/ui/ActivityScanner';
-import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
-import { HoldersView } from './HoldersView';
-import { ShieldCheck, Lock, Users } from 'lucide-react';
-import { useMounted } from '@/hooks/useMounted';
+import { TrendingUp, Users, Activity, Wallet, ShieldCheck, Zap, Globe, ArrowUpRight, Crown, Star } from 'lucide-react';
 import { TradingChart } from '@/components/ui/TradingChart';
-import { useVolume24h } from '@/hooks/useVolume24h';
+import { ActivityScanner } from '@/components/ui/ActivityScanner';
+import { HoldersView } from '@/components/views/HoldersView';
+import { GlassCard } from '@/components/ui/GlassCard';
 
 const container = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.1
-    }
+    transition: { staggerChildren: 0.1 }
   }
 };
 
 const item = {
-  hidden: { opacity: 0, scale: 0.8, y: 20 },
-  show: { opacity: 1, scale: 1, y: 0 }
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
 };
 
 export const DashboardView = () => {
-  const mounted = useMounted();
-  const { address } = useAccount();
-  const { writeContract } = useWriteContract();
-  const chainId = useChainId();
-  const goldTokenAddress = getContractAddress(chainId || 84532, 'goldToken');
-  const bondingCurveAddress = getContractAddress(chainId || 84532, 'bondingCurve');
-  const collateralTokenAddress = getContractAddress(chainId || 84532, 'collateralToken');
-
-  // 1. Fetch Total Supply (GOLD)
-  const { data: totalSupply } = useReadContract({
-    chainId: chainId || 84532,
-    address: goldTokenAddress,
-    abi: ERC20_ABI,
-    functionName: 'totalSupply',
-    query: { refetchInterval: 2000 }
-  });
-
-  // 2. Fetch TVL (USDT in contract)
-  const { data: contractBalance } = useReadContract({
-    chainId: chainId || 84532,
-    address: collateralTokenAddress,
-    abi: ERC20_ABI,
-    functionName: 'balanceOf',
-    args: [bondingCurveAddress],
-    query: { refetchInterval: 2000 }
-  });
-
-  // 3. Fetch Token Price from Bonding Curve (Local Market)
-  const { data: priceData } = useReadContract({
-    chainId: chainId || 84532,
-    address: bondingCurveAddress,
-    abi: GOLD_BONDING_CURVE_ABI,
-    functionName: 'getCurrentPrice',
-    query: { refetchInterval: 2000 }
-  });
-
-  const supply = totalSupply ? Number(formatUnits(totalSupply as bigint, 18)) : 0;
-  const currentPrice = priceData ? Number(formatUnits(priceData as bigint, 6)) : 10.00;
-  const tvl = contractBalance ? Number(formatUnits(contractBalance as bigint, 6)) : 0;
-
-  // 4. Fetch User Balances
-  const { data: userGrams, refetch: refetchGrams } = useReadContract({
-    chainId: chainId || 84532,
-    address: goldTokenAddress,
-    abi: ERC20_ABI,
-    functionName: 'balanceOf',
-    args: address ? [address] : undefined,
-    query: { enabled: !!address, refetchInterval: 2000 }
-  });
-
-  const { data: userUsdt, refetch: refetchUsdt } = useReadContract({
-    chainId: chainId || 84532,
-    address: collateralTokenAddress,
-    abi: ERC20_ABI,
-    functionName: 'balanceOf',
-    args: address ? [address] : undefined,
-    query: { enabled: !!address, refetchInterval: 2000 }
-  });
-
-  const gramsBalance = userGrams ? Number(formatUnits(userGrams as bigint, 18)) : 0;
-  const usdtBalance = userUsdt ? Number(formatUnits(userUsdt as bigint, 6)) : 0;
-
-  const { buyVolume, sellVolume, totalVolume, tradeCount, isLoading: volumeLoading } = useVolume24h();
-
-  const [priceColor, setPriceColor] = useState('text-white');
-  const prevPriceRef = useRef(currentPrice);
-
-  useEffect(() => {
-    if (address) {
-      refetchGrams();
-      refetchUsdt();
-    }
-  }, [address, chainId]);
-
-  useEffect(() => {
-    if (currentPrice > prevPriceRef.current) {
-      setPriceColor('text-green-400');
-      const timer = setTimeout(() => setPriceColor('text-white'), 1000);
-      return () => clearTimeout(timer);
-    } else if (currentPrice < prevPriceRef.current) {
-      setPriceColor('text-red-400');
-      const timer = setTimeout(() => setPriceColor('text-white'), 1000);
-      return () => clearTimeout(timer);
-    }
-    prevPriceRef.current = currentPrice;
-  }, [currentPrice]);
-
-  if (!mounted) return null;
-
   return (
-    <motion.div
+    <motion.div 
       variants={container}
       initial="hidden"
       animate="show"
-      className="w-full max-w-[1200px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 px-4 md:px-0"
+      className="space-y-8 pb-20"
     >
-      {/* Hero Stats */}
-      <motion.div variants={item} className="lg:col-span-2">
-         <GlassCard className="h-full border-white/10 bg-black/40 shadow-2xl p-6 md:p-10 flex flex-col justify-between" variant="gold" delay={0.1}>
-            <div className="flex justify-between items-start">
-               <div>
-                  <h3 className="text-[10px] font-black text-gold/60 uppercase tracking-[0.4em] mb-3">Index Price</h3>
-                  <p className={`text-4xl md:text-6xl font-display font-light tracking-tighter transition-colors duration-500 ${priceColor}`}>${currentPrice.toFixed(4)}</p>
+      {/* Hero Section: Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        {[
+          { label: 'Gold Price (Grams)', value: '$2,342.10', change: '+2.4%', icon: <Zap className="text-gold" />, color: 'gold' },
+          { label: 'Total Holders', value: '1,248', change: '+124', icon: <Users className="text-emerald-400" />, color: 'emerald' },
+          { label: 'Market Cap', value: '$45.2M', change: '+5.2%', icon: <Globe className="text-blue-400" />, color: 'blue' },
+          { label: 'Treasury Backing', value: '100%', change: 'Stable', icon: <ShieldCheck className="text-gold" />, color: 'gold' },
+        ].map((stat, i) => (
+          <motion.div key={i} variants={item}>
+            <GlassCard className="p-6 border-white/5 bg-slate-900/40 relative group overflow-hidden">
+               <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                  {React.cloneElement(stat.icon as React.ReactElement, { size: 64 })}
                </div>
-               <div className="flex flex-col items-end gap-2">
-                 <div className="bg-green-500/10 px-2 md:px-3 py-1 rounded-full border border-green-500/20 text-green-500 text-[10px] md:text-xs font-black">
-                    +{(currentPrice > 10 ? (((currentPrice - 10) / 10) * 100).toFixed(1) : 0)}%
-                 </div>
-                 <VerifiedBadge />
-               </div>
-            </div>
-            <div className="mt-8 md:mt-10 flex flex-col md:flex-row gap-6">
-               <div className="flex-1 min-h-[160px]">
-                  <TradingChart currentPrice={currentPrice} />
-               </div>
-               <div className="flex flex-col gap-4 justify-center">
-                  <button 
-                    onClick={async () => {
-                        const usdtAddress = getContractAddress(chainId || 84532, 'collateralToken');
-                        writeContract({
-                            address: usdtAddress as `0x${string}`,
-                            abi: ERC20_ABI,
-                            functionName: 'mint',
-                            args: [address, parseUnits("1000", 6)],
-                        });
-                    }}
-                    className="px-8 py-5 bg-white text-black rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-gold transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.1)] hover:scale-[1.05] group"
-                  >
-                     <div className="flex items-center gap-3">
-                        <Zap className="w-4 h-4" />
-                        MINT TEST USDT
-                     </div>
-                  </button>
-                  <p className="text-[8px] text-slate-500 uppercase font-black text-center tracking-widest opacity-60">Base Sepolia Faucet</p>
-               </div>
-            </div>
-         </GlassCard>
-      </motion.div>
-
-      <motion.div variants={item}>
-         <GlassCard className="h-full border-white/10 bg-black/20 p-6 md:p-10 flex flex-col justify-between group hover:bg-black/40 transition-all duration-500" delay={0.2}>
-            <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-2xl w-fit mb-6 group-hover:scale-110 transition-transform">
-               <Flame className="w-6 h-6 md:w-8 md:h-8 text-rose-500" />
-            </div>
-            <div>
-               <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-2">Total Value Locked</h3>
-               <p className="text-3xl md:text-4xl font-display font-light text-white tracking-tight">${tvl.toLocaleString()} <span className="text-[10px] md:text-xs text-slate-600 font-sans font-black ml-1 uppercase">USDT</span></p>
-            </div>
-         </GlassCard>
-      </motion.div>
-
-      <motion.div variants={item}>
-         <GlassCard className="h-full border-white/10 bg-black/40 p-6 md:p-10 flex flex-col justify-between shadow-2xl transition-all duration-500 hover:border-gold/30" variant="gold" delay={0.3}>
-            <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-gold/10 border border-gold/20 rounded-xl">
-                    <Wallet className="w-5 h-5 text-gold" />
+               <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-white/5 rounded-xl border border-white/5 group-hover:scale-110 transition-transform">
+                     {stat.icon}
                   </div>
-                  <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Portfolio</h3>
-                </div>
-                <button 
-                  onClick={() => { refetchGrams(); refetchUsdt(); }}
-                  className="p-1.5 bg-white/5 hover:bg-white/10 rounded-lg transition-all"
-                  title="Sync Balances"
-                >
-                  <Recycle className="w-3 h-3 text-gold" />
-                </button>
-            </div>
-            <div className="space-y-6">
-               <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-                  <p className="text-[8px] text-slate-500 uppercase font-black tracking-widest mb-1">Gold Balance</p>
-                  <p className="text-2xl md:text-3xl font-display font-light text-gold neon-text-gold">{gramsBalance.toLocaleString()} <span className="text-[10px] font-sans font-black text-gold/40">GRAMS</span></p>
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">{stat.label}</span>
                </div>
-               <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-                  <p className="text-[8px] text-slate-500 uppercase font-black tracking-widest mb-1">USDT Balance</p>
-                  <p className="text-2xl md:text-3xl font-display font-light text-white tracking-tight">${usdtBalance.toLocaleString()}</p>
+               <div className="flex items-end justify-between">
+                  <h3 className="text-2xl font-black text-white tracking-tight">{stat.value}</h3>
+                  <span className={`text-[10px] font-black px-2 py-1 rounded-full bg-white/5 ${stat.color === 'gold' ? 'text-gold' : 'text-emerald-400'}`}>
+                     {stat.change}
+                  </span>
+               </div>
+            </GlassCard>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Row 1: Chart & Primary Action */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <motion.div variants={item} className="lg:col-span-2">
+          <GlassCard className="border-white/5 bg-slate-900/60 overflow-hidden">
+            <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+               <div className="flex items-center gap-3">
+                  <TrendingUp className="text-gold w-5 h-5" />
+                  <h3 className="text-sm font-black uppercase tracking-widest text-white">Live Price Chart</h3>
+               </div>
+               <div className="flex gap-2">
+                  {['1H', '1D', '1W', 'ALL'].map((t) => (
+                    <button key={t} className="text-[10px] font-black px-3 py-1 rounded-lg bg-white/5 hover:bg-gold hover:text-black transition-all">
+                      {t}
+                    </button>
+                  ))}
                </div>
             </div>
-         </GlassCard>
-      </motion.div>
+            <div className="p-6 h-[400px]">
+               <TradingChart />
+            </div>
+          </GlassCard>
+        </motion.div>
+
+        <div className="space-y-6">
+           {/* Moon Mission Card */}
+           <motion.div variants={item}>
+              <GlassCard className="p-8 border-gold/20 bg-gold/5 relative overflow-hidden group">
+                 <div className="absolute -right-10 -top-10 w-40 h-40 bg-gold/10 rounded-full blur-3xl group-hover:bg-gold/20 transition-all" />
+                 <Crown className="w-12 h-12 text-gold mb-6 animate-float" />
+                 <h3 className="text-2xl font-black text-white mb-2 italic tracking-tighter">THE MOON IS <span className="text-gold underline decoration-2 underline-offset-4">CALLING</span></h3>
+                 <p className="text-xs text-slate-400 font-medium leading-relaxed mb-8">
+                    Join 1,200+ holders and start your journey with the world's most stable gold-backed protocol.
+                 </p>
+                 <button className="w-full py-4 bg-gold text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl hover:bg-white transition-all duration-500 shadow-[0_0_30px_rgba(255,184,0,0.2)]">
+                    Join The Mission
+                 </button>
+              </GlassCard>
+           </motion.div>
+
+           {/* Quick Stats Card */}
+           <motion.div variants={item}>
+              <GlassCard className="p-6 border-white/5 bg-slate-900/40">
+                 <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-emerald-400" />
+                    Protocol Health
+                 </h4>
+                 <div className="space-y-4">
+                    {[
+                       { l: 'Liquidity Locked', v: '98%', p: 98, c: 'bg-gold' },
+                       { l: 'Community Score', v: '9.2/10', p: 92, c: 'bg-emerald-400' },
+                       { l: 'L1 Migration Status', v: 'Phase 2', p: 45, c: 'bg-blue-400' },
+                    ].map((row, i) => (
+                       <div key={i} className="space-y-2">
+                          <div className="flex justify-between items-center text-[10px] font-bold">
+                             <span className="text-slate-400">{row.l}</span>
+                             <span>{row.v}</span>
+                          </div>
+                          <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                             <div className={`h-full ${row.c} transition-all duration-1000`} style={{ width: `${row.p}%` }} />
+                          </div>
+                       </div>
+                    ))}
+                 </div>
+              </GlassCard>
+           </motion.div>
+        </div>
+      </div>
 
       {/* Row 2: Activities & Holders */}
-      <motion.div variants={item} className="lg:col-span-2">
-         <GlassCard className="border-white/5 bg-slate-950/40 p-5 md:p-8">
-            <div className="space-y-4">
-               <ActivityScanner />
-            </div>
-         </GlassCard>
-      </motion.div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <motion.div variants={item}>
+           <GlassCard className="border-white/5 bg-slate-900/40 p-6">
+              <div className="flex items-center gap-3 mb-8">
+                 <Zap className="text-gold w-5 h-5" />
+                 <h3 className="text-sm font-black uppercase tracking-widest text-white">Live Transactions</h3>
+              </div>
+              <ActivityScanner />
+           </GlassCard>
+        </motion.div>
 
-      <motion.div variants={item} className="lg:col-span-2">
-         <HoldersView />
-      </motion.div>
+        <motion.div variants={item}>
+           <GlassCard className="border-white/5 bg-slate-900/40 p-6">
+              <div className="flex items-center gap-3 mb-8">
+                 <Star className="text-gold w-5 h-5" />
+                 <h3 className="text-sm font-black uppercase tracking-widest text-white">Elite Holders</h3>
+              </div>
+              <HoldersView />
+           </GlassCard>
+        </motion.div>
+      </div>
     </motion.div>
   );
 };
