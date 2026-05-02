@@ -118,7 +118,7 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
     query: { refetchInterval: 1000 }
   });
 
-  const { data: expectedOut, isFetching: isFetchingExpected, error: expectedError } = useReadContract({
+  const { data: expectedOut, isFetching: isFetchingExpected, error: expectedError, refetch: refetchExpected } = useReadContract({
     chainId: chainId || 84532,
     address: bondingCurveAddress,
     abi: GOLD_BONDING_CURVE_ABI,
@@ -126,18 +126,17 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
     args: amount && !isNaN(Number(amount)) && Number(amount) > 0 ? [parseUnits(amount, isSelling ? 18 : 6)] : undefined,
     query: { 
       enabled: !!amount && !isNaN(Number(amount)) && Number(amount) > 0,
-      refetchInterval: 1000,
-      retry: 2,
+      refetchInterval: 2000,
     }
   });
 
   useEffect(() => {
-    if (expectedOut) {
+    if (expectedOut && !isFetchingExpected) {
       setOutAmount(formatUnits(expectedOut as bigint, isSelling ? 6 : 18));
-    } else {
+    } else if (!amount || Number(amount) === 0) {
       setOutAmount('0.0');
     }
-  }, [expectedOut, isSelling]);
+  }, [expectedOut, isFetchingExpected, isSelling, amount]);
 
   const { writeContract: writeContractRaw, data: hash, isPending, error: writeError } = useWriteContract();
 
@@ -312,7 +311,11 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
                     </div>
                     <div className="relative z-10 flex justify-between items-center gap-4">
                       <div className="text-4xl md:text-6xl font-display font-light text-white">
-                        {isFetchingExpected ? <span className="text-xl animate-pulse text-gold/40">Calculating...</span> : <span className="neon-text-gold">{outAmount}</span>}
+                        {isFetchingExpected ? (
+                          <span className="text-xl animate-pulse text-gold/40">...</span>
+                        ) : (
+                          <span className="neon-text-gold">{outAmount}</span>
+                        )}
                       </div>
                       <div className="flex items-center gap-3 bg-gold/5 px-4 py-2 rounded-2xl border border-gold/20">
                         {!isSelling ? <GoldLogo className="w-6 h-6 text-gold" /> : null}
