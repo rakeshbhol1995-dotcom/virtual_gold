@@ -91,32 +91,32 @@ export default function Home() {
       <LaserBackground />
 
       {/* Navigation Backdrop */}
-      <div className="fixed top-0 left-0 right-0 h-20 bg-slate-950/60 backdrop-blur-2xl border-b border-white/5 z-40" />
+      <div className="fixed top-0 left-0 right-0 h-24 bg-slate-950/60 backdrop-blur-2xl border-b border-white/5 z-40 pointer-events-none" />
 
-      {/* Modern Header - Compact for Mobile */}
-      <header className="fixed top-0 left-0 right-0 z-50 px-4 md:px-8 h-20 flex items-center justify-between">
-        <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setActiveTab('dashboard')}>
+      {/* Modern Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 px-4 md:px-8 h-24 flex items-center justify-between">
+        <div className="flex items-center gap-4 cursor-pointer group" onClick={() => setActiveTab('dashboard')}>
           <div className="relative">
              <div className="absolute inset-0 bg-gold/20 rounded-full blur-md group-hover:bg-gold/40 transition-all" />
-             <img src="/gold-logo.png" alt="Gold Chain" className="w-8 h-8 md:w-10 md:h-10 relative z-10 drop-shadow-[0_0_10px_rgba(255,184,0,0.3)]" />
+             <img src="/gold-logo.png" alt="Gold Chain" className="w-10 h-10 relative z-10 drop-shadow-[0_0_10px_rgba(255,184,0,0.3)] group-hover:rotate-12 transition-transform duration-500" />
           </div>
-          <div className="hidden sm:block">
-            <h1 className="text-lg md:text-xl font-black tracking-tighter uppercase italic leading-tight">
+          <div className="hidden md:block">
+            <h1 className="text-xl font-black tracking-tighter uppercase italic leading-tight">
               GOLD <span className="text-gold">CHAIN</span>
             </h1>
+            <p className="text-[8px] font-black tracking-[0.3em] uppercase text-slate-500">The Gold Standard</p>
           </div>
         </div>
         
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-2 p-1 bg-white/5 rounded-[2rem] border border-white/5 backdrop-blur-xl">
+        <nav className="flex items-center gap-2 p-1.5 bg-white/5 rounded-[2rem] border border-white/5 backdrop-blur-xl">
           {(['dashboard', 'swap', 'whitepaper'] as ViewType[]).map((tab) => (
             <button 
               key={tab} 
               onClick={() => setActiveTab(tab)}
-              className={`px-6 py-2 rounded-[1.5rem] text-[10px] font-black tracking-widest uppercase transition-all duration-500 relative overflow-hidden group ${
+              className={`px-6 py-2.5 rounded-[1.5rem] text-[10px] font-black tracking-widest uppercase transition-all duration-500 relative overflow-hidden group ${
                 activeTab === tab 
                   ? 'bg-gold text-black shadow-[0_0_30px_rgba(255,184,0,0.3)]' 
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
               }`}
             >
               <span className="relative z-10">{tab}</span>
@@ -124,44 +124,29 @@ export default function Home() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-4">
           <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/5">
              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-             <span className="text-[9px] font-black uppercase text-slate-400">BASE</span>
+             <span className="text-[9px] font-black uppercase text-slate-400">BASE MAINNET</span>
           </div>
           <button 
-            className="group relative px-4 md:px-6 py-2 md:py-3 bg-white text-black text-[9px] md:text-[10px] font-black uppercase tracking-widest rounded-xl md:rounded-[1.5rem] hover:bg-gold transition-all duration-500 overflow-hidden"
+            className="group relative px-6 py-3 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-[1.5rem] hover:bg-gold transition-all duration-500 overflow-hidden"
             onClick={() => isConnected ? disconnect() : connect({ connector: injected() })}
           >
              <span className="relative z-10">{isConnected ? truncateAddress(address!) : 'CONNECT'}</span>
              <div className="absolute inset-0 bg-gold translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
           </button>
+            <a href="https://www.instagram.com/" target="_blank" rel="noreferrer" className="opacity-50 hover:opacity-100 transition-all">
+              <img src="https://www.vectorlogo.zone/logos/instagram/instagram-icon.svg" className="w-4 h-4 invert" alt="Instagram" />
+            </a>
+            <a href="https://www.linkedin.com/in/virtual-gold-138400406/" target="_blank" rel="noreferrer" className="opacity-50 hover:opacity-100 transition-all">
+              <img src="https://www.vectorlogo.zone/logos/linkedin/linkedin-icon.svg" className="w-4 h-4 invert" alt="LinkedIn" />
+            </a>
+          </div>
         </div>
-      </header>
-
-      {/* Mobile Bottom Navigation */}
-      <nav className="fixed bottom-6 left-4 right-4 z-50 md:hidden">
-         <div className="bg-slate-900/80 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-2 flex items-center justify-between shadow-2xl">
-            {(['dashboard', 'swap', 'whitepaper'] as ViewType[]).map((tab) => (
-              <button 
-                key={tab} 
-                onClick={() => setActiveTab(tab)}
-                className={`flex-1 flex flex-col items-center gap-1 py-3 rounded-[2rem] transition-all duration-500 ${
-                  activeTab === tab 
-                    ? 'bg-gold text-black shadow-lg scale-105' 
-                    : 'text-slate-500'
-                }`}
-              >
-                {tab === 'dashboard' && <Activity size={18} />}
-                {tab === 'swap' && <Zap size={18} />}
-                {tab === 'whitepaper' && <ShieldCheck size={18} />}
-                <span className="text-[8px] font-black uppercase tracking-tighter">{tab}</span>
-              </button>
-            ))}
-         </div>
       </nav>
 
-      <main className="flex-1 flex flex-col items-center pt-24 pb-32 md:pb-40 px-4 md:px-6 w-full relative">
+      <main className="flex-1 flex flex-col items-center pt-10 pb-40 px-6 w-full relative">
         <div className="w-full flex justify-center items-start min-h-[700px]">
           <AnimatePresence mode="wait">
             <motion.div
