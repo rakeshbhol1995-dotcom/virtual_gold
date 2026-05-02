@@ -14,21 +14,25 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://virtualgold.org'),
-  title: "GOLD CHAIN | Base Native Gold Standard",
-  description: "The premier decentralized gold protocol on Base. 100% Backed, Secure, and Transparent. Join the Gold Chain revolution today.",
-  keywords: ["Gold Chain", "Base Network", "Gold Trading", "Crypto Gold", "DEX", "Bonding Curve", "DeFi Gold", "GRAMS Token", "Institutional Crypto"],
+  title: "GOLD CHAIN | The #1 Gold Standard on Base L2 Protocol",
+  description: "The premier decentralized gold protocol native to Base Chain. 100% Backed, Ultra-Low Gas, and Institutional Security. Trade physical-grade gold on the world's most efficient L2 ecosystem.",
+  keywords: [
+    "Gold Chain", "Base Chain", "Base L2", "Coinbase Base", "Gold Trading", 
+    "RWA", "Real World Assets", "DeFi Gold", "GRAMS Token", "Crypto Gold", 
+    "Bonding Curve", "Base Network Gold", "Institutional Gold Protocol"
+  ],
   authors: [{ name: "Gold Chain Protocol" }],
   openGraph: {
-    title: "GOLD CHAIN | The Base Gold Standard",
-    description: "Secure, Decentralized, and 100% Backed. Digital gold, perfected on Base.",
+    title: "GOLD CHAIN | Native Gold Standard on Base L2",
+    description: "Secure, Decentralized, and 100% Backed. The future of gold is here on the Base Network. Experience high-speed, low-cost gold trading.",
     url: "https://virtualgold.org",
-    siteName: "Gold Chain",
+    siteName: "Gold Chain Protocol",
     images: [
       {
         url: "/gold-logo.png",
         width: 1024,
         height: 1024,
-        alt: "Gold Chain Premium Logo",
+        alt: "Gold Chain - The Base Standard",
       },
     ],
     locale: "en_US",
@@ -36,17 +40,17 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "GOLD CHAIN | Gold on Base",
-    description: "The premier ecosystem for digital gold on Base.",
+    title: "GOLD CHAIN | Premium Gold on Base L2",
+    description: "The world's most secure gold-backed protocol, native to Base.",
     images: ["/gold-logo.png"],
   },
   icons: {
     icon: [
-      { url: "/gold-logo.png?v=2" },
-      { url: "/gold-logo.png?v=2", type: "image/png" },
+      { url: "/gold-logo.png?v=3" },
+      { url: "/gold-logo.png?v=3", type: "image/png" },
     ],
-    shortcut: "/gold-logo.png?v=2",
-    apple: "/gold-logo.png?v=2",
+    shortcut: "/gold-logo.png?v=3",
+    apple: "/gold-logo.png?v=3",
   },
 };
 
