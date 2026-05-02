@@ -47,17 +47,18 @@ export const DashboardView = () => {
     query: { refetchInterval: 10000 }
   });
 
-  // Real Data: TVL (Reserve)
-  const { data: tvlData } = useReadContract({
+  // Real Data: TVL (Reserve) - Fetching direct USDT balance of contract as backup
+  const { data: tvlData, isLoading: isTVLLoading } = useReadContract({
     chainId,
-    address: bondingCurveAddress,
-    abi: GOLD_BONDING_CURVE_ABI,
-    functionName: 'getReserveBalance',
+    address: getContractAddress(chainId, 'collateralToken'),
+    abi: ERC20_ABI,
+    functionName: 'balanceOf',
+    args: [bondingCurveAddress],
     query: { refetchInterval: 10000 }
   });
 
   // Real Data: Holders Count
-  const { data: holdersCount } = useReadContract({
+  const { data: holdersCount, isLoading: isHoldersLoading } = useReadContract({
     chainId,
     address: bondingCurveAddress,
     abi: GOLD_BONDING_CURVE_ABI,
@@ -67,14 +68,14 @@ export const DashboardView = () => {
 
   const currentPrice = priceData ? Number(formatUnits(priceData as bigint, 6)).toFixed(2) : '0.00';
   const supplyFormatted = totalSupply ? Number(formatUnits(totalSupply as bigint, 18)).toLocaleString() : '0';
-  const tvlFormatted = tvlData ? Number(formatUnits(tvlData as bigint, 6)).toLocaleString() : '0';
+  const tvlFormatted = tvlData ? Number(formatUnits(tvlData as bigint, 6)).toLocaleString() : '0.00';
   const marketCap = priceData && totalSupply ? (Number(formatUnits(priceData as bigint, 6)) * Number(formatUnits(totalSupply as bigint, 18))).toLocaleString() : '0';
 
   const stats = [
-    { label: 'Gold Price (Grams)', value: `$${currentPrice}`, change: 'LIVE', icon: <Zap className="text-gold" />, color: 'gold' },
-    { label: 'Total Holders', value: holdersCount ? String(holdersCount) : '1', change: 'Network', icon: <Users className="text-emerald-400" />, color: 'emerald' },
-    { label: 'Market Cap', value: `$${marketCap}`, change: 'Base Network', icon: <Globe className="text-blue-400" />, color: 'blue' },
-    { label: 'Protocol TVL', value: `$${tvlFormatted}`, change: 'USDT', icon: <ShieldCheck className="text-gold" />, color: 'gold' },
+    { label: 'Gold Price (Grams)', value: priceData ? `$${currentPrice}` : '...', change: 'LIVE', icon: <Zap className="text-gold" />, color: 'gold' },
+    { label: 'Total Holders', value: isHoldersLoading ? '...' : (holdersCount ? String(holdersCount) : '1'), change: 'Network', icon: <Users className="text-emerald-400" />, color: 'emerald' },
+    { label: 'Market Cap', value: totalSupply ? `$${marketCap}` : '...', change: 'Base Network', icon: <Globe className="text-blue-400" />, color: 'blue' },
+    { label: 'Protocol TVL', value: isTVLLoading ? '...' : `$${tvlFormatted}`, change: 'USDT', icon: <ShieldCheck className="text-gold" />, color: 'gold' },
   ];
 
   return (
