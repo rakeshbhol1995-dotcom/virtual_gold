@@ -16,89 +16,78 @@ const GOLD_TOKEN = "0x723803C05dB5dE1Ca50DAf008D809C581AED99d7";
 const USDT_TOKEN = "0xD9305b7E1135Fc09af1D325D538393A55029E0d8";
 
 // ⚠️ IMPORTANT: Add your Bot Wallets here (Base Sepolia Private Keys)
+// ⚠️ IMPORTANT: Use 10-20 different Wallets for organic look
 const PRIVATE_KEYS = [
-    "0xeca9a2554064c2a6f53f12c716046bbc8e64f3d242b0d4d15bc2fe0f8fe26503", // Example: Dev Wallet
-    // Add more for higher volume
+    "0xPRIVATE_KEY_1",
+    "0xPRIVATE_KEY_2",
+    "0xPRIVATE_KEY_3",
+    "0xPRIVATE_KEY_4",
+    "0xPRIVATE_KEY_5"
 ];
 
-const MIN_USDT = "5.0"; // Minimum USDT per trade
-const MAX_USDT = "20.0"; // Maximum USDT per trade
-const DELAY_MS = 30000;  // 30 seconds between trades
+const MIN_USDT = "2.0"; 
+const MAX_USDT = "15.0"; 
 
-// --- ABIs ---
-const BC_ABI = [
-    { name: 'buy', type: 'function', inputs: [{name:'limit',type:'uint256'},{name:'gold',type:'uint256'},{name:'ref',type:'address'}] },
-    { name: 'sell', type: 'function', inputs: [{name:'gold',type:'uint256'},{name:'min',type:'uint256'}] },
-    { name: 'getGoldOut', type: 'function', inputs: [{name:'c',type:'uint256'}], outputs: [{type:'uint256'}] }
-];
-
-const ERC20_ABI = [
-    { name: 'balanceOf', type: 'function', inputs: [{name:'a',type:'address'}], outputs: [{type:'uint256'}] },
-    { name: 'approve', type: 'function', inputs: [{name:'s',type:'address'},{name:'v',type:'uint256'}], outputs: [{type:'bool'}] }
-];
-
-const publicClient = createPublicClient({ chain: baseSepolia, transport: http(RPC_URL) });
-
-async function performTrade(pk) {
+async function performTrade() {
     try {
-        const account = privateKeyToAccount(pk);
+        // 1. Pick a RANDOM wallet from the list
+        const randomKey = PRIVATE_KEYS[Math.floor(Math.random() * PRIVATE_KEYS.length)];
+        const account = privateKeyToAccount(randomKey);
         const walletClient = createWalletClient({ account, chain: baseSepolia, transport: http(RPC_URL) });
         
-        console.log(`\n🤖 Bot Active: ${account.address.slice(0, 10)}...`);
+        console.log(`\n🕵️ Organic Trader: ${account.address.slice(0, 10)}...`);
 
-        // 1. Check Gold Balance to decide Buy or Sell
         const goldBal = await publicClient.readContract({
             address: GOLD_TOKEN, abi: ERC20_ABI, functionName: 'balanceOf', args: [account.address]
         });
 
-        // If no gold, must buy. If has gold, 60% chance to buy, 40% chance to sell.
-        const isBuy = goldBal === 0n || Math.random() > 0.4;
-        const usdtAmount = (Math.random() * (parseFloat(MAX_USDT) - parseFloat(MIN_USDT)) + parseFloat(MIN_USDT)).toFixed(2);
+        // 70% Buy / 30% Sell ratio to pump the chart
+        const isBuy = goldBal < parseUnits("0.1", 18) || Math.random() > 0.3;
         
         if (isBuy) {
+            // Random amount with decimal jitter
+            const usdtAmount = (Math.random() * (parseFloat(MAX_USDT) - parseFloat(MIN_USDT)) + parseFloat(MIN_USDT)).toFixed(6);
             const collateral = parseUnits(usdtAmount, 6);
-            // Calculate gold amount to buy
+            
             const goldToBuy = await publicClient.readContract({
                 address: BONDING_CURVE, abi: BC_ABI, functionName: 'getGoldOut', args: [collateral]
             });
 
-            console.log(`🟢 [BUY] Spending ${usdtAmount} USDT for ${formatUnits(goldToBuy, 18)} GOLD...`);
+            console.log(`🚀 [ORGANIC BUY] ${account.address.slice(0,6)} buying ${usdtAmount} USDT...`);
             
-            // Execute Buy
             const { request } = await publicClient.simulateContract({
                 account, address: BONDING_CURVE, abi: BC_ABI, functionName: 'buy',
-                args: [collateral, goldToBuy, "0x0000000000000000000000000000000000000000"]
+                args: [collateral, (goldToBuy * 95n) / 100n, "0x0000000000000000000000000000000000000000"]
             });
-            const hash = await walletClient.writeContract(request);
-            console.log(`✅ Buy Hash: ${hash}`);
+            await walletClient.writeContract(request);
 
         } else {
-            // Sell 20-50% of current gold balance
-            const sellAmount = (goldBal * BigInt(Math.floor(Math.random() * 30 + 20))) / 100n;
-            console.log(`🔴 [SELL] Selling ${formatUnits(sellAmount, 18)} GOLD...`);
+            // Sell a RANDOM portion (10% to 40%)
+            const sellPercent = Math.floor(Math.random() * 30 + 10);
+            const sellAmount = (goldBal * BigInt(sellPercent)) / 100n;
+            
+            console.log(`🔻 [ORGANIC SELL] ${account.address.slice(0,6)} selling ${sellPercent}%...`);
 
             const { request } = await publicClient.simulateContract({
                 account, address: BONDING_CURVE, abi: BC_ABI, functionName: 'sell',
-                args: [sellAmount, 0n] // No slippage limit for bot
+                args: [sellAmount, 0n]
             });
-            const hash = await walletClient.writeContract(request);
-            console.log(`✅ Sell Hash: ${hash}`);
+            await walletClient.writeContract(request);
         }
 
     } catch (e) {
-        console.error(`❌ Bot Error: ${e.shortMessage || e.message}`);
+        console.log(`⏳ Skipping... (Balance or Network issue)`);
     }
 }
 
 async function runLoop() {
-    console.log("🚀 Gold Chain Market Maker Bot Started!");
+    console.log("🔥 Banana Gun Style Volume Bot Active!");
     while (true) {
-        for (const pk of PRIVATE_KEYS) {
-            await performTrade(pk);
-            const wait = DELAY_MS + (Math.random() * 10000); // Random delay
-            console.log(`⏳ Waiting ${Math.floor(wait/1000)}s...`);
-            await new Promise(r => setTimeout(r, wait));
-        }
+        await performTrade();
+        // Random Delay between 15s to 90s
+        const wait = Math.floor(Math.random() * (90000 - 15000) + 15000);
+        console.log(`💤 Next organic trade in ${Math.floor(wait/1000)}s...`);
+        await new Promise(r => setTimeout(r, wait));
     }
 }
 
