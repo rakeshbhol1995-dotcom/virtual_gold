@@ -206,8 +206,11 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
   };
 
   const handleSwap = () => {
-    const safeSlippage = 10; 
-    const minOut = expectedOut ? (BigInt(expectedOut.toString()) * BigInt(Math.floor(1000 - (safeSlippage * 10)))) / 1000n : 0n;
+    // Convert slippage (e.g., 0.5%) to basis points of 1000 (e.g., 5)
+    // Formula: minOut = expectedOut * (1 - slippage/100)
+    // In basis points of 1000: minOut = expectedOut * (1000 - slippage*10) / 1000
+    const slippageBP = Math.floor(slippage * 10);
+    const minOut = expectedOut ? (BigInt(expectedOut.toString()) * BigInt(1000 - slippageBP)) / 1000n : 0n;
     const refAddr = referrer || '0x0000000000000000000000000000000000000000';
     
     if (isSelling) {
@@ -262,8 +265,30 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
                   <button onClick={() => setActiveTab('send')} className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${activeTab === 'send' ? 'bg-gold text-black shadow-[0_0_15px_rgba(251,191,36,0.3)]' : 'text-slate-500 hover:text-white'}`}>SEND</button>
                   <button onClick={() => setActiveTab('receive')} className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${activeTab === 'receive' ? 'bg-gold text-black shadow-[0_0_15px_rgba(251,191,36,0.3)]' : 'text-slate-500 hover:text-white'}`}>RECEIVE</button>
                 </div>
-                <div className="flex items-center gap-3 bg-black/40 p-1 rounded-xl border border-white/5">
-                   <span className="px-3 text-[9px] font-black text-slate-500 uppercase tracking-widest">Slippage: {slippage}%</span>
+                <div className="flex items-center gap-2 bg-black/40 p-1.5 rounded-2xl border border-white/10">
+                   <span className="px-2 text-[8px] font-black text-slate-500 uppercase tracking-widest hidden sm:block">Slippage</span>
+                   <div className="flex gap-1">
+                      {[0.5, 1.0, 3.0].map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => setSlippage(s)}
+                          className={`px-3 py-1.5 rounded-lg text-[9px] font-black transition-all ${
+                            slippage === s ? 'bg-gold text-black shadow-[0_0_10px_rgba(255,184,0,0.3)]' : 'text-slate-400 hover:text-white hover:bg-white/5'
+                          }`}
+                        >
+                          {s}%
+                        </button>
+                      ))}
+                      <div className="relative flex items-center ml-1">
+                        <input 
+                          type="number"
+                          value={slippage}
+                          onChange={(e) => setSlippage(Number(e.target.value))}
+                          className="w-12 bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-[9px] font-black text-white focus:outline-none focus:border-gold/50 text-center"
+                        />
+                        <span className="absolute right-1 text-[7px] text-slate-600">%</span>
+                      </div>
+                   </div>
                 </div>
               </div>
 
