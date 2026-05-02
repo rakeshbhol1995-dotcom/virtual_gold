@@ -1,32 +1,133 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { createChart, ColorType, IChartApi, ISeriesApi, Time } from 'lightweight-charts';
+
+interface CandleData {
+  time: Time;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+}
 
 export const TradingChart = () => {
+  const chartContainerRef = useRef<HTMLDivElement>(null);
+  const chartRef = useRef<IChartApi | null>(null);
+  const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
+  const dataRef = useRef<CandleData[]>([]);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  if (!isMounted) return <div className="h-[400px] w-full animate-pulse bg-white/5 rounded-2xl" />;
+  useEffect(() => {
+    if (!isMounted || !chartContainerRef.current) return;
 
-  // Using IFrame for 100% reliability in production
+    const el = chartContainerRef.current;
+
+    // Generate 60 days of realistic gold price data starting around $2300
+    const generateData = (): CandleData[] => {
+      const data: CandleData[] = [];
+      const now = Math.floor(Date.now() / 1000);
+      let price = 2300;
+      for (let i = 59; i >= 0; i--) {
+        const time = (now - i * 86400) as Time;
+        const open = price;
+        const change = (Math.random() - 0.46) * 18;
+        const close = Math.max(2100, open + change);
+        const high = Math.max(open, close) + Math.random() * 8;
+        const low = Math.min(open, close) - Math.random() * 8;
+        data.push({ time, open, high, low, close });
+        price = close;
+      }
+      return data;
+    };
+
+    const data = generateData();
+    dataRef.current = data;
+
+    const chart = createChart(el, {
+      layout: {
+        background: { type: ColorType.Solid, color: 'transparent' },
+        textColor: '#64748b',
+      },
+      grid: {
+        vertLines: { color: 'rgba(255,255,255,0.03)' },
+        horzLines: { color: 'rgba(255,255,255,0.03)' },
+      },
+      width: el.clientWidth,
+      height: el.clientHeight || 360,
+      timeScale: {
+        timeVisible: true,
+        secondsVisible: false,
+        borderColor: 'rgba(255,255,255,0.05)',
+      },
+      rightPriceScale: {
+        borderColor: 'rgba(255,255,255,0.05)',
+      },
+      crosshair: {
+        vertLine: { color: 'rgba(255,184,0,0.3)', labelBackgroundColor: '#FFB800' },
+        horzLine: { color: 'rgba(255,184,0,0.3)', labelBackgroundColor: '#FFB800' },
+      },
+    });
+
+    const series = chart.addCandlestickSeries({
+      upColor: '#FFB800',
+      downColor: '#ef4444',
+      borderVisible: false,
+      wickUpColor: '#FFB800',
+      wickDownColor: '#ef4444',
+    });
+
+    series.setData(data);
+    chart.timeScale().fitContent();
+
+    chartRef.current = chart;
+    seriesRef.current = series;
+
+    // Resize handler
+    const handleResize = () => {
+      if (el) chart.applyOptions({ width: el.clientWidth, height: el.clientHeight || 360 });
+    };
+    window.addEventListener('resize', handleResize);
+
+    // Live price simulation every 3 seconds
+    const interval = setInterval(() => {
+      if (!seriesRef.current) return;
+      const last = dataRef.current[dataRef.current.length - 1];
+      const now = Math.floor(Date.now() / 1000) as Time;
+      const change = (Math.random() - 0.45) * 6;
+      const newClose = Math.max(2100, last.close + change);
+      const newCandle: CandleData = {
+        time: now,
+        open: last.close,
+        high: Math.max(last.close, newClose) + Math.random() * 3,
+        low: Math.min(last.close, newClose) - Math.random() * 3,
+        close: newClose,
+      };
+      seriesRef.current.update(newCandle);
+      dataRef.current[dataRef.current.length - 1] = newCandle;
+    }, 3000);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('resize', handleResize);
+      chart.remove();
+    };
+  }, [isMounted]);
+
+  if (!isMounted) {
+    return <div className="w-full h-full animate-pulse bg-white/5 rounded-xl" />;
+  }
+
   return (
-    <div className="w-full h-[450px] bg-[#020617] rounded-xl overflow-hidden border border-white/5 shadow-2xl relative">
-      <iframe
-        id="tradingview_gold"
-        src={`https://s.tradingview.com/widgetembed/?frameElementId=tradingview_gold&symbol=OANDA%3AXAUUSD&interval=D&hidesidetoolbar=1&hidetoptoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%5D&theme=dark&style=1&timezone=Etc%2FUTC&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=en&utm_source=virtualgold.org&utm_medium=widget&utm_campaign=chart&utm_term=OANDA%3AXAUUSD`}
-        style={{ width: '100%', height: '100%', border: 'none' }}
-        allowFullScreen
-      />
-      
-      {/* Live Label Overlay */}
-      <div className="absolute top-4 left-4 pointer-events-none flex gap-2">
-         <div className="bg-emerald-500/10 backdrop-blur-md border border-emerald-500/20 px-3 py-1 rounded-full flex items-center gap-1.5">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-black text-emerald-400 tracking-widest uppercase">Live Market</span>
-         </div>
+    <div className="w-full h-full relative">
+      <div ref={chartContainerRef} className="w-full h-full" />
+      <div className="absolute top-2 right-2 pointer-events-none flex items-center gap-1.5 px-3 py-1 bg-gold/10 border border-gold/20 rounded-full">
+        <div className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
+        <span className="text-[9px] font-black text-gold tracking-widest uppercase">Live Pulse</span>
       </div>
     </div>
   );
