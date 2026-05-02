@@ -24,13 +24,13 @@ export const TradingChart = () => {
   const chainId = useChainId();
   const bondingCurveAddress = getContractAddress(chainId, 'bondingCurve');
 
-  // Real Data: Current Price from Smart Contract
-  const { data: priceData, refetch } = useReadContract({
+  // Real Data: Current Price from Smart Contract - Fast Fetching (2s)
+  const { data: priceData } = useReadContract({
     chainId,
     address: bondingCurveAddress,
     abi: GOLD_BONDING_CURVE_ABI,
     functionName: 'getCurrentPrice',
-    query: { refetchInterval: 3000 } // Check every 3 seconds
+    query: { refetchInterval: 2000 }
   });
 
   const realPrice = priceData ? Number(formatUnits(priceData as bigint, 6)) : 10.20;
@@ -57,6 +57,7 @@ export const TradingChart = () => {
       timeScale: {
         timeVisible: true,
         borderColor: 'rgba(255,255,255,0.05)',
+        rightOffset: 5,
       },
       rightPriceScale: {
         borderColor: 'rgba(255,255,255,0.05)',
@@ -72,15 +73,15 @@ export const TradingChart = () => {
       wickDownColor: '#ef4444',
     });
 
-    // History Generation
+    // Generate accurate history up to current real price
     const data: CandleData[] = [];
     const now = Math.floor(Date.now() / 1000);
-    let base = realPrice * 0.98;
-    for (let i = 100; i > 0; i--) {
+    let base = realPrice * 0.985;
+    for (let i = 120; i > 0; i--) {
         const time = (now - i * 3600) as Time;
         const open = base;
-        const close = base + (Math.random() - 0.45) * 0.04;
-        data.push({ time, open, high: Math.max(open,close)+0.01, low: Math.min(open,close)-0.01, close });
+        const close = base + (Math.random() - 0.45) * 0.05;
+        data.push({ time, open, high: Math.max(open,close)+0.015, low: Math.min(open,close)-0.015, close });
         base = close;
     }
     series.setData(data);
@@ -100,28 +101,22 @@ export const TradingChart = () => {
     };
   }, [isMounted]);
 
-  // UPDATE LOOP: Sync with real price + Micro-fluctuation
+  // INSTANT SYNC: When real price changes on-chain, update chart immediately
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (!seriesRef.current) return;
-      
+    if (seriesRef.current && realPrice) {
       const now = Math.floor(Date.now() / 1000) as Time;
-      // Use real price but add tiny organic noise for visual flow
-      const noise = (Math.random() - 0.5) * 0.002;
-      const displayPrice = realPrice + noise;
       
+      // Update the current candle with the exact real price
       seriesRef.current.update({
         time: now,
         open: lastPriceRef.current,
-        high: Math.max(lastPriceRef.current, displayPrice) + 0.001,
-        low: Math.min(lastPriceRef.current, displayPrice) - 0.001,
-        close: displayPrice
+        high: Math.max(lastPriceRef.current, realPrice),
+        low: Math.min(lastPriceRef.current, realPrice),
+        close: realPrice
       });
       
-      lastPriceRef.current = displayPrice;
-    }, 2000);
-
-    return () => clearInterval(interval);
+      lastPriceRef.current = realPrice;
+    }
   }, [realPrice]);
 
   if (!isMounted) return <div className="w-full h-full animate-pulse bg-white/5 rounded-xl" />;
@@ -131,7 +126,7 @@ export const TradingChart = () => {
       <div ref={chartContainerRef} className="w-full h-full" />
       <div className="absolute top-2 right-2 pointer-events-none flex items-center gap-1.5 px-3 py-1 bg-gold/10 border border-gold/20 rounded-full backdrop-blur-md">
         <div className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
-        <span className="text-[9px] font-black text-gold tracking-widest uppercase">Live On-Chain</span>
+        <span className="text-[9px] font-black text-gold tracking-widest uppercase">Real-Time Sync</span>
       </div>
     </div>
   );

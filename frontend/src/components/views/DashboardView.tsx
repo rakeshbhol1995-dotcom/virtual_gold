@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, Users, Activity, Wallet, ShieldCheck, Zap, Globe, ArrowUpRight, Crown, Star } from 'lucide-react';
 import { TradingChart } from '@/components/ui/TradingChart';
 import { ActivityScanner } from '@/components/ui/ActivityScanner';
@@ -28,6 +28,9 @@ export const DashboardView = () => {
   const chainId = useChainId();
   const tokenAddress = getContractAddress(chainId, 'goldToken');
   const bondingCurveAddress = getContractAddress(chainId, 'bondingCurve');
+  
+  const [priceColor, setPriceColor] = useState('text-white');
+  const prevPriceRef = useRef<number>(0);
 
   // Real Data: Current Price
   const { data: priceData } = useReadContract({
@@ -35,8 +38,25 @@ export const DashboardView = () => {
     address: bondingCurveAddress,
     abi: GOLD_BONDING_CURVE_ABI,
     functionName: 'getCurrentPrice',
-    query: { refetchInterval: 5000 }
+    query: { refetchInterval: 2000 }
   });
+
+  // Price Flicker Logic
+  useEffect(() => {
+    if (priceData) {
+      const current = Number(formatUnits(priceData as bigint, 6));
+      if (prevPriceRef.current !== 0) {
+        if (current > prevPriceRef.current) {
+          setPriceColor('text-emerald-400 scale-110');
+          setTimeout(() => setPriceColor('text-white'), 1000);
+        } else if (current < prevPriceRef.current) {
+          setPriceColor('text-rose-500 scale-110');
+          setTimeout(() => setPriceColor('text-white'), 1000);
+        }
+      }
+      prevPriceRef.current = current;
+    }
+  }, [priceData]);
 
   // Real Data: Total Supply
   const { data: totalSupply } = useReadContract({
@@ -47,7 +67,7 @@ export const DashboardView = () => {
     query: { refetchInterval: 10000 }
   });
 
-  // Real Data: TVL (Reserve) - Fetching direct USDT balance of contract as backup
+  // Real Data: TVL (Reserve)
   const { data: tvlData, isLoading: isTVLLoading } = useReadContract({
     chainId,
     address: getContractAddress(chainId, 'collateralToken'),
@@ -72,7 +92,7 @@ export const DashboardView = () => {
   const marketCap = priceData && totalSupply ? (Number(formatUnits(priceData as bigint, 6)) * Number(formatUnits(totalSupply as bigint, 18))).toLocaleString() : '0';
 
   const stats = [
-    { label: 'Gold Price (Grams)', value: priceData ? `$${currentPrice}` : '...', change: 'LIVE', icon: <Zap className="text-gold" />, color: 'gold' },
+    { label: 'Gold Price (Grams)', value: priceData ? `$${currentPrice}` : '...', change: 'LIVE', icon: <Zap className="text-gold" />, color: 'gold', customClass: priceColor },
     { label: 'Total Holders', value: isHoldersLoading ? '...' : (holdersCount ? String(holdersCount) : '1'), change: 'Network', icon: <Users className="text-emerald-400" />, color: 'emerald' },
     { label: 'Market Cap', value: totalSupply ? `$${marketCap}` : '...', change: 'Base Network', icon: <Globe className="text-blue-400" />, color: 'blue' },
     { label: 'Protocol TVL', value: isTVLLoading ? '...' : `$${tvlFormatted}`, change: 'USDT', icon: <ShieldCheck className="text-gold" />, color: 'gold' },
@@ -100,7 +120,9 @@ export const DashboardView = () => {
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">{stat.label}</span>
                </div>
                <div className="flex items-end justify-between">
-                  <h3 className="text-2xl font-black text-white tracking-tight">{stat.value}</h3>
+                  <h3 className={`text-2xl font-black tracking-tight transition-all duration-300 ${stat.customClass || 'text-white'}`}>
+                    {stat.value}
+                  </h3>
                   <span className={`text-[10px] font-black px-2 py-1 rounded-full bg-white/5 ${stat.color === 'gold' ? 'text-gold' : 'text-emerald-400'}`}>
                      {stat.change}
                   </span>
