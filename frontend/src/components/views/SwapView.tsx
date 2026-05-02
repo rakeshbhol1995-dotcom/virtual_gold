@@ -58,7 +58,7 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
   const { data: totalSupply } = useReadContract({
     chainId: chainId || 84532,
     address: goldTokenAddress,
-    abi: ERC20_ABI,
+    abi: parseAbi(ERC20_ABI),
     functionName: 'totalSupply',
     query: { refetchInterval: 1000 }
   });
@@ -66,7 +66,7 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
   const { data: priceData } = useReadContract({
     chainId: chainId || 84532,
     address: bondingCurveAddress,
-    abi: GOLD_BONDING_CURVE_ABI,
+    abi: parseAbi(GOLD_BONDING_CURVE_ABI),
     functionName: 'getCurrentPrice',
     query: { refetchInterval: 1000 }
   });
@@ -74,7 +74,7 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
   const { data: usdtBalance, refetch: refetchUsdtBalance } = useReadContract({
     chainId: chainId || 84532,
     address: collateralTokenAddress,
-    abi: ERC20_ABI,
+    abi: parseAbi(ERC20_ABI),
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
     query: { enabled: !!address, refetchInterval: 1000 }
@@ -83,7 +83,7 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
   const { data: goldBalance, refetch: refetchGoldBalance } = useReadContract({
     chainId: chainId || 84532,
     address: goldTokenAddress,
-    abi: ERC20_ABI,
+    abi: parseAbi(ERC20_ABI),
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
     query: { enabled: !!address, refetchInterval: 1000 }
@@ -92,7 +92,7 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
   const { data: usdtAllowance, refetch: refetchUsdtAllowance } = useReadContract({
     chainId: chainId || 84532,
     address: collateralTokenAddress,
-    abi: ERC20_ABI,
+    abi: parseAbi(ERC20_ABI),
     functionName: 'allowance',
     args: address ? [address, bondingCurveAddress] : undefined,
     query: { enabled: !!address, refetchInterval: 1000 }
@@ -101,7 +101,7 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
   const { data: goldAllowance, refetch: refetchGoldAllowance } = useReadContract({
     chainId: chainId || 84532,
     address: goldTokenAddress,
-    abi: ERC20_ABI,
+    abi: parseAbi(ERC20_ABI),
     functionName: 'allowance',
     args: address ? [address, bondingCurveAddress] : undefined,
     query: { enabled: !!address, refetchInterval: 1000 }
@@ -112,7 +112,7 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
   const { data: totalTVL } = useReadContract({
     chainId: chainId || 84532,
     address: collateralTokenAddress,
-    abi: ERC20_ABI,
+    abi: parseAbi(ERC20_ABI),
     functionName: 'balanceOf',
     args: [bondingCurveAddress],
     query: { refetchInterval: 1000 }
@@ -121,7 +121,7 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
   const { data: expectedOut, isFetching: isFetchingExpected, error: expectedError, refetch: refetchExpected } = useReadContract({
     chainId: chainId || 84532,
     address: bondingCurveAddress,
-    abi: GOLD_BONDING_CURVE_ABI,
+    abi: parseAbi(GOLD_BONDING_CURVE_ABI),
     functionName: isSelling ? 'getSellProceeds' : 'getGoldOut',
     args: amount && !isNaN(Number(amount)) && Number(amount) > 0 ? [parseUnits(amount, isSelling ? 18 : 6)] : undefined,
     query: { 

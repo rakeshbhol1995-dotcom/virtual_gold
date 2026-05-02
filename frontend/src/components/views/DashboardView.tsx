@@ -8,7 +8,7 @@ import { ActivityScanner } from '@/components/ui/ActivityScanner';
 import { HoldersView } from '@/components/views/HoldersView';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { useReadContract, useChainId } from 'wagmi';
-import { formatUnits } from 'viem';
+import { formatUnits, parseAbi } from 'viem';
 import { getContractAddress, ERC20_ABI, GOLD_BONDING_CURVE_ABI } from '@/constants/contracts';
 
 const container = {
@@ -35,8 +35,7 @@ export const DashboardView = () => {
   // Real Data: Current Price
   const { data: priceData } = useReadContract({
     chainId,
-    address: bondingCurveAddress,
-    abi: GOLD_BONDING_CURVE_ABI,
+    abi: parseAbi(GOLD_BONDING_CURVE_ABI),
     functionName: 'getCurrentPrice',
     query: { refetchInterval: 2000 }
   });
@@ -62,35 +61,32 @@ export const DashboardView = () => {
   const { data: totalSupply } = useReadContract({
     chainId,
     address: tokenAddress,
-    abi: ERC20_ABI,
+    abi: parseAbi(ERC20_ABI),
     functionName: 'totalSupply',
-    query: { refetchInterval: 10000 }
+    query: { refetchInterval: 5000 }
   });
 
   // Real Data: TVL (Reserve)
   const { data: tvlData, isLoading: isTVLLoading } = useReadContract({
     chainId,
-    address: getContractAddress(chainId, 'collateralToken'),
-    abi: ERC20_ABI,
+    abi: parseAbi(ERC20_ABI),
     functionName: 'balanceOf',
     args: [bondingCurveAddress],
-    query: { refetchInterval: 10000 }
+    query: { refetchInterval: 5000 }
   });
 
   // Real Data: Holders Count
   const { data: holdersCount, isLoading: isHoldersLoading } = useReadContract({
     chainId,
-    address: bondingCurveAddress,
-    abi: GOLD_BONDING_CURVE_ABI,
+    abi: parseAbi(GOLD_BONDING_CURVE_ABI),
     functionName: 'getHoldersCount',
-    query: { refetchInterval: 10000 }
+    query: { refetchInterval: 5000 }
   });
 
   // Real Data: Total Volume
   const { data: totalVolumeData, isLoading: isVolumeLoading } = useReadContract({
     chainId,
-    address: bondingCurveAddress,
-    abi: GOLD_BONDING_CURVE_ABI,
+    abi: parseAbi(GOLD_BONDING_CURVE_ABI),
     functionName: 'totalVolume',
     query: { refetchInterval: 3000 }
   });
