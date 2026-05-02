@@ -33,14 +33,20 @@ const item = {
 };
 
 const PLANETS = [
-  { name: 'Mercury', color: '#A5A5A5', size: 8, orbit: 80, speed: 12 },
-  { name: 'Venus', color: '#E3BB76', size: 12, orbit: 110, speed: 20 },
-  { name: 'Earth', color: '#2271B3', size: 14, orbit: 150, speed: 28 },
-  { name: 'Mars', color: '#E27B58', size: 12, orbit: 190, speed: 35 },
-  { name: 'Jupiter', color: '#D39C7E', size: 22, orbit: 250, speed: 50 },
+  { name: 'Mercury', color: '#A5A5A5', size: 8, orbit: 70, speed: 12 },
+  { name: 'Venus', color: '#E3BB76', size: 12, orbit: 100, speed: 20 },
+  { name: 'Earth', color: '#2271B3', size: 14, orbit: 140, speed: 28 },
+  { name: 'Mars', color: '#E27B58', size: 12, orbit: 180, speed: 35 },
+  { name: 'Jupiter', color: '#D39C7E', size: 22, orbit: 230, speed: 50 },
 ];
 
-const TICKER_TEXT = "SMALL INVESTMENT, BIG GROWTH • 21 MILLION CAP • 100% SOLVENCY • MATHEMATICAL SCARCITY • BASE NETWORK • ";
+const FLOATING_WORDS = [
+  { text: "Small Investment", top: '20%', left: '15%' },
+  { text: "Big Growth", top: '15%', left: '75%' },
+  { text: "21 Million Cap", top: '70%', left: '80%' },
+  { text: "100% Solvency", top: '75%', left: '20%' },
+  { text: "Mathematical Scarcity", top: '45%', left: '85%' }
+];
 
 export const DashboardView = () => {
   const chainId = useChainId();
@@ -82,37 +88,92 @@ export const DashboardView = () => {
       animate="show"
       className="space-y-6 md:space-y-10 pb-20 px-2"
     >
-      {/* 🌌 COMPACT SOLAR SYSTEM HERO 🌌 */}
+      {/* 🌌 PREMIUM SOLAR SYSTEM HERO WITH FLOATING KEYWORDS 🌌 */}
       <motion.div variants={item} className="relative">
-        <div className="relative overflow-hidden bg-slate-950 border border-white/10 rounded-[3rem] min-h-[550px] md:min-h-[600px] flex flex-col items-center justify-center group shadow-2xl">
-            {/* Background Effects */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-gold/5 via-transparent to-purple-500/5 pointer-events-none" />
-            
-            {/* SOLAR SYSTEM CONTAINER (RESIZED) */}
-            <div className="relative w-full h-[450px] flex items-center justify-center scale-[0.7] sm:scale-90 md:scale-100 transition-transform duration-700">
+        <div className="relative overflow-hidden bg-slate-950 border border-gold/20 rounded-[3rem] min-h-[550px] md:min-h-[650px] flex items-center justify-center group shadow-2xl">
+            {/* Space Background Layer */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,184,0,0.05)_0%,transparent_70%)] pointer-events-none" />
+            <div className="absolute inset-0 opacity-20 pointer-events-none">
+                {[...Array(60)].map((_, i) => (
+                    <motion.div 
+                        key={i} 
+                        animate={{ opacity: [0.1, 0.6, 0.1] }}
+                        transition={{ duration: 2 + Math.random() * 2, repeat: Infinity }}
+                        className="absolute w-0.5 h-0.5 bg-white rounded-full" 
+                        style={{ top: `${Math.random()*100}%`, left: `${Math.random()*100}%` }} 
+                    />
+                ))}
+            </div>
+
+            {/* ✨ FLOATING "MAST" KEYWORDS ✨ */}
+            <div className="absolute inset-0 pointer-events-none z-40">
+                {FLOATING_WORDS.map((word, i) => (
+                    <motion.div 
+                        key={i}
+                        initial={{ opacity: 0 }}
+                        animate={{ 
+                            opacity: [0.4, 0.8, 0.4],
+                            y: [0, -20, 0],
+                            x: [0, (i % 2 === 0 ? 10 : -10), 0]
+                        }}
+                        transition={{ 
+                            duration: 5 + i, 
+                            repeat: Infinity, 
+                            ease: "easeInOut"
+                        }}
+                        className="absolute hidden md:block"
+                        style={{ top: word.top, left: word.left }}
+                    >
+                        <div className="flex flex-col items-center">
+                            <span className="text-[10px] font-black text-gold uppercase tracking-[0.3em] drop-shadow-[0_0_10px_rgba(255,215,0,0.5)]">
+                                {word.text}
+                            </span>
+                            <motion.div 
+                                animate={{ scaleX: [0, 1, 0] }}
+                                transition={{ duration: 4, repeat: Infinity }}
+                                className="w-full h-[1px] bg-gold/30 mt-1"
+                            />
+                        </div>
+                    </motion.div>
+                ))}
+            </div>
+
+            {/* SOLAR SYSTEM (OPTIMIZED SIZE) */}
+            <div className="relative w-full h-full flex items-center justify-center scale-[0.7] sm:scale-85 md:scale-[0.9] lg:scale-100 transition-all duration-700">
                 
                 {/* ☀️ BURNING GOLD SUN */}
-                <motion.div whileHover="hover" className="relative z-30 group/sun">
+                <motion.div whileHover="hover" className="relative z-30 group/sun cursor-pointer">
                     {[...Array(3)].map((_, i) => (
                         <motion.div 
                             key={i}
-                            animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3], rotate: 360 }}
-                            transition={{ duration: 5 + i, repeat: Infinity, ease: "linear" }}
-                            className={`absolute inset-0 rounded-full blur-2xl ${i === 0 ? 'bg-orange-500' : i === 1 ? 'bg-red-500' : 'bg-gold'}`}
-                            style={{ margin: `-${i * 8}px` }}
+                            animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.5, 0.2], rotate: 360 }}
+                            transition={{ duration: 6 + i, repeat: Infinity, ease: "linear" }}
+                            className={`absolute inset-0 rounded-full blur-[30px] md:blur-[50px] ${i === 0 ? 'bg-orange-600' : i === 1 ? 'bg-red-500' : 'bg-gold'}`}
+                            style={{ margin: `-${i * 12}px` }}
                         />
                     ))}
+
+                    <motion.div 
+                        variants={{ hover: { scale: 1.6, opacity: 1 } }}
+                        initial={{ opacity: 0, scale: 0 }}
+                        className="absolute inset-0 z-50 pointer-events-none"
+                    >
+                        <ZapIcon className="absolute -top-12 left-1/2 -translate-x-1/2 text-white w-10 h-10 animate-pulse drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]" />
+                    </motion.div>
                     
                     <motion.div 
                         animate={{ scale: [1, 1.05, 1] }}
                         transition={{ duration: 3, repeat: Infinity }}
-                        className="relative w-24 h-24 md:w-32 md:h-32 bg-gradient-to-tr from-yellow-700 via-gold to-yellow-200 rounded-full flex items-center justify-center border-4 border-yellow-200/20 shadow-2xl"
+                        className="relative w-28 h-28 md:w-40 md:h-40 bg-gradient-to-tr from-yellow-700 via-gold to-yellow-200 rounded-full flex items-center justify-center border-[6px] border-yellow-200/20 shadow-[0_0_60px_rgba(255,215,0,0.4)]"
                     >
-                        <span className="text-xl md:text-2xl font-black text-white italic drop-shadow-xl">GOLD</span>
+                        <div className="text-center">
+                            <span className="block text-2xl md:text-3xl font-black text-white italic drop-shadow-2xl">GOLD</span>
+                            <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mt-1" />
+                        </div>
                     </motion.div>
                 </motion.div>
 
-                {/* 🪐 ORBITING PLANETS (COMPACT) */}
+                {/* 🪐 ORBITING PLANETS */}
                 {PLANETS.map((planet, i) => (
                     <div 
                         key={planet.name}
@@ -129,17 +190,17 @@ export const DashboardView = () => {
                                 style={{ top: '50%', left: '100%', transform: 'translate(-50%, -50%)' }}
                             >
                                 <motion.div 
-                                    whileHover={{ scale: 1.5 }}
-                                    className="rounded-full shadow-2xl border border-white/20"
+                                    whileHover={{ scale: 1.8 }}
+                                    className="rounded-full shadow-2xl border border-white/30"
                                     style={{ 
                                         width: planet.size, 
                                         height: planet.size, 
                                         backgroundColor: planet.color,
-                                        boxShadow: `0 0 15px ${planet.color}40`
+                                        boxShadow: `0 0 20px ${planet.color}80`
                                     }}
                                 />
-                                <div className="absolute top-full mt-2 opacity-0 group-hover/planet:opacity-100 transition-all">
-                                    <span className="text-[8px] font-black text-white bg-black/90 px-2 py-0.5 rounded border border-gold/40 whitespace-nowrap uppercase tracking-tighter">
+                                <div className="absolute top-full mt-3 opacity-0 group-hover/planet:opacity-100 transition-all scale-75 group-hover/planet:scale-100">
+                                    <span className="text-[9px] font-black text-white bg-black/95 px-3 py-1 rounded-full border border-gold/40 shadow-2xl whitespace-nowrap uppercase tracking-widest">
                                         {planet.name}
                                     </span>
                                 </div>
@@ -149,84 +210,46 @@ export const DashboardView = () => {
                 ))}
             </div>
 
-            {/* 🎞️ BOTTOM SCROLLING TICKER 🎞️ */}
-            <div className="absolute bottom-0 left-0 right-0 h-16 bg-gold/10 backdrop-blur-md border-t border-gold/20 flex items-center overflow-hidden">
+            {/* 👑 BOTTOM BRANDING OVERLAY (NEW) 👑 */}
+            <div className="absolute bottom-10 left-0 right-0 flex flex-col items-center z-50">
                 <motion.div 
-                    animate={{ x: [0, -1000] }}
-                    transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-                    className="flex whitespace-nowrap"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center gap-4 bg-black/40 backdrop-blur-xl border border-white/10 px-8 py-4 rounded-[2rem] shadow-2xl"
                 >
-                    {[...Array(4)].map((_, i) => (
-                        <span key={i} className="text-[12px] md:text-sm font-black text-gold uppercase tracking-[0.3em] px-4">
-                            {TICKER_TEXT}
-                        </span>
-                    ))}
+                    <div className="text-center md:text-left">
+                        <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter uppercase italic leading-none">
+                            GOLD <span className="text-gold">CHAIN</span>
+                        </h1>
+                        <p className="text-[8px] md:text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mt-1">Mathematical Galaxy Standard</p>
+                    </div>
+                    <div className="w-[1px] h-10 bg-white/10 hidden md:block mx-2" />
+                    <button className="hidden md:block px-8 py-3 bg-gold text-black rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_0_30px_rgba(255,215,0,0.3)]">Launch App</button>
                 </motion.div>
-            </div>
-
-            {/* BRANDING OVERLAY */}
-            <div className="absolute top-10 left-10 z-30 hidden md:block">
-                <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic">
-                    GOLD <span className="text-gold">CHAIN</span>
-                </h1>
-                <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.5em] mt-1">Galaxy Standard</p>
             </div>
         </div>
       </motion.div>
 
       {/* STATS GRID */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        {/* PRICE CARD */}
-        <motion.div variants={item}>
-            <GlassCard className="p-6 md:p-8 border-white/10 bg-slate-900/40 hover:border-gold transition-all duration-500">
+        {/* STAT CARDS REMAIN THE SAME BUT WITH REFINED BORDERS */}
+        {[{ label: 'Market Price', value: `$${currentPrice}`, icon: <Activity className="text-gold" />, border: 'border-gold/20' },
+          { label: 'Protocol Reserve', value: `$${formattedTVL}`, icon: <ShieldCheck className="text-emerald-400" />, border: 'border-emerald-500/20' },
+          { label: 'Total Volume', value: `$${formattedVolume}`, icon: <TrendingUp className="text-blue-400" />, border: 'border-blue-500/20' },
+          { label: 'Total Pioneers', value: holdersCount?.toString() || '1', icon: <Users className="text-white" />, border: 'border-white/10' }
+        ].map((stat, i) => (
+          <motion.div key={i} variants={item}>
+            <GlassCard className={`p-6 md:p-8 ${stat.border} bg-slate-900/40 hover:bg-white/[0.03] transition-all duration-500 group relative overflow-hidden`}>
                 <div className="flex items-center justify-between mb-6">
-                    <div className="p-3 bg-gold/10 rounded-xl border border-gold/20">
-                        <Activity className="w-6 h-6 text-gold" />
+                    <div className="p-3 md:p-4 bg-white/5 rounded-2xl border border-white/10 group-hover:scale-110 transition-transform">
+                        {stat.icon}
                     </div>
                 </div>
-                <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-1 text-left">Market Price</h3>
-                <div className="text-2xl md:text-4xl font-black text-white tracking-tighter text-left">${currentPrice}</div>
+                <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-1 text-left">{stat.label}</h3>
+                <div className="text-2xl md:text-4xl font-black text-white tracking-tighter text-left">{stat.value}</div>
             </GlassCard>
-        </motion.div>
-
-        {/* RESERVE CARD */}
-        <motion.div variants={item}>
-            <GlassCard className="p-6 md:p-8 border-emerald-500/20 bg-slate-900/40 hover:bg-emerald-500/5 transition-all">
-                <div className="flex items-center justify-between mb-6">
-                    <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-                        <ShieldCheck className="w-6 h-6 text-emerald-400" />
-                    </div>
-                </div>
-                <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-1 text-left">Protocol Reserve</h3>
-                <div className="text-2xl md:text-4xl font-black text-white tracking-tighter text-left">${formattedTVL}</div>
-            </GlassCard>
-        </motion.div>
-
-        {/* VOLUME CARD */}
-        <motion.div variants={item}>
-            <GlassCard className="p-6 md:p-8 border-white/10 bg-slate-900/40 hover:border-blue-400 transition-all">
-                <div className="flex items-center justify-between mb-6">
-                    <div className="p-3 bg-blue-500/10 rounded-xl border border-blue-500/20">
-                        <TrendingUp className="w-6 h-6 text-blue-400" />
-                    </div>
-                </div>
-                <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-1 text-left">Total Volume</h3>
-                <div className="text-2xl md:text-4xl font-black text-white tracking-tighter text-left">${formattedVolume}</div>
-            </GlassCard>
-        </motion.div>
-
-        {/* HOLDERS CARD */}
-        <motion.div variants={item}>
-            <GlassCard className="p-6 md:p-8 border-white/10 bg-slate-900/40 hover:border-white transition-all">
-                <div className="flex items-center justify-between mb-6">
-                    <div className="p-3 bg-white/5 rounded-xl border border-white/10">
-                        <Users className="w-6 h-6 text-white" />
-                    </div>
-                </div>
-                <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-1 text-left">Total Pioneers</h3>
-                <div className="text-2xl md:text-4xl font-black text-white tracking-tighter text-left">{holdersCount?.toString() || '1'}</div>
-            </GlassCard>
-        </motion.div>
+          </motion.div>
+        ))}
       </div>
     </motion.div>
   );
