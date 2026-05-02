@@ -29,7 +29,7 @@ const container = {
   }
 };
 
-const cinematicReveal = {
+const straightCinematic = {
   hidden: { opacity: 0, y: 30, letterSpacing: '0.4em' },
   show: { 
     opacity: 1, 
@@ -94,91 +94,79 @@ export const DashboardView = () => {
       animate="show"
       className="space-y-24 pb-40 px-4 pt-10"
     >
-      {/* 🌌 HERO SECTION: GOLDEN SOLAR SYSTEM WITH TWINKLING STARS 🌌 */}
-      <motion.div variants={cinematicReveal} className="relative">
+      {/* 🌌 HERO SECTION: GOLDEN SINGULARITY WITH STARS 🌌 */}
+      <motion.div variants={straightCinematic} className="relative">
         <div className="relative overflow-hidden bg-slate-950/95 border border-gold/30 rounded-[4rem] min-h-[700px] md:min-h-[850px] flex items-center justify-center group shadow-2xl">
             
-            {/* ✨ TWINKLING STARS BACKGROUND ✨ */}
+            {/* ✨ TWINKLING STARS ✨ */}
             <div className="absolute inset-0 pointer-events-none">
-                {[...Array(50)].map((_, i) => (
+                {[...Array(60)].map((_, i) => (
                     <motion.div
                         key={i}
-                        animate={{ 
-                            opacity: [0.1, 0.8, 0.1],
-                            scale: [1, 1.2, 1]
-                        }}
-                        transition={{ 
-                            duration: 2 + Math.random() * 3, 
-                            repeat: Infinity, 
-                            delay: Math.random() * 5 
-                        }}
+                        animate={{ opacity: [0.1, 0.7, 0.1], scale: [1, 1.2, 1] }}
+                        transition={{ duration: 2 + Math.random() * 3, repeat: Infinity, delay: Math.random() * 5 }}
                         className="absolute w-1 h-1 bg-white rounded-full shadow-[0_0_10px_white]"
-                        style={{ 
-                            top: `${Math.random() * 100}%`, 
-                            left: `${Math.random() * 100}%` 
-                        }}
+                        style={{ top: `${Math.random() * 100}%`, left: `${Math.random() * 100}%` }}
                     />
                 ))}
             </div>
 
-            {/* Cinematic Branding */}
+            {/* BRANDING */}
             <div className="absolute top-20 text-center z-50">
-                <h2 className="text-4xl md:text-7xl font-black tracking-[0.2em] uppercase leading-tight text-transparent bg-clip-text bg-gradient-to-b from-gold via-yellow-100 to-yellow-600">
+                <motion.h2 variants={straightCinematic} className="text-4xl md:text-8xl font-black tracking-[0.3em] uppercase leading-tight text-transparent bg-clip-text bg-gradient-to-b from-gold via-yellow-100 to-yellow-600 drop-shadow-[0_0_20px_rgba(255,215,0,0.3)]">
                     GOLD CHAIN
-                </h2>
-                <p className="text-[10px] md:text-xs font-black text-gold/40 uppercase tracking-[1em] mt-8">Galaxy Protocol V2.0</p>
+                </motion.h2>
+                <motion.p variants={straightCinematic} className="text-[10px] md:text-xs font-black text-gold/40 uppercase tracking-[1em] mt-8">Mathematical Singularity Protocol</motion.p>
             </div>
 
-            {/* SOLAR SINGULARITY ANIMATION */}
+            {/* 🌟 RESTORED GOLDEN SINGULARITY DESIGN 🌟 */}
             <div className="relative w-full h-full flex items-center justify-center scale-75 md:scale-90 lg:scale-100">
                 <motion.div className="relative z-30">
-                    {[...Array(4)].map((_, i) => (
+                    {[...Array(5)].map((_, i) => (
                         <motion.div 
                             key={i}
-                            animate={{ scale: [1, 1.4, 1], opacity: [0.05, 0.2, 0.05], rotate: 360 }}
-                            transition={{ duration: 6 + i, repeat: Infinity, ease: "linear" }}
-                            className={`absolute inset-0 rounded-full blur-[80px] ${i % 2 === 0 ? 'bg-yellow-600' : 'bg-gold'}`}
-                            style={{ margin: `-${i * 20}px` }}
+                            animate={{ scale: [1, 1.5, 1], opacity: [0.05, 0.2, 0.05] }}
+                            transition={{ duration: 4 + i, repeat: Infinity }}
+                            className="absolute inset-0 rounded-full bg-gold blur-[80px]"
+                            style={{ margin: `-${i * 30}px` }}
                         />
                     ))}
                     <motion.div 
-                        animate={{ scale: [1, 1.05, 1] }}
-                        transition={{ duration: 3, repeat: Infinity }}
-                        className="relative w-40 h-40 md:w-64 md:h-64 bg-gradient-to-tr from-yellow-800 via-gold to-yellow-400 rounded-full border-[10px] border-gold/30 shadow-[0_0_150px_rgba(255,215,0,0.6)]"
-                    />
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                        className="relative w-48 h-48 md:w-72 md:h-72 border-2 border-gold/20 rounded-full flex items-center justify-center p-4"
+                    >
+                        {/* Internal Rings */}
+                        <div className="w-full h-full border-[1px] border-gold/40 rounded-full animate-pulse opacity-30" />
+                        <div className="absolute w-4/5 h-4/5 border-[4px] border-gold/60 rounded-full shadow-[0_0_40px_rgba(255,215,0,0.4)]" />
+                        <div className="absolute w-1/2 h-1/2 bg-gradient-to-tr from-yellow-700 to-gold rounded-full shadow-[0_0_80px_rgba(255,215,0,0.6)]" />
+                    </motion.div>
                 </motion.div>
 
                 {/* 🪐 GOLDEN ORBITS */}
                 {PLANETS.map((planet, i) => (
-                    <div key={planet.name} className="absolute rounded-full border border-gold/10 pointer-events-none" style={{ width: planet.orbit * 2, height: planet.orbit * 2 }}>
+                    <div key={planet.name} className="absolute rounded-full border border-white/5 pointer-events-none" style={{ width: planet.orbit * 2, height: planet.orbit * 2 }}>
                         <motion.div animate={{ rotate: 360 }} transition={{ duration: planet.speed, repeat: Infinity, ease: "linear" }} className="absolute w-full h-full">
-                            <div className="absolute flex flex-col items-center group/planet pointer-events-auto" style={{ top: '50%', left: '100%', transform: 'translate(-50%, -50%)' }}>
-                                <div className="rounded-full shadow-2xl border-2 border-white/20" style={{ width: planet.size, height: planet.size, backgroundColor: planet.color, boxShadow: `0 0 30px ${planet.color}` }} />
+                            <div className="absolute flex flex-col items-center pointer-events-auto" style={{ top: '50%', left: '100%', transform: 'translate(-50%, -50%)' }}>
+                                <div className="rounded-full border-2 border-white/20" style={{ width: planet.size, height: planet.size, backgroundColor: planet.color, boxShadow: `0 0 30px ${planet.color}` }} />
                             </div>
                         </motion.div>
                     </div>
                 ))}
             </div>
-
-            <div className="absolute bottom-16 flex flex-col items-center gap-6 z-50">
-                <div className="flex items-center gap-3 px-6 py-3 bg-white/5 border border-white/10 rounded-full backdrop-blur-xl">
-                    <Sparkles className="w-4 h-4 text-gold" />
-                    <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Global Scarcity Standard</span>
-                </div>
-            </div>
         </div>
       </motion.div>
 
       {/* 📊 PROTOCOL METRICS 📊 */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
         {[
-          { label: 'Market Price', value: `$${currentPrice}`, icon: <Activity className="text-gold" /> },
-          { label: 'Protocol Reserve', value: `$${formattedTVL}`, icon: <ShieldCheck className="text-emerald-400" /> },
-          { label: 'Global Holders', value: holdersCount?.toString() || '1', icon: <Users className="text-white" /> },
-          { label: 'Total Volume', value: `$${formattedVolume}`, icon: <TrendingUp className="text-blue-400" /> }
+          { label: 'MARKET PRICE', value: `$${currentPrice}`, icon: <Activity className="text-gold" /> },
+          { label: 'PROTOCOL TVL', value: `$${formattedTVL}`, icon: <ShieldCheck className="text-emerald-400" /> },
+          { label: 'GLOBAL HOLDERS', value: holdersCount?.toString() || '1', icon: <Users className="text-white" /> },
+          { label: 'TRADE VOLUME', value: `$${formattedVolume}`, icon: <TrendingUp className="text-blue-400" /> }
         ].map((stat, i) => (
-          <motion.div key={i} variants={cinematicReveal}>
-            <GlassCard className="p-10 border-white/10 bg-slate-900/60 hover:bg-gold/5 transition-all text-center group">
+          <motion.div key={i} variants={straightCinematic}>
+            <GlassCard className="p-12 border-white/10 bg-slate-900/60 hover:bg-gold/5 transition-all text-center group">
                 <div className="flex justify-center mb-10">
                     <div className="p-4 bg-white/5 rounded-2xl border border-white/10 group-hover:scale-110 transition-transform">{stat.icon}</div>
                 </div>
@@ -199,9 +187,9 @@ export const DashboardView = () => {
         <GlassCard className="border-gold/20 bg-slate-900/40 rounded-[3rem] overflow-hidden">
             <div className="p-10 md:p-14 space-y-12">
                 <div className="flex items-center justify-between border-b border-white/10 pb-10">
-                    <div className="space-y-2">
+                    <div className="space-y-2 text-left">
                         <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter italic">LIVE <span className="text-gold">ACTIVITY</span></h2>
-                        <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Real-time Transaction Pulse</p>
+                        <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Real-time Transaction Pulse on Base</p>
                     </div>
                     <Activity className="w-10 h-10 text-gold opacity-30 animate-pulse" />
                 </div>
@@ -210,7 +198,7 @@ export const DashboardView = () => {
                     <table className="w-full text-left">
                         <thead>
                             <tr className="border-b border-white/5">
-                                <th className="pb-6 text-[10px] font-black text-slate-600 uppercase tracking-widest">Wallet ID</th>
+                                <th className="pb-6 text-[10px] font-black text-slate-600 uppercase tracking-widest">Wallet Address</th>
                                 <th className="pb-6 text-[10px] font-black text-slate-600 uppercase tracking-widest text-center">Action</th>
                                 <th className="pb-6 text-[10px] font-black text-slate-600 uppercase tracking-widest text-right">Amount (GOLD)</th>
                             </tr>
@@ -250,7 +238,7 @@ export const DashboardView = () => {
               {[
                   { label: 'Telegram', icon: <MessageSquare className="w-5 h-5" />, color: 'bg-blue-500' },
                   { label: 'Twitter X', icon: <Share2 className="w-5 h-5" />, color: 'bg-white text-black' },
-                  { label: 'Global App', icon: <Globe className="w-5 h-5" />, color: 'bg-emerald-500' }
+                  { label: 'Market DApp', icon: <Globe className="w-5 h-5" />, color: 'bg-emerald-500' }
               ].map((social, i) => (
                   <button key={i} className={`flex items-center gap-4 px-10 py-5 ${social.color} rounded-2xl font-black uppercase text-[10px] tracking-widest hover:scale-105 transition-all shadow-2xl`}>
                       {social.icon}
