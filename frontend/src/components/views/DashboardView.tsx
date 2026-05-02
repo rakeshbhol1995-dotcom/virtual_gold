@@ -1,8 +1,8 @@
 // c:\Users\BUNTY\Desktop\dexxxx\frontend\src\components\views\DashboardView.tsx
 'use client';
 
-import React, { useMemo, useState, useEffect } from 'react';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import React, { useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { 
   Activity, 
   TrendingUp, 
@@ -12,8 +12,7 @@ import {
   Zap,
   Globe,
   Sparkles,
-  ArrowRight,
-  Flame
+  ArrowRight
 } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { useReadContract, useChainId } from 'wagmi';
@@ -30,30 +29,22 @@ const container = {
 };
 
 const item = {
-  hidden: { opacity: 0, scale: 0.9, y: 30 },
-  show: { opacity: 1, scale: 1, y: 0, transition: { type: 'spring', damping: 15 } }
+  hidden: { opacity: 0, y: 30 },
+  show: { opacity: 1, y: 0 }
 };
+
+const PLANETS = [
+  { name: 'Mercury', color: '#A5A5A5', size: 8, orbit: 120, speed: 3 },
+  { name: 'Venus', color: '#E3BB76', size: 12, orbit: 160, speed: 5 },
+  { name: 'Earth', color: '#2271B3', size: 14, orbit: 210, speed: 7 },
+  { name: 'Mars', color: '#E27B58', size: 10, orbit: 260, speed: 9 },
+  { name: 'Jupiter', color: '#D39C7E', size: 24, orbit: 330, speed: 15 },
+];
 
 export const DashboardView = () => {
   const chainId = useChainId();
   const mounted = useMounted();
   const bondingCurveAddress = getContractAddress(84532, 'bondingCurve');
-
-  // Mouse Parallax Logic
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const springX = useSpring(mouseX, { stiffness: 50, damping: 20 });
-  const springY = useSpring(mouseY, { stiffness: 50, damping: 20 });
-  const rotateX = useTransform(springY, [-300, 300], [10, -10]);
-  const rotateY = useTransform(springX, [-300, 300], [-10, 10]);
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left - rect.width / 2;
-    const y = e.clientY - rect.top - rect.height / 2;
-    mouseX.set(x);
-    mouseY.set(y);
-  };
 
   const { data: price } = useReadContract({
     chainId: 84532,
@@ -88,180 +79,152 @@ export const DashboardView = () => {
       variants={container}
       initial="hidden"
       animate="show"
-      className="space-y-6 md:space-y-10 pb-20"
+      className="space-y-10 pb-20 px-2"
     >
-      {/* 🚀 EXPLOSIVE HERO SECTION 🚀 */}
-      <motion.div 
-        variants={item} 
-        onMouseMove={handleMouseMove}
-        className="relative perspective-1000"
-      >
-        <div className="relative overflow-hidden bg-slate-950 border border-gold/30 rounded-[3rem] p-10 md:p-24 shadow-[0_0_100px_rgba(255,184,0,0.1)] group">
-            {/* Animated Gradient Background */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-gold/10 via-transparent to-red-500/5 opacity-50" />
-            
-            {/* 🔥 PARTICLE FIRE SYSTEM 🔥 */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                {[...Array(15)].map((_, i) => (
-                    <motion.div 
-                        key={i}
-                        initial={{ y: '110%', x: `${Math.random() * 100}%`, opacity: 0 }}
-                        animate={{ 
-                            y: '-10%', 
-                            opacity: [0, 1, 0],
-                            scale: [0, 1.5, 0],
-                        }}
-                        transition={{ 
-                            duration: 2 + Math.random() * 3, 
-                            repeat: Infinity, 
-                            delay: Math.random() * 5 
-                        }}
-                        className="absolute w-1 h-1 bg-gold rounded-full blur-[1px]"
-                    />
+      {/* 🌌 THE GOLD SOLAR SYSTEM HERO 🌌 */}
+      <motion.div variants={item} className="relative">
+        <div className="relative overflow-hidden bg-slate-950 border border-white/10 rounded-[3rem] min-h-[600px] flex items-center justify-center group shadow-2xl">
+            {/* Starfield Background */}
+            <div className="absolute inset-0 opacity-30 pointer-events-none">
+                {[...Array(50)].map((_, i) => (
+                    <div key={i} className="absolute w-0.5 h-0.5 bg-white rounded-full" style={{ top: `${Math.random()*100}%`, left: `${Math.random()*100}%` }} />
                 ))}
             </div>
 
-            <div className="flex flex-col lg:flex-row items-center justify-between gap-12 relative z-10">
-                <div className="flex-1 text-center lg:text-left">
-                    <motion.div 
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="inline-flex items-center gap-3 px-5 py-2 bg-red-500/10 text-red-400 rounded-full text-[10px] font-black uppercase tracking-[0.3em] mb-10 border border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.1)]"
-                    >
-                       <Flame className="w-4 h-4 animate-bounce" /> 
-                       <span>Protocol Heat Level: Extreme</span>
-                    </motion.div>
-
-                    <h1 className="text-5xl md:text-8xl font-black tracking-tighter text-white mb-8 leading-[0.85] uppercase">
-                        SMALL <span className="text-gold">INVESTMENT</span>, <br/>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-gold to-yellow-500 animate-pulse">BIG GROWTH.</span>
-                    </h1>
-
-                    <p className="text-slate-400 text-lg md:text-2xl font-medium leading-relaxed max-w-xl mx-auto lg:mx-0">
-                        Join the most aggressive gold standard on Base. <span className="text-white">21 Million</span> hard-cap. Infinite scalability. Zero compromises.
-                    </p>
-
-                    <div className="flex flex-col sm:flex-row items-center gap-6 mt-14">
-                        <button className="w-full sm:w-auto px-10 py-5 bg-gold text-black rounded-2xl text-xs font-black uppercase tracking-[0.2em] shadow-[0_0_50px_rgba(255,215,0,0.4)] hover:shadow-gold transition-all hover:-translate-y-1 active:translate-y-0">
-                            Enter the Gold Mine
-                        </button>
-                        <div className="flex items-center gap-4 text-slate-500">
-                            <div className="flex -space-x-3">
-                                {[1,2,3].map(i => <div key={i} className="w-10 h-10 rounded-full border-2 border-slate-900 bg-slate-800" />)}
-                            </div>
-                            <span className="text-[10px] font-black uppercase tracking-widest">+1,248 Pioneers</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* 3D FLOATING BURNING COIN */}
+            {/* SOLAR SYSTEM CONTAINER */}
+            <div className="relative w-full h-full flex items-center justify-center scale-75 md:scale-100">
+                
+                {/* ☀️ THE GOLD SUN (CENTER) */}
                 <motion.div 
-                    style={{ rotateX, rotateY }}
-                    className="relative w-64 h-64 md:w-96 md:h-96"
+                    animate={{ 
+                        scale: [1, 1.05, 1],
+                        boxShadow: [
+                            "0 0 60px rgba(255,215,0,0.3)",
+                            "0 0 100px rgba(255,184,0,0.6)",
+                            "0 0 60px rgba(255,215,0,0.3)"
+                        ]
+                    }}
+                    transition={{ duration: 4, repeat: Infinity }}
+                    className="relative z-20 w-32 h-32 md:w-40 md:h-40 bg-gradient-to-tr from-yellow-600 via-gold to-yellow-300 rounded-full flex items-center justify-center border-4 border-yellow-200/30"
                 >
-                    {/* Radial Glow */}
-                    <motion.div 
-                        animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.6, 0.3] }}
-                        transition={{ duration: 3, repeat: Infinity }}
-                        className="absolute inset-0 bg-gold/20 rounded-full blur-[100px]"
-                    />
-                    
-                    {/* Fire Sparks Overlay */}
-                    <div className="absolute inset-0 z-20">
-                         {[...Array(8)].map((_, i) => (
-                             <motion.div 
-                                key={i}
-                                animate={{ 
-                                    y: [0, -100], 
-                                    x: [0, (i % 2 === 0 ? 50 : -50)],
-                                    opacity: [0, 1, 0] 
-                                }}
-                                transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.2 }}
-                                className="absolute bottom-1/2 left-1/2 w-1.5 h-1.5 bg-orange-500 rounded-full blur-[1px]"
-                             />
-                         ))}
+                    <div className="text-center">
+                        <span className="block text-2xl md:text-3xl font-black text-white drop-shadow-lg tracking-tighter">GOLD</span>
+                        <span className="block text-[8px] font-black text-black bg-white/40 rounded px-1 mt-1 uppercase">Central</span>
                     </div>
-
-                    <img 
-                        src="/assets/burning-gold.png" 
-                        alt="Gold Coin" 
-                        className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_80px_rgba(255,184,0,0.6)] group-hover:scale-110 transition-transform duration-500"
-                    />
+                    {/* Sun Rays */}
+                    <div className="absolute inset-0 rounded-full bg-gold/20 blur-2xl animate-pulse" />
                 </motion.div>
+
+                {/* 🪐 ORBITING PLANETS */}
+                {PLANETS.map((planet, i) => (
+                    <div 
+                        key={planet.name}
+                        className="absolute rounded-full border border-white/5"
+                        style={{ width: planet.orbit * 2, height: planet.orbit * 2 }}
+                    >
+                        <motion.div 
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: planet.speed, repeat: Infinity, ease: "linear" }}
+                            className="absolute w-full h-full top-0 left-0"
+                        >
+                            <div 
+                                className="absolute flex flex-col items-center group/planet"
+                                style={{ 
+                                    top: '50%', 
+                                    left: '100%', 
+                                    transform: 'translate(-50%, -50%)' 
+                                }}
+                            >
+                                {/* Planet Body */}
+                                <div 
+                                    className="rounded-full shadow-lg border border-white/20"
+                                    style={{ 
+                                        width: planet.size, 
+                                        height: planet.size, 
+                                        backgroundColor: planet.color,
+                                        boxShadow: `0 0 15px ${planet.color}40`
+                                    }}
+                                />
+                                {/* Planet Name Tag */}
+                                <span className="absolute top-full mt-2 text-[8px] font-black text-slate-500 uppercase tracking-widest opacity-0 group-hover/planet:opacity-100 transition-opacity bg-black/80 px-2 py-0.5 rounded border border-white/10 whitespace-nowrap">
+                                    {planet.name}
+                                </span>
+                            </div>
+                        </motion.div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Hero Text Overlay (Bottom Left) */}
+            <div className="absolute bottom-10 left-10 z-30 max-w-xl text-left hidden md:block">
+                <h1 className="text-5xl font-black tracking-tighter text-white mb-4 leading-tight uppercase">
+                    GOLD <span className="text-gold">SOLAR</span> SYSTEM
+                </h1>
+                <p className="text-slate-400 text-sm font-medium leading-relaxed">
+                    Expanding across the decentralized galaxy. 21 Million Max Supply. Transparent. Immutable. Infinite.
+                </p>
+                <div className="flex gap-4 mt-6">
+                    <button className="px-8 py-3 bg-gold text-black rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-xl">Trade Now</button>
+                    <button className="px-8 py-3 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-white hover:bg-white/10 transition-all">Audit Report</button>
+                </div>
             </div>
         </div>
       </motion.div>
 
       {/* STATS GRID */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
         {/* PRICE CARD */}
         <motion.div variants={item}>
-            <GlassCard className="p-6 md:p-10 border-white/10 bg-slate-900/40 hover:border-gold transition-all duration-500 group">
-                <div className="flex items-center justify-between mb-6 md:mb-10">
-                    <div className="p-3 md:p-4 bg-gold/10 rounded-2xl border border-gold/20 group-hover:rotate-12 transition-transform">
-                        <Activity className="w-5 h-5 md:w-7 md:h-7 text-gold" />
+            <GlassCard className="p-8 border-white/10 bg-slate-900/40 hover:border-gold transition-all duration-500 group">
+                <div className="flex items-center justify-between mb-8">
+                    <div className="p-4 bg-gold/10 rounded-2xl border border-gold/20">
+                        <Activity className="w-7 h-7 text-gold" />
                     </div>
                 </div>
-                <h3 className="text-slate-500 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-2">Market Price</h3>
-                <div className="text-2xl md:text-5xl font-black text-white tracking-tighter">${currentPrice}</div>
+                <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Market Price</h3>
+                <div className="text-4xl font-black text-white tracking-tighter">${currentPrice}</div>
             </GlassCard>
         </motion.div>
 
         {/* RESERVE CARD */}
         <motion.div variants={item}>
-            <GlassCard className="p-6 md:p-10 border-emerald-500/20 bg-slate-900/40 hover:bg-emerald-500/5 transition-all duration-500 group">
-                <div className="flex items-center justify-between mb-6 md:mb-10">
-                    <div className="p-3 md:p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
-                        <ShieldCheck className="w-5 h-5 md:w-7 md:h-7 text-emerald-400" />
+            <GlassCard className="p-8 border-emerald-500/20 bg-slate-900/40 hover:bg-emerald-500/5 transition-all duration-500">
+                <div className="flex items-center justify-between mb-8">
+                    <div className="p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
+                        <ShieldCheck className="w-7 h-7 text-emerald-400" />
                     </div>
                 </div>
-                <h3 className="text-slate-500 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-2">Protocol Reserve</h3>
-                <div className="text-2xl md:text-5xl font-black text-white tracking-tighter">${formattedTVL}</div>
+                <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Protocol Reserve</h3>
+                <div className="text-4xl font-black text-white tracking-tighter">${formattedTVL}</div>
             </GlassCard>
         </motion.div>
 
         {/* VOLUME CARD */}
         <motion.div variants={item}>
-            <GlassCard className="p-6 md:p-10 border-white/10 bg-slate-900/40 hover:border-blue-400 transition-all duration-500">
-                <div className="flex items-center justify-between mb-6 md:mb-10">
-                    <div className="p-3 md:p-4 bg-blue-500/10 rounded-2xl border border-blue-500/20">
-                        <TrendingUp className="w-5 h-5 md:w-7 md:h-7 text-blue-400" />
+            <GlassCard className="p-8 border-white/10 bg-slate-900/40 hover:border-blue-400 transition-all duration-500">
+                <div className="flex items-center justify-between mb-8">
+                    <div className="p-4 bg-blue-500/10 rounded-2xl border border-blue-500/20">
+                        <TrendingUp className="w-7 h-7 text-blue-400" />
                     </div>
                 </div>
-                <h3 className="text-slate-500 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-2">Total Volume</h3>
-                <div className="text-2xl md:text-5xl font-black text-white tracking-tighter">${formattedVolume}</div>
+                <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Total Volume</h3>
+                <div className="text-4xl font-black text-white tracking-tighter">${formattedVolume}</div>
             </GlassCard>
         </motion.div>
 
         {/* HOLDERS CARD */}
         <motion.div variants={item}>
-            <GlassCard className="p-6 md:p-10 border-white/10 bg-slate-900/40 hover:border-white transition-all duration-500">
-                <div className="flex items-center justify-between mb-6 md:mb-10">
-                    <div className="p-3 md:p-4 bg-white/5 rounded-2xl border border-white/10">
-                        <Users className="w-5 h-5 md:w-7 md:h-7 text-white" />
+            <GlassCard className="p-8 border-white/10 bg-slate-900/40 hover:border-white transition-all duration-500">
+                <div className="flex items-center justify-between mb-8">
+                    <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
+                        <Users className="w-7 h-7 text-white" />
                     </div>
                 </div>
-                <h3 className="text-slate-500 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-2">Total Pioneers</h3>
-                <div className="text-2xl md:text-5xl font-black text-white tracking-tighter">{holdersCount?.toString() || '1'}</div>
+                <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Total Holders</h3>
+                <div className="text-4xl font-black text-white tracking-tighter">{holdersCount?.toString() || '1'}</div>
             </GlassCard>
         </motion.div>
       </div>
-
-      {/* FINAL TRUST BANNER */}
-      <motion.div variants={item}>
-        <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-gold/10 border border-gold/20 rounded-[3rem] p-10 flex flex-col md:flex-row items-center justify-between gap-10">
-            <div className="flex items-center gap-8">
-                <div className="w-16 h-16 rounded-3xl bg-gold/10 flex items-center justify-center border border-gold/20 shadow-2xl">
-                    <ShieldCheck className="w-8 h-8 text-gold" />
-                </div>
-                <div>
-                    <h4 className="text-xl font-black text-white uppercase tracking-tighter">100% On-Chain Solvency</h4>
-                    <p className="text-slate-500 text-sm font-medium mt-1">Our liquidity is locked in the bonding curve. Verified. Mathematical. Immutable.</p>
-                </div>
-            </div>
-            <button className="px-10 py-4 bg-white text-black rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all">Audit Report</button>
-        </div>
-      </motion.div>
     </motion.div>
   );
 };
