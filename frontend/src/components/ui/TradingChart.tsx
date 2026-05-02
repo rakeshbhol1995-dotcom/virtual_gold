@@ -1,27 +1,24 @@
+'use client';
+
 import React, { useEffect, useRef, useState } from 'react';
 import { createChart, ColorType, IChartApi, ISeriesApi } from 'lightweight-charts';
 
 interface TradingChartProps {
-    currentPrice: number;
+    currentPrice?: number;
 }
 
-export const TradingChart: React.FC<TradingChartProps> = ({ currentPrice }) => {
+export const TradingChart: React.FC<TradingChartProps> = ({ currentPrice = 2342.10 }) => {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);
     const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
-
-    // Initial dummy data to make the chart look alive right away.
-    // In a real app, this would be fetched from an indexer.
-    const [historicalData, setHistoricalData] = useState<any[]>([
-        { time: (Math.floor(Date.now() / 1000) - 86400 * 5) as any, open: 10.0, high: 10.1, low: 9.9, close: 10.05 },
-        { time: (Math.floor(Date.now() / 1000) - 86400 * 4) as any, open: 10.05, high: 10.2, low: 10.0, close: 10.15 },
-        { time: (Math.floor(Date.now() / 1000) - 86400 * 3) as any, open: 10.15, high: 10.15, low: 10.05, close: 10.1 },
-        { time: (Math.floor(Date.now() / 1000) - 86400 * 2) as any, open: 10.1, high: 10.3, low: 10.1, close: 10.25 },
-        { time: (Math.floor(Date.now() / 1000) - 86400 * 1) as any, open: 10.25, high: 10.4, low: 10.2, close: 10.35 },
-    ]);
+    const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
-        if (!chartContainerRef.current) return;
+        setIsMounted(true);
+    }, []);
+
+    useEffect(() => {
+        if (!isMounted || !chartContainerRef.current) return;
 
         const handleResize = () => {
             if (chartRef.current && chartContainerRef.current) {
@@ -32,73 +29,95 @@ export const TradingChart: React.FC<TradingChartProps> = ({ currentPrice }) => {
         const chart = createChart(chartContainerRef.current, {
             layout: {
                 background: { type: ColorType.Solid, color: 'transparent' },
-                textColor: '#64748b', // slate-500
+                textColor: '#94a3b8',
             },
             grid: {
-                vertLines: { color: 'rgba(255, 255, 255, 0.05)' },
-                horzLines: { color: 'rgba(255, 255, 255, 0.05)' },
+                vertLines: { color: 'rgba(255, 255, 255, 0.02)' },
+                horzLines: { color: 'rgba(255, 255, 255, 0.02)' },
             },
             width: chartContainerRef.current.clientWidth,
-            height: 300,
+            height: 350,
             timeScale: {
                 timeVisible: true,
                 secondsVisible: false,
+                borderColor: 'rgba(255, 255, 255, 0.05)',
             },
             rightPriceScale: {
-                borderColor: 'rgba(255, 255, 255, 0.1)',
+                borderColor: 'rgba(255, 255, 255, 0.05)',
+                scaleMargins: {
+                    top: 0.3,
+                    bottom: 0.25,
+                },
             }
         });
 
         const candlestickSeries = chart.addCandlestickSeries({
-            upColor: '#22c55e', // green-500
-            downColor: '#ef4444', // red-500
+            upColor: '#FFB800',
+            downColor: '#ef4444',
             borderVisible: false,
-            wickUpColor: '#22c55e',
+            wickUpColor: '#FFB800',
             wickDownColor: '#ef4444',
         });
 
-        candlestickSeries.setData(historicalData);
+        // Generate base historical data
+        let baseTime = Math.floor(Date.now() / 1000) - (86400 * 30);
+        let data = [];
+        let prevPrice = currentPrice - 50;
 
+        for (let i = 0; i < 60; i++) {
+            let open = prevPrice;
+            let close = open + (Math.random() - 0.5) * 20;
+            data.push({
+                time: (baseTime + (i * 3600)) as any,
+                open: open,
+                high: Math.max(open, close) + Math.random() * 5,
+                low: Math.min(open, close) - Math.random() * 5,
+                close: close
+            });
+            prevPrice = close;
+        }
+
+        candlestickSeries.setData(data);
         chartRef.current = chart;
         seriesRef.current = candlestickSeries;
 
         window.addEventListener('resize', handleResize);
 
+        // Real-time Simulation Interval
+        const interval = setInterval(() => {
+           if (seriesRef.current) {
+              const lastTime = Math.floor(Date.now() / 1000);
+              const lastClose = data[data.length - 1].close;
+              const newPrice = lastClose + (Math.random() - 0.45) * 5; // Slight upward bias
+              
+              seriesRef.current.update({
+                 time: lastTime as any,
+                 open: lastClose,
+                 high: Math.max(lastClose, newPrice) + 2,
+                 low: Math.min(lastClose, newPrice) - 2,
+                 close: newPrice
+              });
+           }
+        }, 3000);
+
         return () => {
             window.removeEventListener('resize', handleResize);
+            clearInterval(interval);
             chart.remove();
         };
-    }, []);
+    }, [isMounted]);
 
-    // Update real-time price
-    useEffect(() => {
-        if (!seriesRef.current || currentPrice === 0) return;
-
-        const latestTime = Math.floor(Date.now() / 1000);
-        const lastCandle = historicalData[historicalData.length - 1];
-
-        // Ensure currentPrice isn't totally disconnected if we restart
-        let open = lastCandle ? lastCandle.close : currentPrice;
-        
-        seriesRef.current.update({
-            time: latestTime as any,
-            open: open,
-            high: Math.max(open, currentPrice),
-            low: Math.min(open, currentPrice),
-            close: currentPrice,
-        });
-
-    }, [currentPrice]);
+    if (!isMounted) return <div className="h-[350px] w-full animate-pulse bg-white/5 rounded-2xl" />;
 
     return (
-        <div className="w-full relative">
+        <div className="w-full relative group">
             <div 
                 ref={chartContainerRef} 
-                className="w-full rounded-xl overflow-hidden"
+                className="w-full rounded-2xl overflow-hidden"
             />
-            <div className="absolute top-2 left-2 z-10 flex gap-2">
-                <span className="bg-slate-900/80 px-2 py-1 rounded text-[10px] font-black text-slate-300 uppercase border border-white/10">1D</span>
-                <span className="bg-gold/10 px-2 py-1 rounded text-[10px] font-black text-gold uppercase border border-gold/20">LIVE</span>
+            <div className="absolute top-4 right-4 z-10 flex items-center gap-2 px-3 py-1 bg-gold/10 border border-gold/20 rounded-full">
+                <div className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
+                <span className="text-[10px] font-black text-gold tracking-widest uppercase">Live Pulse</span>
             </div>
         </div>
     );
