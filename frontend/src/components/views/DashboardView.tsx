@@ -9,11 +9,14 @@ import {
   Users, 
   ShieldCheck, 
   ZapIcon,
-  BarChart3,
-  Clock,
-  ArrowUpRight,
   Target,
-  Rocket
+  Rocket,
+  ArrowRight,
+  Gem,
+  Lock,
+  Coins,
+  BarChart4,
+  CheckCircle2
 } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { useReadContract, useChainId } from 'wagmi';
@@ -93,177 +96,147 @@ export const DashboardView = () => {
       variants={container}
       initial="hidden"
       animate="show"
-      className="space-y-12 pb-32 px-4"
+      className="space-y-20 pb-40 px-4"
     >
-      {/* 🌌 MEGA SOLAR HERO SECTION (BIGGER) 🌌 */}
+      {/* 🌌 HERO SECTION 🌌 */}
       <motion.div variants={item} className="relative">
-        <div className="relative overflow-hidden bg-slate-950 border border-gold/20 rounded-[4rem] min-h-[750px] md:min-h-[850px] flex items-center justify-center group shadow-[0_0_150px_rgba(255,184,0,0.1)]">
-            {/* Space Nebula */}
+        <div className="relative overflow-hidden bg-slate-950 border border-gold/20 rounded-[4rem] min-h-[700px] md:min-h-[850px] flex items-center justify-center group shadow-2xl">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,184,0,0.1)_0%,transparent_80%)] pointer-events-none" />
             
-            {/* BRANDING (TOP-LEFT) */}
             <div className="absolute top-16 left-16 z-50">
-                <motion.div 
-                    initial={{ x: -50, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    className="space-y-4"
-                >
-                    <h1 className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase italic leading-none">
-                        GOLD <span className="text-gold">CHAIN</span>
-                    </h1>
-                    <div className="flex items-center gap-4">
-                        <div className="w-20 h-1.5 bg-gold rounded-full" />
-                        <p className="text-sm md:text-base font-black text-slate-500 uppercase tracking-[0.6em]">Galaxy Standard V2</p>
-                    </div>
-                </motion.div>
+                <h1 className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase italic leading-none">
+                    GOLD <span className="text-gold">CHAIN</span>
+                </h1>
+                <p className="text-sm md:text-base font-black text-slate-500 uppercase tracking-[0.6em] mt-4">Galaxy Standard V2</p>
             </div>
 
-            {/* ☀️ MEGA BURNING SURYA (BIGGER & BRIGHTER) ☀️ */}
-            <div className="relative w-full h-full flex items-center justify-center scale-90 md:scale-100 lg:scale-110">
-                <motion.div whileHover="hover" className="relative z-30 group/sun cursor-pointer">
-                    {/* Layered Sun Fire */}
+            {/* ☀️ BURNING SURYA (CLEAN - NO TEXT) ☀️ */}
+            <div className="relative w-full h-full flex items-center justify-center">
+                <motion.div className="relative z-30">
                     {[...Array(4)].map((_, i) => (
                         <motion.div 
                             key={i}
-                            animate={{ 
-                                scale: [1, 1.4, 1], 
-                                opacity: [0.1, 0.4, 0.1], 
-                                rotate: [0, 90, 180, 270, 360] 
-                            }}
+                            animate={{ scale: [1, 1.4, 1], opacity: [0.1, 0.4, 0.1], rotate: 360 }}
                             transition={{ duration: 4 + i, repeat: Infinity, ease: "linear" }}
                             className={`absolute inset-0 rounded-full blur-[60px] md:blur-[100px] ${i === 0 ? 'bg-red-600' : i === 1 ? 'bg-orange-500' : i === 2 ? 'bg-yellow-400' : 'bg-gold'}`}
                             style={{ margin: `-${i * 20}px` }}
                         />
                     ))}
-                    
                     <motion.div 
-                        animate={{ scale: [1, 1.08, 1] }}
+                        animate={{ scale: [1, 1.05, 1] }}
                         transition={{ duration: 3, repeat: Infinity }}
-                        className="relative w-40 h-40 md:w-56 md:h-56 bg-gradient-to-tr from-yellow-700 via-gold to-white rounded-full flex items-center justify-center border-[10px] border-white/20 shadow-[0_0_120px_rgba(255,215,0,0.6)]"
-                    >
-                        <div className="text-center z-10">
-                            <span className="block text-4xl md:text-6xl font-black text-white italic drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] tracking-tighter">GOLD</span>
-                            <div className="w-16 h-2 bg-black/40 rounded-full mx-auto mt-2" />
-                        </div>
-                    </motion.div>
+                        className="relative w-40 h-40 md:w-64 md:h-64 bg-gradient-to-tr from-yellow-700 via-gold to-white rounded-full border-[10px] border-white/20 shadow-[0_0_120px_rgba(255,215,0,0.6)]"
+                    />
                 </motion.div>
 
-                {/* 🪐 ORBITING PLANETS (EXPANDED) */}
+                {/* 🪐 ORBITS */}
                 {PLANETS.map((planet, i) => (
-                    <div 
-                        key={planet.name}
-                        className="absolute rounded-full border border-white/10 pointer-events-none"
-                        style={{ width: planet.orbit * 2, height: planet.orbit * 2 }}
-                    >
-                        <motion.div 
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: planet.speed, repeat: Infinity, ease: "linear" }}
-                            className="absolute w-full h-full top-0 left-0"
-                        >
-                            <div 
-                                className="absolute flex flex-col items-center group/planet pointer-events-auto"
-                                style={{ top: '50%', left: '100%', transform: 'translate(-50%, -50%)' }}
-                            >
-                                <motion.div 
-                                    whileHover={{ scale: 2 }}
-                                    className="rounded-full shadow-2xl border-2 border-white/40"
-                                    style={{ 
-                                        width: planet.size, 
-                                        height: planet.size, 
-                                        backgroundColor: planet.color,
-                                        boxShadow: `0 0 30px ${planet.color}`
-                                    }}
-                                />
-                                <div className="absolute top-full mt-4 opacity-0 group-hover/planet:opacity-100 transition-all scale-75 group-hover/planet:scale-100">
-                                    <span className="text-[10px] font-black text-white bg-black/95 px-4 py-1.5 rounded-full border border-gold/40 shadow-2xl whitespace-nowrap uppercase tracking-widest">
-                                        {planet.name}
-                                    </span>
-                                </div>
+                    <div key={planet.name} className="absolute rounded-full border border-white/10" style={{ width: planet.orbit * 2, height: planet.orbit * 2 }}>
+                        <motion.div animate={{ rotate: 360 }} transition={{ duration: planet.speed, repeat: Infinity, ease: "linear" }} className="absolute w-full h-full">
+                            <div className="absolute flex flex-col items-center group/planet pointer-events-auto" style={{ top: '50%', left: '100%', transform: 'translate(-50%, -50%)' }}>
+                                <div className="rounded-full shadow-2xl border-2 border-white/40" style={{ width: planet.size, height: planet.size, backgroundColor: planet.color, boxShadow: `0 0 30px ${planet.color}` }} />
                             </div>
                         </motion.div>
                     </div>
                 ))}
             </div>
 
-            {/* 📊 BOTTOM METRICS BAR (NEW) 📊 */}
             <div className="absolute bottom-16 left-0 right-0 px-16 flex items-center justify-between z-50">
                 <div className="flex gap-12">
                     <div>
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Max Supply</p>
-                        <p className="text-2xl font-black text-white">21,000,000.00</p>
-                    </div>
-                    <div className="w-[1px] h-10 bg-white/10" />
-                    <div>
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Target Price</p>
-                        <p className="text-2xl font-black text-gold">$100,000.00</p>
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 text-left">Target Price</p>
+                        <p className="text-3xl font-black text-white text-left">$100,000.00</p>
                     </div>
                 </div>
-                <button className="px-12 py-5 bg-gold text-black rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:scale-105 transition-all shadow-[0_0_50px_rgba(255,215,0,0.4)]">Buy Gold Now</button>
+                <button className="px-12 py-5 bg-gold text-black rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:scale-105 transition-all shadow-[0_0_50px_rgba(255,215,0,0.4)]">Invest Now</button>
             </div>
         </div>
       </motion.div>
 
-      {/* 🚀 PROTOCOL HEALTH & PROGRESS 🚀 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          {/* Supply Progress */}
-          <GlassCard className="lg:col-span-2 p-10 border-gold/20 bg-slate-900/60 overflow-hidden relative">
-              <div className="flex items-center justify-between mb-8">
-                  <div>
-                      <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">Minting Progress</h3>
-                      <p className="text-slate-500 text-xs font-medium">Scarcity tracking in real-time</p>
-                  </div>
-                  <Target className="w-10 h-10 text-gold opacity-50" />
+      {/* 🚀 WHY INVEST IN GOLD CHAIN? (NEW SECTION) 🚀 */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-10 py-10">
+          <motion.div variants={item} className="space-y-6">
+              <div className="w-16 h-16 bg-gold/10 rounded-2xl border border-gold/20 flex items-center justify-center">
+                  <Gem className="w-8 h-8 text-gold" />
               </div>
-              <div className="relative h-6 bg-white/5 rounded-full overflow-hidden border border-white/10">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: `${Math.max(5, supplyPercent)}%` }}
-                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-gold to-yellow-300 shadow-[0_0_30px_rgba(255,215,0,0.5)]"
-                  />
-              </div>
-              <div className="flex justify-between mt-4">
-                  <span className="text-[10px] font-black text-slate-500 uppercase">Current: {totalSupply ? formatUnits(totalSupply as bigint, 18) : '0'} GOLD</span>
-                  <span className="text-[10px] font-black text-gold uppercase tracking-widest">Hard Cap: 21,000,000</span>
-              </div>
-          </GlassCard>
+              <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter">Absolute Scarcity</h3>
+              <p className="text-slate-400 text-lg leading-relaxed">
+                  Only 21,000,000 Gold Chains will ever exist. Just like Bitcoin, this scarcity ensures that as demand grows, the price must skyrocket. 
+              </p>
+          </motion.div>
 
-          {/* Protocol Status */}
-          <GlassCard className="p-10 border-emerald-500/20 bg-emerald-500/5">
-              <div className="flex items-center gap-4 mb-8">
-                  <div className="w-3 h-3 rounded-full bg-emerald-500 animate-ping" />
-                  <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">Protocol Status</h3>
+          <motion.div variants={item} className="space-y-6">
+              <div className="w-16 h-16 bg-blue-500/10 rounded-2xl border border-blue-500/20 flex items-center justify-center">
+                  <Rocket className="w-8 h-8 text-blue-400" />
               </div>
-              <div className="space-y-6">
-                  <div className="flex justify-between items-center">
-                      <span className="text-xs font-medium text-slate-400">Security Audit</span>
-                      <span className="text-[10px] font-black text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full uppercase">Passed</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                      <span className="text-xs font-medium text-slate-400">Liquidity</span>
-                      <span className="text-[10px] font-black text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full uppercase">Locked</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                      <span className="text-xs font-medium text-slate-400">Slippage Protection</span>
-                      <span className="text-[10px] font-black text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full uppercase">Active</span>
-                  </div>
+              <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter">Exponential Growth</h3>
+              <p className="text-slate-400 text-lg leading-relaxed">
+                  Our bonding curve math is designed for massive growth. Every purchase increases the price, targeting a valuation of $100,000 per gram.
+              </p>
+          </motion.div>
+
+          <motion.div variants={item} className="space-y-6">
+              <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 flex items-center justify-center">
+                  <Lock className="w-8 h-8 text-emerald-400" />
               </div>
-          </GlassCard>
+              <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter">100% Backed</h3>
+              <p className="text-slate-400 text-lg leading-relaxed">
+                  Every Gold Chain is 100% backed by USDT in the protocol reserve. No middlemen, no centralized risk—just pure on-chain security.
+              </p>
+          </motion.div>
       </div>
+
+      {/* 💰 INVESTOR BENEFITS (LABHA) 💰 */}
+      <motion.div variants={item} className="bg-slate-900/40 border border-white/10 rounded-[4rem] p-12 md:p-20 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-gold/5 blur-[100px] pointer-events-none" />
+          
+          <div className="flex flex-col lg:flex-row gap-20">
+              <div className="flex-1">
+                  <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter mb-8 leading-none italic">
+                      INVESTOR <span className="text-gold">BENEFITS</span>
+                  </h2>
+                  <p className="text-xl text-slate-400 font-medium mb-10 leading-relaxed">
+                      Gold Chain is built for the community. We've removed all centralized barriers to give you the best investment experience.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                      {[
+                        { title: 'Direct Ownership', desc: 'No banks or middlemen. You own your gold tokens 100%.', icon: <CheckCircle2 className="text-gold" /> },
+                        { title: 'Zero Middlemen', desc: 'Fees go back to the protocol and holders, not to centralized bosses.', icon: <CheckCircle2 className="text-gold" /> },
+                        { title: 'Instant Liquidity', desc: 'Sell back to the bonding curve anytime. Instant USDT withdrawal.', icon: <CheckCircle2 className="text-gold" /> },
+                        { title: 'Transparent Math', desc: 'Watch the price and reserve grow in real-time on-chain.', icon: <CheckCircle2 className="text-gold" /> }
+                      ].map((benefit, i) => (
+                          <div key={i} className="flex gap-4">
+                              <div className="mt-1">{benefit.icon}</div>
+                              <div>
+                                  <h4 className="font-black text-white uppercase text-sm mb-1">{benefit.title}</h4>
+                                  <p className="text-xs text-slate-500 font-medium leading-relaxed">{benefit.desc}</p>
+                              </div>
+                          </div>
+                      ))}
+                  </div>
+              </div>
+              <div className="lg:w-1/3 bg-gold/10 border border-gold/20 rounded-[3rem] p-10 flex flex-col justify-center text-center">
+                  <Coins className="w-20 h-20 text-gold mx-auto mb-6 drop-shadow-lg" />
+                  <h3 className="text-4xl font-black text-white uppercase tracking-tighter mb-4 italic">Moon Ready</h3>
+                  <p className="text-slate-400 font-medium mb-8">Start your journey today with as little as 1 USDT and watch your investment grow with the galaxy.</p>
+                  <button className="w-full py-5 bg-gold text-black rounded-2xl font-black uppercase tracking-widest hover:scale-105 transition-all">Start Investing</button>
+              </div>
+          </div>
+      </motion.div>
 
       {/* 📊 MAIN STATS GRID 📊 */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-        {[{ label: 'Live Price', value: `$${currentPrice}`, icon: <Activity className="text-gold" />, color: 'gold' },
-          { label: 'Total Reserve', value: `$${formattedTVL}`, icon: <ShieldCheck className="text-emerald-400" />, color: 'emerald' },
-          { label: 'Trading Volume', value: `$${formattedVolume}`, icon: <TrendingUp className="text-blue-400" />, color: 'blue' },
-          { label: 'Global Pioneers', value: holdersCount?.toString() || '1', icon: <Users className="text-white" />, color: 'white' }
+        {[{ label: 'Live Price', value: `$${currentPrice}`, icon: <Activity className="text-gold" /> },
+          { label: 'Total Reserve', value: `$${formattedTVL}`, icon: <ShieldCheck className="text-emerald-400" /> },
+          { label: 'Trading Volume', value: `$${formattedVolume}`, icon: <TrendingUp className="text-blue-400" /> },
+          { label: 'Global Pioneers', value: holdersCount?.toString() || '1', icon: <Users className="text-white" /> }
         ].map((stat, i) => (
           <motion.div key={i} variants={item}>
-            <GlassCard className="p-8 border-white/10 bg-slate-900/40 hover:scale-105 transition-all duration-500 group relative">
+            <GlassCard className="p-8 border-white/10 bg-slate-900/40 group relative overflow-hidden">
                 <div className="flex items-center justify-between mb-10">
                     <div className="p-4 bg-white/5 rounded-2xl border border-white/10 group-hover:bg-gold/10 transition-colors">
                         {stat.icon}
                     </div>
-                    <ArrowUpRight className="w-5 h-5 text-slate-700 group-hover:text-gold transition-colors" />
                 </div>
                 <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] mb-2 text-left">{stat.label}</h3>
                 <div className="text-3xl md:text-5xl font-black text-white tracking-tighter text-left">{stat.value}</div>
