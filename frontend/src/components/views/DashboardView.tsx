@@ -15,7 +15,11 @@ import {
   Coins,
   CheckCircle2,
   ZapIcon,
-  Calculator
+  Calculator,
+  MessageSquare,
+  Twitter,
+  Globe,
+  ArrowRight
 } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { useReadContract, useChainId } from 'wagmi';
@@ -42,6 +46,14 @@ const PLANETS = [
   { name: 'Earth', color: '#2271B3', size: 20, orbit: 250, speed: 38 },
   { name: 'Mars', color: '#E27B58', size: 16, orbit: 310, speed: 48 },
   { name: 'Jupiter', color: '#D39C7E', size: 34, orbit: 390, speed: 68 },
+];
+
+const RECENT_MINT_MSGS = [
+  "New Pioneer joined: 520 GOLD minted",
+  "Whale Alert: 1,250 GOLD locked",
+  "Growth Milestone: Price hit $10.45",
+  "Direct Swap: 100 USDT -> GOLD",
+  "Pioneer Reward: 12 GOLD harvested"
 ];
 
 export const DashboardView = () => {
@@ -82,13 +94,12 @@ export const DashboardView = () => {
       variants={container}
       initial="hidden"
       animate="show"
-      className="space-y-24 pb-40 px-4 pt-10"
+      className="space-y-32 pb-40 px-4 pt-10"
     >
       {/* 🌌 HERO SECTION: 24 KARAT SOLAR SYSTEM 🌌 */}
       <motion.div variants={cinematicReveal} className="relative">
         <div className="relative overflow-hidden bg-slate-950/95 border border-gold/30 rounded-[4rem] min-h-[650px] md:min-h-[850px] flex items-center justify-center group shadow-2xl">
             
-            {/* Cinematic Branding */}
             <div className="absolute top-16 text-center z-50">
                 <h2 className="text-4xl md:text-7xl font-black italic tracking-[0.05em] uppercase leading-tight text-transparent bg-clip-text bg-gradient-to-b from-gold via-yellow-100 to-yellow-600 drop-shadow-[0_0_20px_rgba(255,215,0,0.4)]">
                     GOLD CHAIN
@@ -99,7 +110,7 @@ export const DashboardView = () => {
 
             {/* ☀️ 24 KARAT GOLD SURYA ☀️ */}
             <div className="relative w-full h-full flex items-center justify-center scale-75 md:scale-90 lg:scale-100">
-                <motion.div className="relative z-30 group/sun cursor-pointer">
+                <motion.div className="relative z-30">
                     {[...Array(4)].map((_, i) => (
                         <motion.div 
                             key={i}
@@ -127,44 +138,27 @@ export const DashboardView = () => {
                         <motion.div animate={{ rotate: 360 }} transition={{ duration: planet.speed, repeat: Infinity, ease: "linear" }} className="absolute w-full h-full top-0 left-0">
                             <div className="absolute flex flex-col items-center group/planet pointer-events-auto" style={{ top: '50%', left: '100%', transform: 'translate(-50%, -50%)' }}>
                                 <div className="rounded-full shadow-2xl border-2 border-white/30" style={{ width: planet.size, height: planet.size, backgroundColor: planet.color, boxShadow: `0 0 40px ${planet.color}CC` }} />
-                                <div className="absolute top-full mt-3 opacity-0 group-hover/planet:opacity-100 transition-all scale-75 group-hover/planet:scale-100">
-                                    <span className="text-[10px] font-black text-white bg-black/95 px-4 py-1 rounded-full border border-gold/40 shadow-2xl uppercase tracking-widest whitespace-nowrap">
-                                        {planet.name}
-                                    </span>
-                                </div>
                             </div>
                         </motion.div>
                     </div>
                 ))}
             </div>
 
-            <div className="absolute bottom-16 flex flex-col items-center gap-6 z-50">
-                <button className="px-14 py-6 bg-gold text-black rounded-2xl text-[11px] font-black uppercase tracking-[0.4em] hover:scale-105 transition-all shadow-[0_0_60px_rgba(255,215,0,0.4)]">Launch Terminal</button>
+            {/* LIVE ACTIVITY TICKER (NEW) */}
+            <div className="absolute bottom-12 w-full px-12 z-50 overflow-hidden">
+                <div className="flex justify-center items-center gap-8 animate-marquee whitespace-nowrap">
+                    {RECENT_MINT_MSGS.map((msg, i) => (
+                        <div key={i} className="flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 rounded-full backdrop-blur-md">
+                            <div className="w-2 h-2 rounded-full bg-gold animate-pulse" />
+                            <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{msg}</span>
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
       </motion.div>
 
-      {/* 📊 PROTOCOL OVERVIEW 📊 */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          { label: 'Protocol Reserve', value: `$${formattedTVL}`, icon: <ShieldCheck className="text-emerald-400" /> },
-          { label: 'Total Pioneers', value: holdersCount?.toString() || '1', icon: <Users className="text-white" /> },
-          { label: 'Market Price', value: `$${currentPrice}`, icon: <Activity className="text-gold" /> },
-          { label: 'Trading Volume', value: `$${formattedVolume}`, icon: <TrendingUp className="text-blue-400" /> }
-        ].map((stat, i) => (
-          <motion.div key={i} variants={cinematicReveal}>
-            <GlassCard className="p-10 border-white/10 bg-slate-900/60 hover:bg-white/[0.03] transition-all duration-500">
-                <div className="flex items-center justify-between mb-10">
-                    <div className="p-4 bg-white/5 rounded-2xl border border-white/10">{stat.icon}</div>
-                </div>
-                <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em] mb-2 text-left">{stat.label}</h3>
-                <div className="text-3xl md:text-5xl font-black text-white tracking-tighter text-left">{stat.value}</div>
-            </GlassCard>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* 🚀 THE 1 USDT INVESTMENT JOURNEY (NEW) 🚀 */}
+      {/* 🚀 THE 1 USDT INVESTMENT JOURNEY 🚀 */}
       <motion.div 
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -173,13 +167,16 @@ export const DashboardView = () => {
       >
           <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gold/10 blur-[150px] pointer-events-none" />
           
-          <div className="flex flex-col lg:flex-row gap-20 items-center">
-              <div className="flex-1 text-left space-y-10">
-                  <div className="flex items-center gap-4">
-                      <Calculator className="w-10 h-10 text-gold" />
-                      <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter italic leading-none">
-                          INVEST <span className="text-gold">1 USDT</span>
-                      </h2>
+          <div className="flex flex-col lg:flex-row gap-24 items-center">
+              <div className="flex-1 text-left space-y-12">
+                  <div className="space-y-4">
+                      <div className="flex items-center gap-4">
+                          <Calculator className="w-12 h-12 text-gold" />
+                          <h2 className="text-6xl md:text-8xl font-black text-white uppercase tracking-tighter italic leading-none">
+                              INVEST <span className="text-gold">1 USDT</span>
+                          </h2>
+                      </div>
+                      <div className="w-32 h-1.5 bg-gold rounded-full" />
                   </div>
                   
                   <div className="space-y-8">
@@ -188,15 +185,15 @@ export const DashboardView = () => {
                       </p>
                       
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
-                          <div className="p-8 bg-white/5 rounded-3xl border border-white/10">
-                              <h4 className="text-gold font-black uppercase text-xs mb-2 tracking-widest">Year 1 Projection</h4>
-                              <p className="text-4xl font-black text-white">$100 - $1,000+</p>
-                              <p className="text-[10px] text-slate-500 mt-2">Based on scarcity math & bonding curve growth.</p>
+                          <div className="p-10 bg-white/5 rounded-[2.5rem] border border-white/10 group hover:border-gold/30 transition-all">
+                              <h4 className="text-gold font-black uppercase text-[10px] mb-2 tracking-[0.3em]">Year 1 Projection</h4>
+                              <p className="text-5xl font-black text-white">$100 - $1,000+</p>
+                              <p className="text-[10px] text-slate-500 mt-4 uppercase tracking-widest font-bold">Protocol Growth Forecast</p>
                           </div>
-                          <div className="p-8 bg-gold/10 rounded-3xl border border-gold/30">
-                              <h4 className="text-white font-black uppercase text-xs mb-2 tracking-widest">Max Supply Target</h4>
-                              <p className="text-4xl font-black text-gold">$100,000 / Gram</p>
-                              <p className="text-[10px] text-slate-500 mt-2">The ultimate scarcity goal of Gold Chain.</p>
+                          <div className="p-10 bg-gold/10 rounded-[2.5rem] border border-gold/30 group hover:scale-105 transition-all">
+                              <h4 className="text-white font-black uppercase text-[10px] mb-2 tracking-[0.3em]">Max Supply Target</h4>
+                              <p className="text-5xl font-black text-gold">$100,000</p>
+                              <p className="text-[10px] text-slate-500 mt-4 uppercase tracking-widest font-bold">Final Scarcity Valuation</p>
                           </div>
                       </div>
                   </div>
@@ -204,27 +201,69 @@ export const DashboardView = () => {
               
               <div className="lg:w-1/3 text-center bg-black/40 backdrop-blur-2xl border border-white/10 p-16 rounded-[4rem] shadow-2xl relative">
                   <Rocket className="w-20 h-20 text-gold mx-auto mb-8 animate-bounce" />
-                  <h3 className="text-4xl font-black text-white uppercase italic mb-4">Start Your Journey</h3>
+                  <h3 className="text-4xl font-black text-white uppercase italic mb-4">Join The Mission</h3>
                   <p className="text-slate-400 text-base font-medium mb-12">Small investment today, astronomical growth tomorrow.</p>
-                  <button className="w-full py-6 bg-gold text-black rounded-3xl font-black uppercase tracking-widest hover:scale-105 transition-all shadow-gold">Invest Now</button>
+                  <button className="w-full py-6 bg-gold text-black rounded-3xl font-black uppercase tracking-widest hover:shadow-gold transition-all">Start Investing</button>
               </div>
           </div>
       </motion.div>
 
-      {/* 💰 INVESTOR BENEFITS 💰 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-          {[
-            { title: 'Extreme Scarcity', desc: 'A hard cap of 21,000,000 tokens ensures your investment stays rare and valuable.', icon: <Gem className="text-gold" /> },
-            { title: 'Liquidity Guarantee', desc: '100% USDT backed reserve. Sell back to the protocol anytime.', icon: <CheckCircle2 className="text-emerald-400" /> },
-            { title: 'Zero Middlemen', desc: 'Fees go back to the protocol and holders, not to banks.', icon: <Lock className="text-blue-400" /> }
-          ].map((item, i) => (
-              <motion.div key={i} variants={cinematicReveal} className="p-10 bg-slate-900/60 border border-white/5 rounded-[3rem] hover:border-gold/20 transition-all">
-                  <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-10">{item.icon}</div>
-                  <h3 className="text-4xl font-black text-white uppercase italic tracking-tighter mb-4">{item.title}</h3>
-                  <p className="text-slate-500 text-lg leading-relaxed font-medium text-left">{item.desc}</p>
-              </motion.div>
-          ))}
+      {/* 📊 MAIN STATS 📊 */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        {[
+          { label: 'Global Pioneers', value: holdersCount?.toString() || '1', icon: <Users className="text-white" /> },
+          { label: 'Market Price', value: `$${currentPrice}`, icon: <Activity className="text-gold" /> },
+          { label: 'Protocol Reserve', value: `$${formattedTVL}`, icon: <ShieldCheck className="text-emerald-400" /> },
+          { label: 'Trade Volume', value: `$${formattedVolume}`, icon: <TrendingUp className="text-blue-400" /> }
+        ].map((stat, i) => (
+          <motion.div key={i} variants={cinematicReveal}>
+            <GlassCard className="p-10 border-white/10 bg-slate-900/60 hover:bg-gold/5 transition-all duration-500 text-center">
+                <div className="flex justify-center mb-10">
+                    <div className="p-4 bg-white/5 rounded-2xl border border-white/10">{stat.icon}</div>
+                </div>
+                <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em] mb-2">{stat.label}</h3>
+                <div className="text-3xl md:text-5xl font-black text-white tracking-tighter drop-shadow-lg">{stat.value}</div>
+            </GlassCard>
+          </motion.div>
+        ))}
       </div>
+
+      {/* 🤝 COMMUNITY & TRUST (NEW) 🤝 */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        className="flex flex-col items-center text-center space-y-12 pb-20"
+      >
+          <div className="space-y-4">
+              <h2 className="text-5xl md:text-7xl font-black text-white uppercase italic tracking-tighter">JOIN THE <span className="text-gold text-transparent bg-clip-text bg-gradient-to-r from-gold to-white">GALAXY</span></h2>
+              <p className="text-slate-500 font-medium tracking-[0.2em] uppercase text-xs">Be part of the 21 Million Scarcity Revolution</p>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-6">
+              {[
+                  { label: 'Telegram', icon: <MessageSquare className="w-6 h-6" />, color: 'bg-blue-500' },
+                  { label: 'Twitter X', icon: <Twitter className="w-6 h-6" />, color: 'bg-white text-black' },
+                  { label: 'Global App', icon: <Globe className="w-6 h-6" />, color: 'bg-emerald-500' }
+              ].map((social, i) => (
+                  <button key={i} className={`flex items-center gap-4 px-10 py-5 ${social.color} rounded-2xl font-black uppercase text-xs tracking-widest hover:scale-105 transition-all shadow-2xl`}>
+                      {social.icon}
+                      {social.label}
+                  </button>
+              ))}
+          </div>
+
+          <div className="flex items-center gap-10 opacity-40">
+              <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5" />
+                  <span className="text-[10px] font-black uppercase">Verified Contract</span>
+              </div>
+              <div className="w-1.5 h-1.5 rounded-full bg-slate-700" />
+              <div className="flex items-center gap-2">
+                  <Lock className="w-5 h-5" />
+                  <span className="text-[10px] font-black uppercase">Audit Ready</span>
+              </div>
+          </div>
+      </motion.div>
     </motion.div>
   );
 };
