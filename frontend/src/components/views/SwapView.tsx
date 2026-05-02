@@ -179,10 +179,14 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
   }, [isSuccess]);
 
   const handleFaucet = async () => {
-    if (!address || !collateralTokenAddress) return;
+    if (!address || !collateralTokenAddress) {
+        alert("Please connect your wallet first!");
+        return;
+    }
+    console.log("Faucet Clicked for:", collateralTokenAddress);
     writeContract({
       address: collateralTokenAddress as `0x${string}`,
-      abi: ERC20_ABI,
+      abi: parseAbi(ERC20_ABI),
       functionName: 'mint',
       args: [address, parseUnits('10000', 6)],
     }, 'faucet');
@@ -195,7 +199,7 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
     const MAX_UINT256 = BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
     writeContract({
       address: tokenToApprove as `0x${string}`,
-      abi: ERC20_ABI,
+      abi: parseAbi(ERC20_ABI),
       functionName: 'approve',
       args: [bondingCurveAddress as `0x${string}`, MAX_UINT256],
     }, 'approve');
@@ -209,14 +213,14 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
     if (isSelling) {
       writeContract({
         address: bondingCurveAddress as `0x${string}`,
-        abi: GOLD_BONDING_CURVE_ABI,
+        abi: parseAbi(GOLD_BONDING_CURVE_ABI),
         functionName: 'sell',
         args: [parseUnits(amount, 18), minOut],
       }, 'swap');
     } else {
       writeContract({
         address: bondingCurveAddress as `0x${string}`,
-        abi: GOLD_BONDING_CURVE_ABI,
+        abi: parseAbi(GOLD_BONDING_CURVE_ABI),
         functionName: 'buy',
         args: [parseUnits(amount, 6), minOut, refAddr as `0x${string}`],
       }, 'swap');
@@ -233,7 +237,7 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
     if (!recipient || !sendAmount || !goldTokenAddress) return;
     writeContract({
       address: goldTokenAddress as `0x${string}`,
-      abi: ERC20_ABI,
+      abi: parseAbi(ERC20_ABI),
       functionName: 'transfer',
       args: [recipient as `0x${string}`, parseUnits(sendAmount, 18)],
     }, 'send');
