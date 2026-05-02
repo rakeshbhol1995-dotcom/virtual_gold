@@ -10,9 +10,6 @@ import {
   ShieldCheck, 
   ArrowUpRight,
   ArrowDownRight,
-  MessageSquare,
-  Share2,
-  Globe,
   Sparkles
 } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -25,17 +22,17 @@ const container = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: { staggerChildren: 0.2 }
+    transition: { staggerChildren: 0.15 }
   }
 };
 
-const straightCinematic = {
-  hidden: { opacity: 0, y: 30, letterSpacing: '0.4em' },
+const brandReveal = {
+  hidden: { opacity: 0, y: 20, letterSpacing: '0.6em' },
   show: { 
     opacity: 1, 
     y: 0, 
-    letterSpacing: '0.2em',
-    transition: { duration: 1, ease: "easeOut" } 
+    letterSpacing: '0.4em',
+    transition: { duration: 1.2, ease: [0.16, 1, 0.3, 1] } 
   }
 };
 
@@ -94,52 +91,58 @@ export const DashboardView = () => {
       animate="show"
       className="space-y-24 pb-40 px-4 pt-10"
     >
-      {/* 🌌 HERO SECTION: GOLDEN SINGULARITY WITH STARS 🌌 */}
-      <motion.div variants={straightCinematic} className="relative">
-        <div className="relative overflow-hidden bg-slate-950/95 border border-gold/30 rounded-[4rem] min-h-[700px] md:min-h-[850px] flex items-center justify-center group shadow-2xl">
+      {/* 🌌 PREMIUM BRANDED HERO 🌌 */}
+      <div className="relative overflow-hidden bg-slate-950/95 border border-gold/30 rounded-[4rem] min-h-[700px] md:min-h-[850px] flex flex-col items-center justify-center shadow-2xl">
             
-            {/* ✨ TWINKLING STARS ✨ */}
+            {/* ✨ STARS BACKGROUND ✨ */}
             <div className="absolute inset-0 pointer-events-none">
                 {[...Array(60)].map((_, i) => (
                     <motion.div
                         key={i}
-                        animate={{ opacity: [0.1, 0.7, 0.1], scale: [1, 1.2, 1] }}
-                        transition={{ duration: 2 + Math.random() * 3, repeat: Infinity, delay: Math.random() * 5 }}
-                        className="absolute w-1 h-1 bg-white rounded-full shadow-[0_0_10px_white]"
+                        animate={{ opacity: [0.1, 0.6, 0.1] }}
+                        transition={{ duration: 2 + Math.random() * 3, repeat: Infinity }}
+                        className="absolute w-0.5 h-0.5 bg-white rounded-full shadow-[0_0_5px_white]"
                         style={{ top: `${Math.random() * 100}%`, left: `${Math.random() * 100}%` }}
                     />
                 ))}
             </div>
 
-            {/* BRANDING */}
-            <div className="absolute top-20 text-center z-50">
-                <motion.h2 variants={straightCinematic} className="text-4xl md:text-8xl font-black tracking-[0.3em] uppercase leading-tight text-transparent bg-clip-text bg-gradient-to-b from-gold via-yellow-100 to-yellow-600 drop-shadow-[0_0_20px_rgba(255,215,0,0.3)]">
-                    GOLD CHAIN
-                </motion.h2>
-                <motion.p variants={straightCinematic} className="text-[10px] md:text-xs font-black text-gold/40 uppercase tracking-[1em] mt-8">Mathematical Singularity Protocol</motion.p>
+            {/* 🏆 ROYAL GOLD CHAIN BRANDING 🏆 */}
+            <div className="text-center z-50 mb-10">
+                <motion.div variants={brandReveal} className="relative inline-block">
+                    <h1 className="text-5xl md:text-9xl font-black uppercase tracking-[0.3em] leading-none text-transparent bg-clip-text bg-gradient-to-b from-[#FFF3A0] via-gold to-[#B8860B] drop-shadow-[0_10px_40px_rgba(255,215,0,0.4)]">
+                        GOLD CHAIN
+                    </h1>
+                    {/* Glowing Underline */}
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: '100%' }}
+                      transition={{ duration: 1.5, delay: 0.5 }}
+                      className="h-1 bg-gradient-to-r from-transparent via-gold to-transparent mt-6 shadow-[0_0_20px_gold]"
+                    />
+                </motion.div>
+                <motion.p variants={brandReveal} className="text-[10px] md:text-sm font-black text-gold/30 uppercase tracking-[1.2em] mt-10">THE SUPREME ON-CHAIN GOLD STANDARD</motion.p>
             </div>
 
-            {/* 🌟 RESTORED GOLDEN SINGULARITY DESIGN 🌟 */}
-            <div className="relative w-full h-full flex items-center justify-center scale-75 md:scale-90 lg:scale-100">
+            {/* GOLDEN SINGULARITY ANIMATION */}
+            <div className="relative w-full flex items-center justify-center scale-75 md:scale-90 lg:scale-100 mt-10">
                 <motion.div className="relative z-30">
-                    {[...Array(5)].map((_, i) => (
+                    {[...Array(4)].map((_, i) => (
                         <motion.div 
                             key={i}
-                            animate={{ scale: [1, 1.5, 1], opacity: [0.05, 0.2, 0.05] }}
-                            transition={{ duration: 4 + i, repeat: Infinity }}
-                            className="absolute inset-0 rounded-full bg-gold blur-[80px]"
-                            style={{ margin: `-${i * 30}px` }}
+                            animate={{ scale: [1, 1.5, 1], opacity: [0.05, 0.2, 0.05], rotate: 360 }}
+                            transition={{ duration: 5 + i, repeat: Infinity }}
+                            className="absolute inset-0 rounded-full bg-gold blur-[70px]"
+                            style={{ margin: `-${i * 25}px` }}
                         />
                     ))}
                     <motion.div 
                         animate={{ rotate: 360 }}
-                        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-                        className="relative w-48 h-48 md:w-72 md:h-72 border-2 border-gold/20 rounded-full flex items-center justify-center p-4"
+                        transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+                        className="relative w-40 h-40 md:w-60 md:h-60 border-2 border-gold/20 rounded-full flex items-center justify-center p-4"
                     >
-                        {/* Internal Rings */}
-                        <div className="w-full h-full border-[1px] border-gold/40 rounded-full animate-pulse opacity-30" />
-                        <div className="absolute w-4/5 h-4/5 border-[4px] border-gold/60 rounded-full shadow-[0_0_40px_rgba(255,215,0,0.4)]" />
-                        <div className="absolute w-1/2 h-1/2 bg-gradient-to-tr from-yellow-700 to-gold rounded-full shadow-[0_0_80px_rgba(255,215,0,0.6)]" />
+                        <div className="absolute w-4/5 h-4/5 border-[3px] border-gold/50 rounded-full shadow-[0_0_30px_rgba(255,215,0,0.3)]" />
+                        <div className="absolute w-1/3 h-1/3 bg-gradient-to-tr from-yellow-700 to-gold rounded-full shadow-[0_0_60px_rgba(255,215,0,0.5)]" />
                     </motion.div>
                 </motion.div>
 
@@ -148,14 +151,18 @@ export const DashboardView = () => {
                     <div key={planet.name} className="absolute rounded-full border border-white/5 pointer-events-none" style={{ width: planet.orbit * 2, height: planet.orbit * 2 }}>
                         <motion.div animate={{ rotate: 360 }} transition={{ duration: planet.speed, repeat: Infinity, ease: "linear" }} className="absolute w-full h-full">
                             <div className="absolute flex flex-col items-center pointer-events-auto" style={{ top: '50%', left: '100%', transform: 'translate(-50%, -50%)' }}>
-                                <div className="rounded-full border-2 border-white/20" style={{ width: planet.size, height: planet.size, backgroundColor: planet.color, boxShadow: `0 0 30px ${planet.color}` }} />
+                                <div className="rounded-full border-2 border-white/20 shadow-2xl" style={{ width: planet.size, height: planet.size, backgroundColor: planet.color }} />
                             </div>
                         </motion.div>
                     </div>
                 ))}
             </div>
-        </div>
-      </motion.div>
+
+            <div className="absolute bottom-16 flex items-center gap-4 px-8 py-3 bg-white/5 border border-white/10 rounded-full backdrop-blur-md opacity-40">
+                <Sparkles className="w-4 h-4 text-gold" />
+                <span className="text-[10px] font-black text-white uppercase tracking-[0.5em]">Protocol Active</span>
+            </div>
+      </div>
 
       {/* 📊 PROTOCOL METRICS 📊 */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
@@ -165,8 +172,8 @@ export const DashboardView = () => {
           { label: 'GLOBAL HOLDERS', value: holdersCount?.toString() || '1', icon: <Users className="text-white" /> },
           { label: 'TRADE VOLUME', value: `$${formattedVolume}`, icon: <TrendingUp className="text-blue-400" /> }
         ].map((stat, i) => (
-          <motion.div key={i} variants={straightCinematic}>
-            <GlassCard className="p-12 border-white/10 bg-slate-900/60 hover:bg-gold/5 transition-all text-center group">
+          <motion.div key={i} variants={brandReveal}>
+            <GlassCard className="p-12 border-white/5 bg-slate-900/60 hover:bg-gold/5 transition-all text-center group">
                 <div className="flex justify-center mb-10">
                     <div className="p-4 bg-white/5 rounded-2xl border border-white/10 group-hover:scale-110 transition-transform">{stat.icon}</div>
                 </div>
@@ -189,16 +196,16 @@ export const DashboardView = () => {
                 <div className="flex items-center justify-between border-b border-white/10 pb-10">
                     <div className="space-y-2 text-left">
                         <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter italic">LIVE <span className="text-gold">ACTIVITY</span></h2>
-                        <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Real-time Transaction Pulse on Base</p>
+                        <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Real-time Trading Pulse</p>
                     </div>
-                    <Activity className="w-10 h-10 text-gold opacity-30 animate-pulse" />
+                    <Activity className="w-10 h-10 text-gold opacity-20 animate-pulse" />
                 </div>
 
                 <div className="w-full overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
                             <tr className="border-b border-white/5">
-                                <th className="pb-6 text-[10px] font-black text-slate-600 uppercase tracking-widest">Wallet Address</th>
+                                <th className="pb-6 text-[10px] font-black text-slate-600 uppercase tracking-widest">Wallet ID</th>
                                 <th className="pb-6 text-[10px] font-black text-slate-600 uppercase tracking-widest text-center">Action</th>
                                 <th className="pb-6 text-[10px] font-black text-slate-600 uppercase tracking-widest text-right">Amount (GOLD)</th>
                             </tr>
@@ -221,31 +228,6 @@ export const DashboardView = () => {
                 </div>
             </div>
         </GlassCard>
-      </motion.div>
-
-      {/* 🤝 COMMUNITY HUB 🤝 */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        className="flex flex-col items-center text-center space-y-12 pb-20"
-      >
-          <div className="space-y-4">
-              <h2 className="text-4xl md:text-6xl font-black text-white uppercase italic tracking-tighter">JOIN THE <span className="text-gold">MISSION</span></h2>
-              <p className="text-slate-600 font-black tracking-[0.4em] uppercase text-[10px]">On-Chain Gold Revolution</p>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-6">
-              {[
-                  { label: 'Telegram', icon: <MessageSquare className="w-5 h-5" />, color: 'bg-blue-500' },
-                  { label: 'Twitter X', icon: <Share2 className="w-5 h-5" />, color: 'bg-white text-black' },
-                  { label: 'Market DApp', icon: <Globe className="w-5 h-5" />, color: 'bg-emerald-500' }
-              ].map((social, i) => (
-                  <button key={i} className={`flex items-center gap-4 px-10 py-5 ${social.color} rounded-2xl font-black uppercase text-[10px] tracking-widest hover:scale-105 transition-all shadow-2xl`}>
-                      {social.icon}
-                      {social.label}
-                  </button>
-              ))}
-          </div>
       </motion.div>
     </motion.div>
   );
