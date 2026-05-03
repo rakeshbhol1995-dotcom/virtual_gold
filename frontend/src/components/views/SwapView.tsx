@@ -52,8 +52,8 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
   const [copied, setCopied] = useState(false);
   const [pendingAction, setPendingAction] = useState<'approve' | 'swap' | 'send' | 'faucet' | null>(null);
   
-  const goldTokenAddress = '0x62b85AC66FDf0cfF8d34601CCdc3060054a87525';
-  const bondingCurveAddress = '0x184d32Bdc23501Ca860Ab000612c63d1940c50AF';
+  const goldTokenAddress = '0x2DE2FAacA36a2BD434276126966F32453B7d1849';
+  const bondingCurveAddress = '0x15C3EC22A9DB635B3B5FbE49B9dd2b567Cd31e85';
   const collateralTokenAddress = '0x526d075C81cb3451B436943BF999667Ba659ffC8';
 
   const { data: totalSupply, refetch: refetchTotalSupply } = useReadContract({
@@ -344,13 +344,31 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
 
                             {/* Action Core */}
                             <div className="pt-6 space-y-4">
-                                {isSuccess && (
-                                    <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
-                                        <div className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mb-1">Success</div>
-                                        <div className="text-[10px] text-emerald-200/60 leading-relaxed">
-                                            Swap complete! Refreshing portfolio in 1s...
-                                        </div>
+                                {isSuccess && hash && (
+                                  <motion.div 
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl"
+                                  >
+                                    <div className="flex items-center justify-between mb-2">
+                                      <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">
+                                        {pendingAction === 'approve' ? 'Authorization Successful!' : 'Trade Executed Successfully!'}
+                                      </span>
+                                      <a 
+                                        href={`https://sepolia.basescan.org/tx/${hash}`} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="text-[9px] text-emerald-400 underline hover:text-white transition-colors"
+                                      >
+                                        View on Explorer
+                                      </a>
                                     </div>
+                                    <p className="text-[9px] text-emerald-200/60 leading-relaxed">
+                                      {pendingAction === 'approve' 
+                                        ? 'Permission granted to trade. You can now click "Execute Buy" to finalize your swap.' 
+                                        : 'Gold has been added to your wallet. Your portfolio will refresh in a few seconds.'}
+                                    </p>
+                                  </motion.div>
                                 )}
                                 
                                 {isConfirming && (
