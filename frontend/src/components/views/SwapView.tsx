@@ -47,13 +47,13 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
   const [amount, setAmount] = useState('');
   const [outAmount, setOutAmount] = useState('0.0');
   const [isSelling, setIsSelling] = useState(false);
-  const [slippage, setSlippage] = useState(0.5); 
+  const [slippage, setSlippage] = useState(1.0); 
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [pendingAction, setPendingAction] = useState<'approve' | 'swap' | 'send' | 'faucet' | null>(null);
   
-  const goldTokenAddress = '0xab69182e2f5082037bC2ccba78eba80C7CBcbE8D';
-  const bondingCurveAddress = '0x679743E899D03EbC2384BC774E67C08c95eA0f1b';
+  const goldTokenAddress = '0xa9baC54e54311B025ED039e6c5A708B71dD4C0C8';
+  const bondingCurveAddress = '0xE270277FE5129f151B1e56A3d2Fb5386dAC2a68E';
   const collateralTokenAddress = '0x526d075C81cb3451B436943BF999667Ba659ffC8';
 
   const { data: totalSupply, refetch: refetchTotalSupply } = useReadContract({
@@ -164,10 +164,13 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
     }, 'approve');
   };
 
+  
   const handleSwap = () => {
     const slippageBP = Math.floor(slippage * 10);
     const minOut = expectedOut ? (BigInt(expectedOut.toString()) * BigInt(1000 - slippageBP)) / 1000n : 0n;
     
+    console.log("Execution Payload:", { isSelling, amount, expectedOut: expectedOut?.toString(), minOut: minOut.toString() });
+
     if (isSelling) {
       writeContract({
         address: bondingCurveAddress as `0x${string}`,
