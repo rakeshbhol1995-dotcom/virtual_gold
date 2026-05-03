@@ -52,8 +52,8 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
   const [copied, setCopied] = useState(false);
   const [pendingAction, setPendingAction] = useState<'approve' | 'swap' | 'send' | 'faucet' | null>(null);
   
-  const goldTokenAddress = '0xAB955b6ee45d40D948afA04e2D44066afd02AED7';
-  const bondingCurveAddress = '0x8AE95E755B0AbC29C1f96C115Da36185781EB7Cc';
+  const goldTokenAddress = '0x43bE6562d0a01b685fAFf5dD31A4bF2d211f31E9';
+  const bondingCurveAddress = '0xffdfCBa74d2a8AB4b787C6c3F44aAc2486CF441E';
   const collateralTokenAddress = '0x526d075C81cb3451B436943BF999667Ba659ffC8';
 
   const { data: totalSupply, refetch: refetchTotalSupply } = useReadContract({
@@ -132,16 +132,23 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
 
   useEffect(() => {
     if (isSuccess) {
-      setTimeout(() => {
+      // Triple-Pulse Refetch to combat RPC Latency
+      const triggerRefetch = () => {
         refetchUsdtAllowance(); 
         refetchGoldAllowance();
         refetchUsdtBalance(); 
         refetchGoldBalance();
         refetchTotalSupply();
         refetchPrice();
-        if (pendingAction === 'swap') onSwap?.();
-        setPendingAction(null);
-      }, 1000); // 1s delay for chain state to stabilize
+      };
+
+      triggerRefetch(); // Instant
+      setTimeout(triggerRefetch, 2000); // 2s Buffer
+      setTimeout(triggerRefetch, 5000); // 5s Final confirmation
+
+      if (pendingAction === 'swap') onSwap?.();
+      setPendingAction(null);
+      setAmount(''); // Reset input
     }
   }, [isSuccess]);
 

@@ -57,10 +57,11 @@ const MOCK_TRADES = [
 export const DashboardView = () => {
   const chainId = useChainId();
   const mounted = useMounted();
-  const goldTokenAddress = '0xAB955b6ee45d40D948afA04e2D44066afd02AED7';
-  const bondingCurveAddress = '0x8AE95E755B0AbC29C1f96C115Da36185781EB7Cc';
+  const goldTokenAddress = '0x43bE6562d0a01b685fAFf5dD31A4bF2d211f31E9';
+  const bondingCurveAddress = '0xffdfCBa74d2a8AB4b787C6c3F44aAc2486CF441E';
+  const collateralTokenAddress = CONTRACTS[84532].collateralToken;
 
-  const { data: totalSupply } = useReadContract({
+  const { data: totalSupply, refetch: refetchTotalSupply } = useReadContract({
     chainId: 84532,
     address: goldTokenAddress as `0x${string}`,
     abi: parseAbi(ERC20_ABI),
@@ -68,7 +69,7 @@ export const DashboardView = () => {
     query: { refetchInterval: 1000 }
   });
 
-  const { data: price } = useReadContract({
+  const { data: price, refetch: refetchPrice } = useReadContract({
     chainId: 84532,
     address: bondingCurveAddress as `0x${string}`,
     abi: parseAbi(GOLD_BONDING_CURVE_ABI),
@@ -76,7 +77,7 @@ export const DashboardView = () => {
     query: { refetchInterval: 1000 }
   });
 
-  const { data: volume } = useReadContract({
+  const { data: volume, refetch: refetchVolume } = useReadContract({
     chainId: 84532,
     address: bondingCurveAddress as `0x${string}`,
     abi: parseAbi(GOLD_BONDING_CURVE_ABI),
@@ -92,9 +93,9 @@ export const DashboardView = () => {
     query: { refetchInterval: 1000 }
   });
 
-  const { data: tvlBalance } = useReadContract({
+  const { data: tvlBalance, refetch: refetchTVL } = useReadContract({
     chainId: 84532,
-    address: CONTRACTS[84532].collateralToken as `0x${string}`,
+    address: collateralTokenAddress as `0x${string}`,
     abi: parseAbi(ERC20_ABI),
     functionName: 'balanceOf',
     args: [bondingCurveAddress as `0x${string}`],
