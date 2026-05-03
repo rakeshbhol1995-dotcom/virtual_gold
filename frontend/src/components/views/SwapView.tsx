@@ -52,8 +52,8 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
   const [copied, setCopied] = useState(false);
   const [pendingAction, setPendingAction] = useState<'approve' | 'swap' | 'send' | 'faucet' | null>(null);
   
-  const goldTokenAddress = '0x43bE6562d0a01b685fAFf5dD31A4bF2d211f31E9';
-  const bondingCurveAddress = '0xffdfCBa74d2a8AB4b787C6c3F44aAc2486CF441E';
+  const goldTokenAddress = '0x44988eAFcDa128dBcbd9b4c003fC2fA5e1623621';
+  const bondingCurveAddress = '0x067B09C09AE81246232025e62e5a8078A0c38d56';
   const collateralTokenAddress = '0x526d075C81cb3451B436943BF999667Ba659ffC8';
 
   const { data: totalSupply, refetch: refetchTotalSupply } = useReadContract({
@@ -71,11 +71,11 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
   });
 
   const { data: usdtBalance, refetch: refetchUsdtBalance } = useReadContract({
-    address: collateralTokenAddress,
+    address: collateralTokenAddress as `0x${string}`,
     abi: parseAbi(ERC20_ABI),
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
-    query: { enabled: !!address, refetchInterval: 2000 }
+    query: { refetchInterval: 1000, staleTime: 0 }
   });
 
   const { data: goldBalance, refetch: refetchGoldBalance } = useReadContract({
@@ -87,19 +87,19 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
   });
 
   const { data: usdtAllowance, refetch: refetchUsdtAllowance } = useReadContract({
-    address: collateralTokenAddress,
+    address: collateralTokenAddress as `0x${string}`,
     abi: parseAbi(ERC20_ABI),
     functionName: 'allowance',
-    args: address ? [address, bondingCurveAddress] : undefined,
-    query: { enabled: !!address, refetchInterval: 2000 }
+    args: address ? [address as `0x${string}`, bondingCurveAddress as `0x${string}`] : undefined,
+    query: { enabled: !!address, refetchInterval: 1000, staleTime: 0 }
   });
 
   const { data: goldAllowance, refetch: refetchGoldAllowance } = useReadContract({
-    address: goldTokenAddress,
+    address: goldTokenAddress as `0x${string}`,
     abi: parseAbi(ERC20_ABI),
     functionName: 'allowance',
-    args: address ? [address, bondingCurveAddress] : undefined,
-    query: { enabled: !!address, refetchInterval: 2000 }
+    args: address ? [address as `0x${string}`, bondingCurveAddress as `0x${string}`] : undefined,
+    query: { enabled: !!address, refetchInterval: 1000, staleTime: 0 }
   });
 
   const allowance = isSelling ? goldAllowance : usdtAllowance;

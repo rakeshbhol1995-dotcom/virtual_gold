@@ -57,8 +57,8 @@ const MOCK_TRADES = [
 export const DashboardView = () => {
   const chainId = useChainId();
   const mounted = useMounted();
-  const goldTokenAddress = '0x43bE6562d0a01b685fAFf5dD31A4bF2d211f31E9';
-  const bondingCurveAddress = '0xffdfCBa74d2a8AB4b787C6c3F44aAc2486CF441E';
+  const goldTokenAddress = '0x44988eAFcDa128dBcbd9b4c003fC2fA5e1623621';
+  const bondingCurveAddress = '0x067B09C09AE81246232025e62e5a8078A0c38d56';
   const collateralTokenAddress = CONTRACTS[84532].collateralToken;
 
   const { data: totalSupply, refetch: refetchTotalSupply } = useReadContract({
@@ -66,7 +66,7 @@ export const DashboardView = () => {
     address: goldTokenAddress as `0x${string}`,
     abi: parseAbi(ERC20_ABI),
     functionName: 'totalSupply',
-    query: { refetchInterval: 1000 }
+    query: { refetchInterval: 1000, staleTime: 0 }
   });
 
   const { data: price, refetch: refetchPrice } = useReadContract({
@@ -74,7 +74,7 @@ export const DashboardView = () => {
     address: bondingCurveAddress as `0x${string}`,
     abi: parseAbi(GOLD_BONDING_CURVE_ABI),
     functionName: 'getCurrentPrice',
-    query: { refetchInterval: 1000 }
+    query: { refetchInterval: 1000, staleTime: 0 }
   });
 
   const { data: volume, refetch: refetchVolume } = useReadContract({
@@ -82,15 +82,15 @@ export const DashboardView = () => {
     address: bondingCurveAddress as `0x${string}`,
     abi: parseAbi(GOLD_BONDING_CURVE_ABI),
     functionName: 'totalVolume',
-    query: { refetchInterval: 1000 }
+    query: { refetchInterval: 1000, staleTime: 0 }
   });
 
-  const { data: holdersCount } = useReadContract({
+  const { data: holdersCount, refetch: refetchHolders } = useReadContract({
     chainId: 84532,
     address: bondingCurveAddress as `0x${string}`,
     abi: parseAbi(GOLD_BONDING_CURVE_ABI),
-    functionName: 'getHoldersCount',
-    query: { refetchInterval: 1000 }
+    functionName: 'holdersCount',
+    query: { refetchInterval: 1000, staleTime: 0 }
   });
 
   const { data: tvlBalance, refetch: refetchTVL } = useReadContract({
@@ -99,13 +99,15 @@ export const DashboardView = () => {
     abi: parseAbi(ERC20_ABI),
     functionName: 'balanceOf',
     args: [bondingCurveAddress as `0x${string}`],
-    query: { refetchInterval: 1000 }
+    query: { refetchInterval: 1000, staleTime: 0 }
   });
+
 
   const currentPrice = useMemo(() => price ? formatUnits(price as bigint, 6) : '10.00', [price]);
   const formattedVolume = useMemo(() => volume ? Number(formatUnits(volume as bigint, 6)).toLocaleString() : '0', [volume]);
   const formattedTVL = useMemo(() => tvlBalance ? Number(formatUnits(tvlBalance as bigint, 6)).toLocaleString() : '0', [tvlBalance]);
   const formattedTotalSupply = useMemo(() => totalSupply ? Number(formatUnits(totalSupply as bigint, 18)).toLocaleString() : '0', [totalSupply]);
+  const formattedHolders = useMemo(() => holdersCount ? Number(holdersCount).toLocaleString() : '0', [holdersCount]);
 
   if (!mounted) return null;
 
@@ -197,7 +199,7 @@ export const DashboardView = () => {
         {[
           { label: 'MARKET PRICE', value: `$${currentPrice}`, icon: <Activity className="text-gold" /> },
           { label: 'PROTOCOL TVL', value: `$${formattedTVL}`, icon: <ShieldCheck className="text-emerald-400" /> },
-          { label: 'GLOBAL HOLDERS', value: holdersCount ? holdersCount.toString() : '...', icon: <Users className="text-white" /> },
+          { label: 'GLOBAL HOLDERS', value: formattedHolders, icon: <Users className="text-white" /> },
           { label: 'TRADE VOLUME', value: `$${formattedVolume}`, icon: <TrendingUp className="text-blue-400" /> }
         ].map((stat, i) => (
           <motion.div key={i} variants={brandReveal}>
