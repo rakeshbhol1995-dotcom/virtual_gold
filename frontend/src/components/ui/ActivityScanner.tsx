@@ -63,7 +63,7 @@ export const ActivityScanner = () => {
             type: 'Buy' as const,
             status: 'success' as const,
             timestamp: Number(log.blockNumber) || Date.now(), // Use block number for order
-            amount: formatUnits(log.args.collateralAmount || 0n, 6),
+            amount: formatUnits(log.args.collateralIn || 0n, 6),
             symbol: 'USDT',
             user: log.args.user?.toLowerCase() || '',
             isGlobal: true
@@ -73,7 +73,7 @@ export const ActivityScanner = () => {
             type: 'Sell' as const,
             status: 'success' as const,
             timestamp: Number(log.blockNumber) || Date.now(),
-            amount: formatUnits(log.args.collateralAmount || 0n, 6),
+            amount: formatUnits(log.args.collateralOut || 0n, 6),
             symbol: 'USDT',
             user: log.args.user?.toLowerCase() || '',
             isGlobal: true
@@ -108,7 +108,7 @@ export const ActivityScanner = () => {
           type: 'Buy',
           status: 'success',
           timestamp: Date.now(),
-          amount: formatUnits(log.args.collateralAmount || 0n, 6),
+          amount: formatUnits(log.args.collateralIn || 0n, 6),
           symbol: 'USDT',
           user: log.args.user?.toLowerCase() || '',
           isGlobal: true
@@ -129,7 +129,7 @@ export const ActivityScanner = () => {
           type: 'Sell',
           status: 'success',
           timestamp: Date.now(),
-          amount: formatUnits(log.args.collateralAmount || 0n, 6),
+          amount: formatUnits(log.args.collateralOut || 0n, 6),
           symbol: 'USDT',
           user: log.args.user?.toLowerCase() || '',
           isGlobal: true

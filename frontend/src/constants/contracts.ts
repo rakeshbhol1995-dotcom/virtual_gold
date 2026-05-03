@@ -2,9 +2,9 @@
 import { Address } from 'viem';
 
 export const CONTRACTS = {
-  84532: { // Base Sepolia V2 (21M CAP)
-    goldToken: '0x0FE9D0eC2331302F713c67ba811A2945DB775987' as Address,
-    bondingCurve: '0x47bE45746A50438cC677389a8Cc9b04b55e7D093' as Address,
+  84532: { // Base Sepolia V2 (Final Audit V2)
+    goldToken: '0x789c629864f1146743A95E7C85d3493206A7C6B8' as Address,
+    bondingCurve: '0xE9C7EEf2D1f1E492Ee0a5B8D5fc26a087be49f75' as Address,
     collateralToken: '0x526d075C81cb3451B436943BF999667Ba659ffC8' as Address, // Mock USDT V2
   },
   8453: { // Base Mainnet
@@ -34,15 +34,21 @@ export const GOLD_TOKEN_ABI = [
 
 export const GOLD_BONDING_CURVE_ABI = [
   "function getCurrentPrice() view returns (uint256)",
+  "function virtualBasePrice() view returns (uint256)",
   "function calculateCost(uint256 supply, uint256 amount) view returns (uint256)",
-  "function buy(uint256 collateralLimit, uint256 goldAmount, address referrer) external",
+  "function buy(uint256 goldAmount, uint256 maxCollateralIn) external",
   "function sell(uint256 goldAmount, uint256 minCollateralOut) external",
   "function getGoldOut(uint256 collateralAmount) view returns (uint256)",
   "function getSellProceeds(uint256 goldAmount) view returns (uint256)",
   "function getHoldersCount() view returns (uint256)",
   "function totalVolume() view returns (uint256)",
-  "event Bought(address indexed user, uint256 collateralAmount, uint256 goldAmount, uint256 fee, address indexed referrer)",
-  "event Sold(address indexed user, uint256 goldAmount, uint256 collateralAmount, uint256 fee)"
+  "function miningPool() view returns (uint256)",
+  "function claimMiningReward() external",
+  "function lastClaimed(address) view returns (uint256)",
+  "event Bought(address indexed user, uint256 collateralIn, uint256 goldOut, uint256 fee)",
+  "event Sold(address indexed user, uint256 goldIn, uint256 collateralOut, uint256 fee)",
+  "event RewardClaimed(address indexed user, uint256 amount)",
+  "event FloorBoosted(uint256 newBasePrice)"
 ];
 
 export const ERC20_ABI = [

@@ -13,10 +13,13 @@ import {
   Sparkles
 } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
-import { useReadContract, useChainId } from 'wagmi';
-import { getContractAddress, GOLD_BONDING_CURVE_ABI } from '@/constants/contracts';
+import { FloatingGem } from '@/components/ui/FloatingGem';
+import { useReadContract, useChainId, useAccount } from 'wagmi';
+import { getContractAddress, CONTRACTS, GOLD_BONDING_CURVE_ABI, ERC20_ABI } from '@/constants/contracts';
 import { formatUnits, parseAbi } from 'viem';
 import { useMounted } from '@/hooks/useMounted';
+import { ActivityScanner } from '@/components/ui/ActivityScanner';
+import { TradingChart } from '@/components/ui/TradingChart';
 
 const container = {
   hidden: { opacity: 0 },
@@ -61,7 +64,7 @@ export const DashboardView = () => {
     address: bondingCurveAddress as `0x${string}`,
     abi: parseAbi(GOLD_BONDING_CURVE_ABI),
     functionName: 'getCurrentPrice',
-    query: { refetchInterval: 5000 }
+    query: { refetchInterval: 1000 }
   });
 
   const { data: volume } = useReadContract({
@@ -69,6 +72,7 @@ export const DashboardView = () => {
     address: bondingCurveAddress as `0x${string}`,
     abi: parseAbi(GOLD_BONDING_CURVE_ABI),
     functionName: 'totalVolume',
+    query: { refetchInterval: 1000 }
   });
 
   const { data: holdersCount } = useReadContract({
@@ -76,11 +80,21 @@ export const DashboardView = () => {
     address: bondingCurveAddress as `0x${string}`,
     abi: parseAbi(GOLD_BONDING_CURVE_ABI),
     functionName: 'getHoldersCount',
+    query: { refetchInterval: 1000 }
+  });
+
+  const { data: tvlBalance } = useReadContract({
+    chainId: 84532,
+    address: CONTRACTS[84532].collateralToken as `0x${string}`,
+    abi: parseAbi(ERC20_ABI),
+    functionName: 'balanceOf',
+    args: [bondingCurveAddress as `0x${string}`],
+    query: { refetchInterval: 1000 }
   });
 
   const currentPrice = useMemo(() => price ? formatUnits(price as bigint, 6) : '10.00', [price]);
   const formattedVolume = useMemo(() => volume ? Number(formatUnits(volume as bigint, 6)).toLocaleString() : '0', [volume]);
-  const formattedTVL = useMemo(() => volume ? (Number(formatUnits(volume as bigint, 6)) * 0.85).toLocaleString() : '0', [volume]);
+  const formattedTVL = useMemo(() => tvlBalance ? Number(formatUnits(tvlBalance as bigint, 6)).toLocaleString() : '0', [tvlBalance]);
 
   if (!mounted) return null;
 
@@ -111,7 +125,7 @@ export const DashboardView = () => {
             <div className="text-center z-50 mb-8">
                 <motion.div variants={brandReveal} className="relative inline-block">
                     {/* Resized Text: md:text-7xl for better balance */}
-                    <h1 className="text-4xl md:text-7xl font-black uppercase tracking-[0.2em] leading-none text-transparent bg-clip-text bg-gradient-to-b from-[#FFF3A0] via-gold to-[#B8860B] drop-shadow-[0_0_30px_rgba(255,215,0,0.4)]">
+                    <h1 className="text-5xl md:text-7xl font-black uppercase tracking-[0.1em] md:tracking-[0.2em] leading-none text-transparent bg-clip-text bg-gradient-to-b from-[#FFF3A0] via-gold to-[#B8860B] drop-shadow-[0_0_30px_rgba(255,215,0,0.4)]">
                         GOLD CHAIN
                     </h1>
                     <motion.div 
@@ -127,7 +141,7 @@ export const DashboardView = () => {
                 </motion.p>
             </div>
 
-            {/* GOLDEN SINGULARITY */}
+            {/* GOLDEN SINGULARITY (REVERTED TO STABLE DESIGN) */}
             <div className="relative w-full flex items-center justify-center scale-75 md:scale-90 lg:scale-100 mt-6">
                 <motion.div className="relative z-30">
                     {[...Array(4)].map((_, i) => (
@@ -168,69 +182,65 @@ export const DashboardView = () => {
       </div>
 
       {/* 📊 PROTOCOL METRICS 📊 */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
         {[
           { label: 'MARKET PRICE', value: `$${currentPrice}`, icon: <Activity className="text-gold" /> },
           { label: 'PROTOCOL TVL', value: `$${formattedTVL}`, icon: <ShieldCheck className="text-emerald-400" /> },
-          { label: 'GLOBAL HOLDERS', value: holdersCount?.toString() || '1', icon: <Users className="text-white" /> },
+          { label: 'GLOBAL HOLDERS', value: holdersCount ? holdersCount.toString() : '...', icon: <Users className="text-white" /> },
           { label: 'TRADE VOLUME', value: `$${formattedVolume}`, icon: <TrendingUp className="text-blue-400" /> }
         ].map((stat, i) => (
           <motion.div key={i} variants={brandReveal}>
-            <GlassCard className="p-10 border-white/5 bg-slate-900/60 hover:bg-gold/5 transition-all text-center group">
-                <div className="flex justify-center mb-8">
-                    <div className="p-4 bg-white/5 rounded-2xl border border-white/10 group-hover:scale-110 transition-transform">{stat.icon}</div>
+            <GlassCard className="p-6 md:p-10 border-white/5 bg-slate-900/60 hover:bg-gold/5 transition-all text-center group">
+                <div className="flex justify-center mb-6 md:mb-8">
+                    <div className="p-3 md:p-4 bg-white/5 rounded-2xl border border-white/10 group-hover:scale-110 transition-transform">{stat.icon}</div>
                 </div>
-                <h3 className="text-slate-600 text-[9px] font-black uppercase tracking-[0.4em] mb-2">{stat.label}</h3>
-                <div className="text-3xl md:text-5xl font-black text-white tracking-tighter drop-shadow-xl">{stat.value}</div>
+                <h3 className="text-slate-600 text-[8px] md:text-[9px] font-black uppercase tracking-[0.4em] mb-2">{stat.label}</h3>
+                <div className="text-2xl md:text-5xl font-black text-white tracking-tighter drop-shadow-xl">{stat.value}</div>
             </GlassCard>
           </motion.div>
         ))}
       </div>
 
-      {/* 🚀 LIVE MARKET ACTIVITY LOG 🚀 */}
+      {/* 🚀 TERMINAL FOOTER: ACTIVITY & CHAT 🚀 */}
       <motion.div 
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="max-w-6xl mx-auto w-full"
+        className="max-w-7xl mx-auto w-full"
       >
-        <GlassCard className="border-gold/20 bg-slate-900/40 rounded-[3rem] overflow-hidden">
-            <div className="p-10 md:p-14 space-y-12">
-                <div className="flex items-center justify-between border-b border-white/10 pb-10">
-                    <div className="space-y-2 text-left">
-                        <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter italic">LIVE <span className="text-gold">ACTIVITY</span></h2>
-                        <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest">Real-time Trading Pulse</p>
+        <div className="grid lg:grid-cols-12 gap-8">
+            {/* Trading Chart (Left - 8 columns) */}
+            <div className="lg:col-span-8 space-y-6">
+                <div className="flex items-center justify-between px-6">
+                    <div className="space-y-1">
+                        <h2 className="text-xl md:text-3xl font-black text-white uppercase tracking-tighter italic">MARKET <span className="text-gold">CHART</span></h2>
+                        <p className="text-slate-500 text-[8px] font-black uppercase tracking-widest">Real-time Candlestick Feed</p>
                     </div>
-                    <Activity className="w-8 h-8 text-gold opacity-20 animate-pulse" />
                 </div>
-
-                <div className="w-full overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="border-b border-white/5">
-                                <th className="pb-6 text-[9px] font-black text-slate-600 uppercase tracking-widest">Wallet ID</th>
-                                <th className="pb-6 text-[9px] font-black text-slate-600 uppercase tracking-widest text-center">Action</th>
-                                <th className="pb-6 text-[9px] font-black text-slate-600 uppercase tracking-widest text-right">Amount (GOLD)</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-white/5">
-                            {MOCK_TRADES.map((trade, i) => (
-                                <tr key={i} className="group hover:bg-white/[0.02] transition-colors">
-                                    <td className="py-7 text-xs font-black text-white/50 group-hover:text-white transition-colors uppercase tracking-widest">{trade.id}</td>
-                                    <td className="py-7">
-                                        <div className={`mx-auto flex items-center justify-center gap-2 w-20 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest ${trade.type === 'BUY' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
-                                            {trade.type === 'BUY' ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
-                                            {trade.type}
-                                        </div>
-                                    </td>
-                                    <td className="py-7 text-lg font-black text-white text-right tracking-tighter">{trade.amount}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                <div className="w-full h-[500px] md:h-[600px]">
+                    <GlassCard className="h-full border-gold/10 bg-black/40 overflow-hidden">
+                        <TradingChart />
+                    </GlassCard>
                 </div>
             </div>
-        </GlassCard>
+
+            {/* Live Activity (Right - 4 columns) */}
+            <div className="lg:col-span-4 space-y-6">
+                <div className="flex items-center justify-between px-6">
+                    <div className="space-y-1">
+                        <h2 className="text-xl md:text-3xl font-black text-white uppercase tracking-tighter italic">LIVE <span className="text-gold">FEED</span></h2>
+                        <p className="text-slate-500 text-[8px] font-black uppercase tracking-widest">Real-time Syncing</p>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1 bg-gold/10 border border-gold/20 rounded-full">
+                        <div className="w-1 h-1 bg-gold rounded-full animate-pulse" />
+                        <span className="text-[7px] font-black text-gold uppercase tracking-widest">Sync</span>
+                    </div>
+                </div>
+                <div className="w-full h-[500px] md:h-[600px] overflow-hidden">
+                    <ActivityScanner />
+                </div>
+            </div>
+        </div>
       </motion.div>
     </motion.div>
   );
