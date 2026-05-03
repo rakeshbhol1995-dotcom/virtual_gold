@@ -52,9 +52,9 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
   const [copied, setCopied] = useState(false);
   const [pendingAction, setPendingAction] = useState<'approve' | 'swap' | 'send' | 'faucet' | null>(null);
   
-  const goldTokenAddress = getContractAddress(chainId || 84532, 'goldToken');
-  const bondingCurveAddress = getContractAddress(chainId || 84532, 'bondingCurve');
-  const collateralTokenAddress = getContractAddress(chainId || 84532, 'collateralToken');
+  const goldTokenAddress = '0xc4a58a1dbe2b78b0aa1fe550a2ced27e5835b6be';
+  const bondingCurveAddress = '0xE9C7EEf2D1f1E492Ee0a5B8D5fc26a087be49f75';
+  const collateralTokenAddress = '0x526d075C81cb3451B436943BF999667Ba659ffC8';
 
   const { data: totalSupply, refetch: refetchTotalSupply } = useReadContract({
     address: goldTokenAddress as `0x${string}`,

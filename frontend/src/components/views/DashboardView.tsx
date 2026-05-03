@@ -57,7 +57,16 @@ const MOCK_TRADES = [
 export const DashboardView = () => {
   const chainId = useChainId();
   const mounted = useMounted();
-  const bondingCurveAddress = getContractAddress(84532, 'bondingCurve');
+  const goldTokenAddress = '0xc4a58a1dbe2b78b0aa1fe550a2ced27e5835b6be';
+  const bondingCurveAddress = '0xE9C7EEf2D1f1E492Ee0a5B8D5fc26a087be49f75';
+
+  const { data: totalSupply } = useReadContract({
+    chainId: 84532,
+    address: goldTokenAddress as `0x${string}`,
+    abi: parseAbi(ERC20_ABI),
+    functionName: 'totalSupply',
+    query: { refetchInterval: 1000 }
+  });
 
   const { data: price } = useReadContract({
     chainId: 84532,
@@ -95,6 +104,7 @@ export const DashboardView = () => {
   const currentPrice = useMemo(() => price ? formatUnits(price as bigint, 6) : '10.00', [price]);
   const formattedVolume = useMemo(() => volume ? Number(formatUnits(volume as bigint, 6)).toLocaleString() : '0', [volume]);
   const formattedTVL = useMemo(() => tvlBalance ? Number(formatUnits(tvlBalance as bigint, 6)).toLocaleString() : '0', [tvlBalance]);
+  const formattedTotalSupply = useMemo(() => totalSupply ? Number(formatUnits(totalSupply as bigint, 18)).toLocaleString() : '0', [totalSupply]);
 
   if (!mounted) return null;
 
