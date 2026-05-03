@@ -52,8 +52,8 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
   const [copied, setCopied] = useState(false);
   const [pendingAction, setPendingAction] = useState<'approve' | 'swap' | 'send' | 'faucet' | null>(null);
   
-  const goldTokenAddress = '0xa9baC54e54311B025ED039e6c5A708B71dD4C0C8';
-  const bondingCurveAddress = '0xE270277FE5129f151B1e56A3d2Fb5386dAC2a68E';
+  const goldTokenAddress = '0xAB955b6ee45d40D948afA04e2D44066afd02AED7';
+  const bondingCurveAddress = '0x8AE95E755B0AbC29C1f96C115Da36185781EB7Cc';
   const collateralTokenAddress = '0x526d075C81cb3451B436943BF999667Ba659ffC8';
 
   const { data: totalSupply, refetch: refetchTotalSupply } = useReadContract({
@@ -405,10 +405,22 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
                             <div className="text-xl font-black text-white">${totalSupply && priceData ? (Number(formatUnits(totalSupply as bigint, 18)) * Number(formatUnits(priceData as bigint, 6))).toLocaleString(undefined, {maximumFractionDigits: 0}) : '0'}</div>
                         </div>
                     </div>
-                    <div className="mt-auto pt-6">
-                        <button onClick={handleFaucet} className="w-full py-3 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-blue-500/20 transition-all">
-                            Request Test Assets
-                        </button>
+                    <div className="mt-auto pt-6 border-t border-white/5">
+                        <div className="text-[8px] font-black text-gold uppercase tracking-widest mb-3">Protocol Insights</div>
+                        <div className="space-y-3">
+                            <div className="flex gap-3">
+                                <div className="w-1 h-1 rounded-full bg-gold mt-1.5 shrink-0" />
+                                <p className="text-[9px] text-slate-400 leading-relaxed"><span className="text-gold">Dynamic Pricing:</span> Price increases automatically with supply via Bonding Curve.</p>
+                            </div>
+                            <div className="flex gap-3">
+                                <div className="w-1 h-1 rounded-full bg-gold mt-1.5 shrink-0" />
+                                <p className="text-[9px] text-slate-400 leading-relaxed"><span className="text-gold">Instant Exit:</span> Sell anytime back to the protocol with guaranteed liquidity.</p>
+                            </div>
+                            <div className="flex gap-3">
+                                <div className="w-1 h-1 rounded-full bg-gold mt-1.5 shrink-0" />
+                                <p className="text-[9px] text-slate-400 leading-relaxed"><span className="text-gold">Verified Floor:</span> Every trade permanently boosts the virtual base price.</p>
+                            </div>
+                        </div>
                     </div>
                 </GlassCard>
 
