@@ -6,10 +6,7 @@ import "../contracts/GoldChain_Final_Audit_V2.sol";
 
 contract DeployFinal is Script {
     function run() external {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address deployerAddress = vm.addr(deployerPrivateKey);
-        
-        vm.startBroadcast(deployerPrivateKey);
+        vm.startBroadcast();
 
         // 1. Deploy Token
         GoldToken token = new GoldToken();
@@ -17,7 +14,7 @@ contract DeployFinal is Script {
         // 2. Deploy Curve
         // _goldToken, _collateralToken (Mock USDT), _feeRecipient (Deployer)
         address collateralToken = 0x526d075C81cb3451B436943BF999667Ba659ffC8;
-        address feeRecipient = deployerAddress;
+        address feeRecipient = msg.sender;
         
         GoldBondingCurve curve = new GoldBondingCurve(address(token), collateralToken, feeRecipient);
         

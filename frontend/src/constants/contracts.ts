@@ -2,10 +2,10 @@
 import { Address } from 'viem';
 
 export const CONTRACTS = {
-  84532: { // Base Sepolia V2 (Final Audit V2)
-    goldToken: '0xc4a58a1dbe2b78b0aa1fe550a2ced27e5835b6be' as Address,
-    bondingCurve: '0xE9C7EEf2D1f1E492Ee0a5B8D5fc26a087be49f75' as Address,
-    collateralToken: '0x526d075C81cb3451B436943BF999667Ba659ffC8' as Address, // Mock USDT V2
+  84532: { // Base Sepolia V3 (No Mining - Rising Floor)
+    goldToken: '0x1a3fe6eb095e3539d8C7024FD9Ca544F0741643C' as Address,
+    bondingCurve: '0xab69182e2f5082037bC2ccba78eba80C7CBcbE8D' as Address,
+    collateralToken: '0x526d075C81cb3451B436943BF999667Ba659ffC8' as Address, 
   },
   8453: { // Base Mainnet
     goldToken: '0xc4a58a1dbe2b78b0aa1fe550a2ced27e5835b6be' as Address,
