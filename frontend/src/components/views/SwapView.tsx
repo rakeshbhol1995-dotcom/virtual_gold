@@ -52,8 +52,8 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
   const [copied, setCopied] = useState(false);
   const [pendingAction, setPendingAction] = useState<'approve' | 'swap' | 'send' | 'faucet' | null>(null);
   
-  const goldTokenAddress = '0x44988eAFcDa128dBcbd9b4c003fC2fA5e1623621';
-  const bondingCurveAddress = '0x067B09C09AE81246232025e62e5a8078A0c38d56';
+  const goldTokenAddress = '0x62b85AC66FDf0cfF8d34601CCdc3060054a87525';
+  const bondingCurveAddress = '0x184d32Bdc23501Ca860Ab000612c63d1940c50AF';
   const collateralTokenAddress = '0x526d075C81cb3451B436943BF999667Ba659ffC8';
 
   const { data: totalSupply, refetch: refetchTotalSupply } = useReadContract({
@@ -132,7 +132,7 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
 
   useEffect(() => {
     if (isSuccess) {
-      // Triple-Pulse Refetch to combat RPC Latency
+      // Extended Multi-Pulse Refetch (10s window)
       const triggerRefetch = () => {
         refetchUsdtAllowance(); 
         refetchGoldAllowance();
@@ -142,13 +142,15 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
         refetchPrice();
       };
 
-      triggerRefetch(); // Instant
-      setTimeout(triggerRefetch, 2000); // 2s Buffer
-      setTimeout(triggerRefetch, 5000); // 5s Final confirmation
+      triggerRefetch(); // 0s
+      setTimeout(triggerRefetch, 1000); // 1s
+      setTimeout(triggerRefetch, 3000); // 3s
+      setTimeout(triggerRefetch, 5000); // 5s
+      setTimeout(triggerRefetch, 8000); // 8s
 
       if (pendingAction === 'swap') onSwap?.();
       setPendingAction(null);
-      setAmount(''); // Reset input
+      setAmount(''); // Hard reset amount
     }
   }, [isSuccess]);
 
@@ -173,10 +175,13 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
 
   
   const handleSwap = () => {
+    if (!amount || isNaN(Number(amount)) || !expectedOut || BigInt(expectedOut.toString()) === 0n) return;
+    
     const slippageBP = Math.floor(slippage * 10);
     const minOut = expectedOut ? (BigInt(expectedOut.toString()) * BigInt(1000 - slippageBP)) / 1000n : 0n;
+    const maxIn = (BigInt(parseUnits(amount, 6)) * BigInt(1000 + slippageBP)) / 1000n;
     
-    console.log("Execution Payload:", { isSelling, amount, expectedOut: expectedOut?.toString(), minOut: minOut.toString() });
+    setPendingAction('swap');
 
     if (isSelling) {
       writeContract({
@@ -190,7 +195,7 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
         address: bondingCurveAddress as `0x${string}`,
         abi: parseAbi(GOLD_BONDING_CURVE_ABI),
         functionName: 'buy',
-        args: [expectedOut ? BigInt(expectedOut.toString()) : 0n, parseUnits(amount, 6)],
+        args: [BigInt(expectedOut.toString()), maxIn],
       }, 'swap');
     }
   };
