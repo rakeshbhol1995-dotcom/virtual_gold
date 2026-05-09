@@ -437,12 +437,12 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
                                 )}
                                 
                                 {/* 🪙 QUICK FAUCET ACCESS 🪙 */}
-                                <button 
+                                <MagneticButton 
                                     onClick={handleFaucet} 
                                     className="w-full mt-6 py-4 bg-blue-500/5 border border-blue-500/10 text-blue-400 text-[9px] font-black uppercase tracking-[0.3em] rounded-2xl hover:bg-blue-500/10 transition-all"
                                 >
                                     Need Test USDT? Request Faucet
-                                </button>
+                                </MagneticButton>
                             </div>
                         </div>
                     </GlassCard>
