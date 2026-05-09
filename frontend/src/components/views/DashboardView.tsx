@@ -15,7 +15,7 @@ import {
 import { GlassCard } from '@/components/ui/GlassCard';
 import { FloatingGem } from '@/components/ui/FloatingGem';
 import { useReadContract, useChainId, useAccount } from 'wagmi';
-import { getContractAddress, CONTRACTS, GOLD_BONDING_CURVE_ABI, ERC20_ABI } from '@/constants/contracts';
+import { getContractAddress, CONTRACTS, GOLD_TOKEN_ABI, GOLD_BONDING_CURVE_ABI, ERC20_ABI } from '@/constants/contracts';
 import { formatUnits, parseAbi } from 'viem';
 import { useMounted } from '@/hooks/useMounted';
 import { ActivityScanner } from '@/components/ui/ActivityScanner';
@@ -87,8 +87,8 @@ export const DashboardView = () => {
 
   const { data: holdersCount, refetch: refetchHolders } = useReadContract({
     chainId: 84532,
-    address: bondingCurveAddress as `0x${string}`,
-    abi: parseAbi(GOLD_BONDING_CURVE_ABI),
+    address: goldTokenAddress as `0x${string}`,
+    abi: parseAbi(GOLD_TOKEN_ABI),
     functionName: 'holdersCount',
     query: { refetchInterval: 1000, staleTime: 0 }
   });

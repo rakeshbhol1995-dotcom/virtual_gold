@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Users, User, Download } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { useReadContract } from 'wagmi';
-import { getContractAddress, GOLD_BONDING_CURVE_ABI, ERC20_ABI } from '@/constants/contracts';
+import { getContractAddress, CONTRACTS, GOLD_TOKEN_ABI, GOLD_BONDING_CURVE_ABI, ERC20_ABI } from '@/constants/contracts';
 import { formatUnits, parseAbi } from 'viem';
 import { useMounted } from '@/hooks/useMounted';
 
@@ -17,9 +17,9 @@ export const HoldersView = () => {
   // Real Data: Holders Count
   const { data: holdersCount } = useReadContract({
     chainId: 84532,
-    address: bondingCurveAddress as `0x${string}`,
-    abi: parseAbi(GOLD_BONDING_CURVE_ABI),
-    functionName: 'getHoldersCount',
+    address: tokenAddress as `0x${string}`,
+    abi: parseAbi(GOLD_TOKEN_ABI),
+    functionName: 'holdersCount',
     query: { refetchInterval: 5000 }
   });
 
