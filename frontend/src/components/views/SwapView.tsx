@@ -52,9 +52,9 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
   const [copied, setCopied] = useState(false);
   const [pendingAction, setPendingAction] = useState<'approve' | 'swap' | 'send' | 'faucet' | null>(null);
   
-  const goldTokenAddress = '0x2DE2FAacA36a2BD434276126966F32453B7d1849';
-  const bondingCurveAddress = '0x15C3EC22A9DB635B3B5FbE49B9dd2b567Cd31e85';
-  const collateralTokenAddress = '0x526d075C81cb3451B436943BF999667Ba659ffC8';
+  const goldTokenAddress = getContractAddress(84532, 'goldToken');
+  const bondingCurveAddress = getContractAddress(84532, 'bondingCurve');
+  const collateralTokenAddress = getContractAddress(84532, 'collateralToken');
 
   const { data: totalSupply, refetch: refetchTotalSupply } = useReadContract({
     address: goldTokenAddress as `0x${string}`,
@@ -113,7 +113,7 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
   });
 
   useEffect(() => {
-    if (expectedOut && !isFetchingExpected) {
+    if (expectedOut !== undefined && !isFetchingExpected) {
       setOutAmount(formatUnits(expectedOut as bigint, isSelling ? 6 : 18));
     } else if (!amount || Number(amount) === 0) {
       setOutAmount('0.0');
@@ -148,9 +148,11 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
       setTimeout(triggerRefetch, 5000); // 5s
       setTimeout(triggerRefetch, 8000); // 8s
 
-      if (pendingAction === 'swap') onSwap?.();
+      if (pendingAction === 'swap') {
+        setAmount(''); // Only reset amount after successful trade
+        onSwap?.();
+      }
       setPendingAction(null);
-      setAmount(''); // Hard reset amount
     }
   }, [isSuccess]);
 
@@ -296,16 +298,23 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
                                         </button>
                                     </div>
                                 </div>
-                                <div className="bg-white/5 rounded-[2rem] p-6 md:p-8 border border-white/5 focus-within:border-gold/30 transition-all">
+                                <div className="bg-white/5 rounded-[2rem] p-6 md:p-8 border border-white/5 focus-within:border-gold/30 transition-all relative">
                                     <div className="flex items-center justify-between gap-4 md:gap-6">
-                                        <input 
-                                            type="text" 
-                                            value={amount} 
-                                            onChange={(e) => setAmount(e.target.value)} 
-                                            placeholder="0.0" 
-                                            className="bg-transparent border-none outline-none text-4xl md:text-7xl font-display font-light text-white w-full"
-                                        />
-                                        <div className="flex items-center gap-2 md:gap-3 bg-black/40 px-3 md:px-5 py-2 md:py-3 rounded-2xl border border-white/10 shrink-0">
+                                        <div className="w-full flex flex-col">
+                                            <input 
+                                                type="text" 
+                                                value={amount} 
+                                                onChange={(e) => setAmount(e.target.value)} 
+                                                placeholder="0.0" 
+                                                className="bg-transparent border-none outline-none text-4xl md:text-7xl font-display font-light text-white w-full"
+                                            />
+                                            {amount && !isNaN(Number(amount)) && Number(amount) > 0 && (
+                                              <span className="text-white/40 text-sm font-medium mt-1">
+                                                ≈ ${isSelling && priceData ? (Number(amount) * Number(formatUnits(priceData as bigint, 6))).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : Number(amount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                                              </span>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-2 md:gap-3 bg-black/40 px-3 md:px-5 py-2 md:py-3 rounded-2xl border border-white/10 shrink-0 self-start mt-2">
                                             {isSelling ? <GoldLogo className="w-4 h-4 md:w-6 md:h-6" /> : <div className="w-4 h-4 md:w-6 md:h-6 bg-emerald-500 rounded-full flex items-center justify-center text-[8px] md:text-[10px] font-bold text-black">$</div>}
                                             <span className="font-black text-[10px] md:text-xs text-white tracking-widest">{isSelling ? 'GRAMS' : 'USDT'}</span>
                                         </div>
@@ -328,13 +337,31 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center px-4">
                                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">You Receive</span>
+                                    <div className="flex items-center gap-2 group/bal">
+                                        <span className="text-[9px] font-bold text-white/40 uppercase">
+                                            BAL: {!isSelling ? (goldBalance ? Number(formatUnits(goldBalance as bigint, 18)).toLocaleString() : '0') : (usdtBalance ? Number(formatUnits(usdtBalance as bigint, 6)).toLocaleString() : '0')}
+                                        </span>
+                                        <button 
+                                            onClick={() => { refetchGoldBalance(); refetchUsdtBalance(); }}
+                                            className="p-1 hover:bg-white/10 rounded-md transition-all opacity-0 group-hover/bal:opacity-100"
+                                        >
+                                            <RotateCw size={10} className="text-gold" />
+                                        </button>
+                                    </div>
                                 </div>
-                                <div className="bg-gold/5 rounded-[2rem] p-6 md:p-8 border border-gold/10">
+                                <div className="bg-gold/5 rounded-[2rem] p-6 md:p-8 border border-gold/10 relative">
                                     <div className="flex items-center justify-between gap-4 md:gap-6">
-                                        <div className="text-4xl md:text-7xl font-display font-light text-gold overflow-hidden text-ellipsis">
-                                            {isFetchingExpected ? <span className="animate-pulse opacity-40">...</span> : outAmount}
+                                        <div className="w-full flex flex-col">
+                                            <div className="text-4xl md:text-7xl font-display font-light text-gold overflow-hidden text-ellipsis">
+                                                {isFetchingExpected ? <span className="animate-pulse opacity-40">...</span> : outAmount}
+                                            </div>
+                                            {outAmount && outAmount !== '0.0' && !isFetchingExpected && (
+                                              <span className="text-gold/40 text-sm font-medium mt-1">
+                                                ≈ ${!isSelling && priceData ? (Number(outAmount) * Number(formatUnits(priceData as bigint, 6))).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : Number(outAmount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                                              </span>
+                                            )}
                                         </div>
-                                        <div className="flex items-center gap-2 md:gap-3 bg-gold/10 px-3 md:px-5 py-2 md:py-3 rounded-2xl border border-gold/20 shrink-0">
+                                        <div className="flex items-center gap-2 md:gap-3 bg-gold/10 px-3 md:px-5 py-2 md:py-3 rounded-2xl border border-gold/20 shrink-0 self-start mt-2">
                                             {!isSelling ? <GoldLogo className="w-4 h-4 md:w-6 md:h-6" /> : <div className="w-4 h-4 md:w-6 md:h-6 bg-emerald-500 rounded-full flex items-center justify-center text-[8px] md:text-[10px] font-bold text-black">$</div>}
                                             <span className="font-black text-[10px] md:text-xs text-gold tracking-widest">{isSelling ? 'USDT' : 'GRAMS'}</span>
                                         </div>
@@ -348,25 +375,25 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
                                   <motion.div 
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl"
+                                    className={`mt-4 p-4 border rounded-xl ${pendingAction === 'approve' ? 'bg-blue-500/10 border-blue-500/20' : 'bg-emerald-500/10 border-emerald-500/20'}`}
                                   >
                                     <div className="flex items-center justify-between mb-2">
-                                      <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">
-                                        {pendingAction === 'approve' ? 'Authorization Successful!' : 'Trade Executed Successfully!'}
+                                      <span className={`text-[10px] font-bold uppercase tracking-widest ${pendingAction === 'approve' ? 'text-blue-400' : 'text-emerald-400'}`}>
+                                        {pendingAction === 'approve' ? '✨ STEP 1 COMPLETE: AUTHORIZED' : '✅ STEP 2 COMPLETE: SWAP SUCCESS'}
                                       </span>
                                       <a 
                                         href={`https://sepolia.basescan.org/tx/${hash}`} 
                                         target="_blank" 
                                         rel="noopener noreferrer"
-                                        className="text-[9px] text-emerald-400 underline hover:text-white transition-colors"
+                                        className="text-[9px] opacity-50 underline hover:opacity-100 transition-colors text-white"
                                       >
-                                        View on Explorer
+                                        View Receipt
                                       </a>
                                     </div>
-                                    <p className="text-[9px] text-emerald-200/60 leading-relaxed">
+                                    <p className="text-[10px] text-white/60 leading-relaxed font-medium">
                                       {pendingAction === 'approve' 
-                                        ? 'Permission granted to trade. You can now click "Execute Buy" to finalize your swap.' 
-                                        : 'Gold has been added to your wallet. Your portfolio will refresh in a few seconds.'}
+                                        ? 'Permission granted! Now click the button below for "STEP 2" to finish your trade.' 
+                                        : 'Success! Your transaction has been confirmed on the blockchain.'}
                                     </p>
                                   </motion.div>
                                 )}
@@ -393,13 +420,13 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
                                     <MagneticButton onClick={() => setIsWalletModalOpen(true)} className="w-full py-8 bg-white text-black font-black uppercase tracking-[0.4em] text-xs rounded-3xl shadow-[0_20px_60px_rgba(255,255,255,0.1)]">CONNECT NODE</MagneticButton>
                                 ) : (
                                     <div className="space-y-4">
-                                        {(allowance !== undefined && amount && (allowance as bigint) < parseUnits(amount, isSelling ? 18 : 6)) ? (
-                                            <MagneticButton onClick={handleApprove} disabled={isPending || isConfirming} className="w-full py-8 bg-white text-black font-black uppercase tracking-[0.4em] text-xs rounded-3xl">
-                                                {isConfirming ? 'APPROVING...' : 'AUTHORIZE PROTOCOL'}
+                                        {(!isSelling && allowance !== undefined && amount && (allowance as bigint) < parseUnits(amount, 6)) ? (
+                                            <MagneticButton onClick={handleApprove} disabled={isPending || isConfirming} className="w-full py-8 bg-blue-500 text-white font-black uppercase tracking-[0.4em] text-xs rounded-3xl shadow-[0_20px_60px_rgba(59,130,246,0.2)]">
+                                                {isConfirming ? 'AUTHORIZING...' : 'STEP 1: AUTHORIZE PROTOCOL'}
                                             </MagneticButton>
                                         ) : (
                                             <MagneticButton onClick={handleSwap} disabled={!amount || isPending || isConfirming} className="w-full py-8 bg-gold text-black font-black uppercase tracking-[0.4em] text-xs rounded-3xl shadow-[0_20px_60px_rgba(255,215,0,0.2)]">
-                                                {isConfirming ? 'PROCESSING...' : isSelling ? 'EXECUTE SELL' : 'EXECUTE BUY'}
+                                                {isConfirming ? 'EXECUTING SWAP...' : isSelling ? 'STEP 2: EXECUTE SELL' : 'STEP 2: EXECUTE BUY'}
                                             </MagneticButton>
                                         )}
                                     </div>

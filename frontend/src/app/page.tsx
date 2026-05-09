@@ -14,12 +14,10 @@ import { getContractAddress, ERC20_ABI } from '@/constants/contracts';
 const DashboardView = dynamic(() => import('@/components/views/DashboardView').then(mod => mod.DashboardView), { ssr: false, loading: () => <div className="p-20 text-gold font-black animate-pulse text-center">LOADING DASHBOARD...</div> });
 const SwapView = dynamic(() => import('@/components/views/SwapView').then(mod => mod.SwapView), { ssr: false, loading: () => <div className="p-20 text-gold font-black animate-pulse text-center">LOADING SWAP ENGINE...</div> });
 const WhitepaperView = dynamic(() => import('@/components/views/WhitepaperView').then(mod => mod.WhitepaperView), { ssr: false, loading: () => <div className="p-20 text-gold font-black animate-pulse text-center">LOADING WHITEPAPER...</div> });
-const MinerView = dynamic(() => import('@/components/views/MinerView').then(mod => mod.MinerView), { ssr: false, loading: () => <div className="p-20 text-gold font-black animate-pulse text-center">INITIALIZING MINING ENGINE...</div> });
-const Pickaxe = dynamic(() => import('lucide-react').then(mod => mod.Pickaxe), { ssr: false });
 const ActivityScanner = dynamic(() => import('@/components/ui/ActivityScanner').then(mod => mod.ActivityScanner), { ssr: false });
 const LiveTicker = dynamic(() => import('@/components/ui/LiveTicker').then(mod => mod.LiveTicker), { ssr: false });
 
-type ViewType = 'dashboard' | 'swap' | 'miner' | 'activity' | 'whitepaper' | 'transaction';
+type ViewType = 'dashboard' | 'swap' | 'activity' | 'whitepaper' | 'transaction';
 
 export default function Home() {
   const { address, isConnected } = useAccount();
@@ -45,7 +43,6 @@ export default function Home() {
     switch (activeTab) {
       case 'dashboard': return <DashboardView />;
       case 'swap': return <SwapView onSwap={() => setActiveTab('activity')} />;
-      case 'miner': return <MinerView />;
       case 'activity': return (
         <div className="w-full max-w-4xl mx-auto py-10">
           <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter mb-10 text-center italic">
@@ -75,7 +72,7 @@ export default function Home() {
 
   if (!mounted) return <div className="min-h-screen bg-black flex items-center justify-center text-gold font-black">INITIALIZING GOLD PROTOCOL...</div>;
 
-  const tabs: ViewType[] = ['dashboard', 'swap', 'miner', 'activity', 'whitepaper'];
+  const tabs: ViewType[] = ['dashboard', 'swap', 'activity', 'whitepaper'];
 
   return (
     <div className="flex flex-col min-h-screen text-slate-200 selection:bg-gold/30 selection:text-gold overflow-x-hidden">
@@ -143,7 +140,6 @@ export default function Home() {
             >
               {tab === 'dashboard' && <Activity size={18} />}
               {tab === 'swap' && <Zap size={18} />}
-              {tab === 'miner' && <Pickaxe size={18} />}
               {tab === 'activity' && <Clock size={18} />}
               {tab === 'whitepaper' && <ShieldCheck size={18} />}
               <span className="text-[8px] font-black uppercase tracking-widest">{tab}</span>

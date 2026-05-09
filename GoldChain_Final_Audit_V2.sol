@@ -60,20 +60,17 @@ contract GoldBondingCurve is Ownable, ReentrancyGuard {
     uint256 public constant MAX_WALLET_LIMIT = 200000 * 10**18; // Max 200,000 GOLD per wallet
     uint256 public virtualBasePrice = 10 * 10**6; // Starts at $10, grows over time
     
-    uint256 public constant FEE_PERCENT = 100; // 1%
+    uint256 public constant FEE_PERCENT = 120; // 1.2% Total Fee (0.2% Protocol, 1.0% Admin+Spread)
     uint256 public constant BASIS_POINTS = 10000;
     
     address public feeRecipient;
     uint256 public totalVolume;
-    uint256 public miningPool; 
     uint256 public holdersCount;
 
-    mapping(address => uint256) public lastClaimed;
     mapping(address => bool) public hasHeld;
 
     event Bought(address indexed user, uint256 collateralIn, uint256 goldOut, uint256 fee);
     event Sold(address indexed user, uint256 goldIn, uint256 collateralOut, uint256 fee);
-    event RewardClaimed(address indexed user, uint256 amount);
     event FeeRecipientUpdated(address indexed newRecipient);
     event FloorBoosted(uint256 newBasePrice);
 
@@ -158,16 +155,15 @@ contract GoldBondingCurve is Ownable, ReentrancyGuard {
 
         collateralToken.safeTransferFrom(msg.sender, address(this), totalRequired);
 
-        // --- RISING FLOOR LOGIC ---
-        uint256 floorBoost = (fee * 1000) / BASIS_POINTS; 
+        // --- RISING FLOOR LOGIC (0.2% of cost) ---
+        uint256 floorBoost = (cost * 20) / BASIS_POINTS; 
         if (supply > 0) {
             virtualBasePrice += (floorBoost * PRECISION) / supply;
             emit FloorBoosted(virtualBasePrice);
         }
 
-        uint256 forMiners = (fee * 3000) / BASIS_POINTS; 
-        miningPool += forMiners;
-        collateralToken.safeTransfer(feeRecipient, fee - forMiners - floorBoost);
+        // Admin gets the remaining fee (1.0% of cost)
+        collateralToken.safeTransfer(feeRecipient, fee - floorBoost);
 
         emit Bought(msg.sender, totalRequired, goldAmount, fee);
     }
@@ -185,32 +181,14 @@ contract GoldBondingCurve is Ownable, ReentrancyGuard {
         goldToken.burn(msg.sender, goldAmount);
         totalVolume += rawReturn;
 
-        uint256 forMiners = (fee * 3000) / BASIS_POINTS;
-        miningPool += forMiners;
-
+        // Entire fee on sell goes to Admin (1.2%)
         collateralToken.safeTransfer(msg.sender, netReturn);
-        collateralToken.safeTransfer(feeRecipient, fee - forMiners);
+        collateralToken.safeTransfer(feeRecipient, fee);
 
         emit Sold(msg.sender, goldAmount, netReturn, fee);
     }
 
-    function claimMiningReward() external nonReentrant {
-        require(block.timestamp >= lastClaimed[msg.sender] + 1 hours, "Cooldown active");
 
-        uint256 userBalance = goldToken.balanceOf(msg.sender);
-        uint256 supply = goldToken.totalSupply();
-        require(userBalance >= 1 * PRECISION, "Anti-Sybil: Must hold min 1 GOLD");
-
-        // Proportional reward
-        uint256 rewardAmount = (miningPool * userBalance) / supply;
-        require(rewardAmount > 0, "Reward too small");
-
-        miningPool -= rewardAmount;
-        lastClaimed[msg.sender] = block.timestamp;
-        collateralToken.safeTransfer(msg.sender, rewardAmount);
-
-        emit RewardClaimed(msg.sender, rewardAmount);
-    }
 
     function updateFeeRecipient(address _newRecipient) external onlyOwner {
         require(_newRecipient != address(0), "Zero address");

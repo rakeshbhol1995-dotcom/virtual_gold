@@ -40,22 +40,47 @@ export const ActivityScanner = () => {
       if (!bondingCurveAddress) return;
       try {
         const currentBlock = await scannerClient.getBlockNumber();
-        const fromBlock = currentBlock > 5000n ? currentBlock - 5000n : 0n;
+        let allBuyLogs: any[] = [];
+        let allSellLogs: any[] = [];
+        
+        let toBlock = currentBlock;
+        let fetchedEvents = 0;
+        const maxChunks = 20; // up to 200,000 blocks ~ 4.6 days
+        
+        for (let i = 0; i < maxChunks; i++) {
+            const fromBlock = toBlock > 9999n ? toBlock - 9999n : 0n;
+            
+            const [buyLogsChunk, sellLogsChunk] = await Promise.all([
+              scannerClient.getContractEvents({
+                address: bondingCurveAddress as `0x${string}`,
+                abi: parseAbi(GOLD_BONDING_CURVE_ABI),
+                eventName: 'Bought',
+                fromBlock,
+                toBlock,
+              }),
+              scannerClient.getContractEvents({
+                address: bondingCurveAddress as `0x${string}`,
+                abi: parseAbi(GOLD_BONDING_CURVE_ABI),
+                eventName: 'Sold',
+                fromBlock,
+                toBlock,
+              })
+            ]);
+            
+            allBuyLogs = [...allBuyLogs, ...buyLogsChunk];
+            allSellLogs = [...allSellLogs, ...sellLogsChunk];
+            
+            fetchedEvents += buyLogsChunk.length + sellLogsChunk.length;
+            
+            if (fetchedEvents >= 30 || fromBlock === 0n) {
+                break;
+            }
+            
+            toBlock = fromBlock - 1n;
+        }
 
-        const [buyLogs, sellLogs] = await Promise.all([
-          scannerClient.getContractEvents({
-            address: bondingCurveAddress as `0x${string}`,
-            abi: parseAbi(GOLD_BONDING_CURVE_ABI),
-            eventName: 'Bought',
-            fromBlock,
-          }),
-          scannerClient.getContractEvents({
-            address: bondingCurveAddress as `0x${string}`,
-            abi: parseAbi(GOLD_BONDING_CURVE_ABI),
-            eventName: 'Sold',
-            fromBlock,
-          })
-        ]);
+        const buyLogs = allBuyLogs;
+        const sellLogs = allSellLogs;
 
         const formatted = [
           ...buyLogs.map((log: any) => ({
@@ -92,8 +117,6 @@ export const ActivityScanner = () => {
       }
     };
     fetchHistory();
-    const inv = setInterval(fetchHistory, 10000);
-    return () => clearInterval(inv);
   }, [bondingCurveAddress]);
 
   // 2. Watch Live

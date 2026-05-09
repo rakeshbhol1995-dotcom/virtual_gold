@@ -57,9 +57,9 @@ const MOCK_TRADES = [
 export const DashboardView = () => {
   const chainId = useChainId();
   const mounted = useMounted();
-  const goldTokenAddress = '0x2DE2FAacA36a2BD434276126966F32453B7d1849';
-  const bondingCurveAddress = '0x15C3EC22A9DB635B3B5FbE49B9dd2b567Cd31e85';
-  const collateralTokenAddress = CONTRACTS[84532].collateralToken;
+  const goldTokenAddress = getContractAddress(84532, 'goldToken');
+  const bondingCurveAddress = getContractAddress(84532, 'bondingCurve');
+  const collateralTokenAddress = getContractAddress(84532, 'collateralToken');
 
   const { data: totalSupply, refetch: refetchTotalSupply } = useReadContract({
     chainId: 84532,

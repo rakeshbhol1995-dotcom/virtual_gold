@@ -3,8 +3,8 @@ import { Address } from 'viem';
 
 export const CONTRACTS = {
   84532: { // Base Sepolia V6 (Definitive)
-    goldToken: '0x2DE2FAacA36a2BD434276126966F32453B7d1849' as Address,
-    bondingCurve: '0x15C3EC22A9DB635B3B5FbE49B9dd2b567Cd31e85' as Address,
+    goldToken: '0xa9d68cc8971722Bd5acfd8230507F3F0d4DB8428' as Address,
+    bondingCurve: '0x6B7B8EAAeDB4499dc04AD0FFCb65FE94b6465bb1' as Address,
     collateralToken: '0x526d075C81cb3451B436943BF999667Ba659ffC8' as Address, 
   },
   8453: { // Base Mainnet
@@ -42,12 +42,8 @@ export const GOLD_BONDING_CURVE_ABI = [
   "function getSellProceeds(uint256 goldAmount) view returns (uint256)",
   "function holdersCount() view returns (uint256)",
   "function totalVolume() view returns (uint256)",
-  "function miningPool() view returns (uint256)",
-  "function claimMiningReward() external",
-  "function lastClaimed(address) view returns (uint256)",
   "event Bought(address indexed user, uint256 collateralIn, uint256 goldOut, uint256 fee)",
   "event Sold(address indexed user, uint256 goldIn, uint256 collateralOut, uint256 fee)",
-  "event RewardClaimed(address indexed user, uint256 amount)",
   "event FloorBoosted(uint256 newBasePrice)"
 ];
 
