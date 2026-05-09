@@ -45,9 +45,13 @@ export const metadata: Metadata = {
     images: ["/gold-logo.png"],
   },
   icons: {
-    icon: "/gold-logo.png?v=5",
-    shortcut: "/gold-logo.png?v=5",
-    apple: "/gold-logo.png?v=5",
+    icon: [
+      { url: '/gold-logo.png', type: 'image/png' }
+    ],
+    shortcut: ['/gold-logo.png'],
+    apple: [
+      { url: '/gold-logo.png', type: 'image/png' }
+    ],
   },
 };
 
@@ -78,7 +82,6 @@ export default function RootLayout({
       className={`${outfit.variable} ${spaceGrotesk.variable} font-sans bg-black text-white h-full antialiased selection:bg-gold/30 selection:text-gold`}
     >
       <head>
-        <link rel="icon" href="/gold-logo.png" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
