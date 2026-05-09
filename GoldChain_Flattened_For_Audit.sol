@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+﻿// SPDX-License-Identifier: MIT
+pragma solidity >=0.4.16 >=0.6.2 >=0.8.4 ^0.8.20;
 
 // lib/openzeppelin-contracts/contracts/utils/Context.sol
 
@@ -1554,9 +1554,9 @@ contract GoldBondingCurve is Ownable, ReentrancyGuard, Pausable {
     uint256 public constant BASIS_POINTS = 10000;
     
     // Scaling Factors: Used to avoid precision loss while preventing overflow
-    // RESERVE_SCALER = 2 * 10^30 = 2 * PRECISION * 10^12
-    // Accounts for: (a) division by 2 from integral, (b) PRECISION for GOLD wei, (c) 10^12 for SLOPE units.
-    uint256 public constant RESERVE_SCALER = 2 * 10**30; 
+    // RESERVE_SCALER = 2 * 10^48 = 2 * PRECISION * 10^30
+    // Accounts for: (a) division by 2 from integral, (b) PRECISION for GOLD wei, (c) 10^30 for SLOPE scaling.
+    uint256 public constant RESERVE_SCALER = 2 * 10**48; 
     
     uint256 public totalVolume;
 
@@ -1584,8 +1584,8 @@ contract GoldBondingCurve is Ownable, ReentrancyGuard, Pausable {
 
     function getCurrentPrice() public view returns (uint256) {
         uint256 supply = goldToken.totalSupply();
-        // Corrected Scaling: (SLOPE * supply) / (PRECISION * 10^12)
-        return VIRTUAL_BASE_PRICE + (SLOPE * supply) / (PRECISION * 10**12);
+        // Corrected Scaling: (SLOPE * supply) / 10^30
+        return VIRTUAL_BASE_PRICE + (SLOPE * supply) / 10**30;
     }
 
     /**
