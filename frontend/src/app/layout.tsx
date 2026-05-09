@@ -75,6 +75,45 @@ export default function RootLayout({
     ]
   };
 
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is Gold Chain Protocol?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Gold Chain Protocol is a decentralized finance platform native to the Base L2 network that allows users to trade physical-grade gold tokens with ultra-low latency and institutional security."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does the Gold Bonding Curve work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The protocol uses an advanced bonding curve mechanism where the price of gold tokens adjusts dynamically based on supply and demand, ensuring continuous liquidity."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is Gold Chain safe to use?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, Gold Chain is 100% backed and built with institutional-grade security on the Coinbase-backed Base L2 blockchain, ensuring transparency and safety for all users."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What are the fees on Gold Chain?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Trading on Gold Chain features ultra-low gas fees thanks to Base L2, and a transparent 1.2% protocol fee that helps boost the floor price and sustain the ecosystem."
+        }
+      }
+    ]
+  };
+
   return (
     <html
       lang="en"
@@ -85,6 +124,10 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
       </head>
       <body className="min-h-full flex flex-col">
