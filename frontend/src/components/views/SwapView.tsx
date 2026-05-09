@@ -17,6 +17,7 @@ import { useAccount, useReadContract, useWriteContract, useWaitForTransactionRec
 import { parseUnits, formatUnits } from 'viem';
 import { 
   getContractAddress,
+  GOLD_TOKEN_ABI,
   GOLD_BONDING_CURVE_ABI,
   ERC20_ABI 
 } from '@/constants/contracts';
