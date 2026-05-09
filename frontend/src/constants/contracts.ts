@@ -31,7 +31,7 @@ export const GOLD_TOKEN_ABI = [
   "function allowance(address, address) view returns (uint256)",
   "function holdersCount() view returns (uint256)",
   "event Transfer(address indexed from, address indexed to, uint256 value)"
-];
+] as const;
 
 export const GOLD_BONDING_CURVE_ABI = [
   "function getCurrentPrice() view returns (uint256)",
@@ -41,13 +41,12 @@ export const GOLD_BONDING_CURVE_ABI = [
   "function sell(uint256 goldAmount, uint256 minCollateralOut) external",
   "function getGoldOut(uint256 collateralAmount) view returns (uint256)",
   "function getSellProceeds(uint256 goldAmount) view returns (uint256)",
-  "function holdersCount() view returns (uint256)",
   "function totalVolume() view returns (uint256)",
   "function pause() external",
   "function unpause() external",
   "event Bought(address indexed user, uint256 collateralIn, uint256 goldOut, uint256 fee)",
   "event Sold(address indexed user, uint256 goldIn, uint256 collateralOut, uint256 fee)"
-];
+] as const;
 
 export const ERC20_ABI = [
   "function balanceOf(address) view returns (uint256)",
@@ -57,4 +56,4 @@ export const ERC20_ABI = [
   "function allowance(address, address) view returns (uint256)",
   "function totalSupply() view returns (uint256)",
   "function mint(address, uint256) external"
-];
+] as const;

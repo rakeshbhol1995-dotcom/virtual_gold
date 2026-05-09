@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useChainId, useSwitchChain } from 'wagmi';
-import { parseUnits, formatUnits, parseAbi } from 'viem';
+import { parseUnits, formatUnits } from 'viem';
 import { 
   getContractAddress,
   GOLD_BONDING_CURVE_ABI,
@@ -58,21 +58,21 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
 
   const { data: totalSupply, refetch: refetchTotalSupply } = useReadContract({
     address: goldTokenAddress as `0x${string}`,
-    abi: parseAbi(ERC20_ABI),
+    abi: GOLD_TOKEN_ABI,
     functionName: 'totalSupply',
     query: { refetchInterval: 1000 }
   });
 
   const { data: priceData, refetch: refetchPrice } = useReadContract({
     address: bondingCurveAddress as `0x${string}`,
-    abi: parseAbi(GOLD_BONDING_CURVE_ABI),
+    abi: GOLD_BONDING_CURVE_ABI,
     functionName: 'getCurrentPrice',
     query: { refetchInterval: 1000 }
   });
 
   const { data: usdtBalance, refetch: refetchUsdtBalance } = useReadContract({
     address: collateralTokenAddress as `0x${string}`,
-    abi: parseAbi(ERC20_ABI),
+    abi: ERC20_ABI,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
     query: { refetchInterval: 1000, staleTime: 0 }
@@ -80,7 +80,7 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
 
   const { data: goldBalance, refetch: refetchGoldBalance } = useReadContract({
     address: goldTokenAddress as `0x${string}`,
-    abi: parseAbi(ERC20_ABI),
+    abi: GOLD_TOKEN_ABI,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
     query: { refetchInterval: 1000, staleTime: 0 }
@@ -88,7 +88,7 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
 
   const { data: usdtAllowance, refetch: refetchUsdtAllowance } = useReadContract({
     address: collateralTokenAddress as `0x${string}`,
-    abi: parseAbi(ERC20_ABI),
+    abi: ERC20_ABI,
     functionName: 'allowance',
     args: address ? [address as `0x${string}`, bondingCurveAddress as `0x${string}`] : undefined,
     query: { enabled: !!address, refetchInterval: 1000, staleTime: 0 }
@@ -96,7 +96,7 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
 
   const { data: goldAllowance, refetch: refetchGoldAllowance } = useReadContract({
     address: goldTokenAddress as `0x${string}`,
-    abi: parseAbi(ERC20_ABI),
+    abi: GOLD_TOKEN_ABI,
     functionName: 'allowance',
     args: address ? [address as `0x${string}`, bondingCurveAddress as `0x${string}`] : undefined,
     query: { enabled: !!address, refetchInterval: 1000, staleTime: 0 }
@@ -106,10 +106,13 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
 
   const { data: expectedOut, isFetching: isFetchingExpected } = useReadContract({
     address: bondingCurveAddress,
-    abi: parseAbi(GOLD_BONDING_CURVE_ABI),
+    abi: GOLD_BONDING_CURVE_ABI,
     functionName: isSelling ? 'getSellProceeds' : 'getGoldOut',
     args: amount && !isNaN(Number(amount)) && Number(amount) > 0 ? [parseUnits(amount, isSelling ? 18 : 6)] : undefined,
-    query: { enabled: !!amount && !isNaN(Number(amount)) && Number(amount) > 0 }
+    query: { 
+      enabled: !!amount && !isNaN(Number(amount)) && Number(amount) > 0,
+      refetchInterval: 1000 
+    }
   });
 
   useEffect(() => {
@@ -159,7 +162,7 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
   const handleFaucet = () => {
     writeContract({
       address: collateralTokenAddress as `0x${string}`,
-      abi: parseAbi(ERC20_ABI),
+      abi: ERC20_ABI,
       functionName: 'mint',
       args: [address, parseUnits('100000', 6)],
     }, 'faucet');
@@ -169,7 +172,7 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
     const token = isSelling ? goldTokenAddress : collateralTokenAddress;
     writeContract({
       address: token as `0x${string}`,
-      abi: parseAbi(ERC20_ABI),
+      abi: ERC20_ABI,
       functionName: 'approve',
       args: [bondingCurveAddress as `0x${string}`, BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')],
     }, 'approve');
@@ -188,14 +191,14 @@ export const SwapView = ({ onSwap }: { onSwap?: () => void }) => {
     if (isSelling) {
       writeContract({
         address: bondingCurveAddress as `0x${string}`,
-        abi: parseAbi(GOLD_BONDING_CURVE_ABI),
+        abi: GOLD_BONDING_CURVE_ABI,
         functionName: 'sell',
         args: [parseUnits(amount, 18), minOut],
       }, 'swap');
     } else {
       writeContract({
         address: bondingCurveAddress as `0x${string}`,
-        abi: parseAbi(GOLD_BONDING_CURVE_ABI),
+        abi: GOLD_BONDING_CURVE_ABI,
         functionName: 'buy',
         args: [BigInt(expectedOut.toString()), maxIn],
       }, 'swap');
